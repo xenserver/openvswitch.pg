@@ -1,0 +1,15 @@
+--- openvswitch-0.90.1.orig/xenserver/etc_init.d_vswitch	2009-06-29 06:18:10.000000000 -0400
++++ openvswitch-0.90.1/xenserver/etc_init.d_vswitch	2009-06-29 11:21:12.000000000 -0400
+@@ -92,10 +92,10 @@
+ function insert_modules_if_required {
+     if ! lsmod | grep -q "openvswitch_mod"; then
+         action "Inserting llc module" modprobe llc
+-        action "Inserting openvswitch module" insmod $VSWITCH_BASE/kernel_modules/openvswitch_mod.ko
++        action "Inserting openvswitch module" modprobe openvswitch_mod
+     fi
+     if [ -n "$BRCOMPATD_PIDFILE" ] && ! lsmod | grep -q "brcompat_mod"; then
+-        action "Inserting brcompat module" insmod $VSWITCH_BASE/kernel_modules/brcompat_mod.ko
++        action "Inserting brcompat module" modprobe brcompat_mod
+     fi
+ }
+ 

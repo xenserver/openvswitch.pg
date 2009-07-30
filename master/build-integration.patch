@@ -1,0 +1,154 @@
+diff -r be90da2a5daa mk/Makefile
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/mk/Makefile	Thu Jul 30 15:47:31 2009 +0100
+@@ -0,0 +1,60 @@
++include $(B_BASE)/common.mk
++include $(B_BASE)/rpmbuild.mk
++
++REPONAME  := openvswitch
++REPOSTAMP := $(call pq_req,$(REPONAME))
++REPO      := $(call pq_loc,$(REPONAME))
++
++-include $(MY_OBJ_DIR)/version.inc
++$(MY_OBJ_DIR)/version.inc: $(REPOSTAMP)
++	rm -f $(MY_OBJ_DIR)/version.inc
++	$(call hg_cset_number,$(REPONAME)) >> $@
++	echo -n "OPENVSWITCH_VERSION := " >> $@
++	awk -F, '/^AC_INIT\(/ { print $$2 }' $(REPO)/configure.ac >>$@
++
++OPENVSWITCH_RELEASE := $(CSET_NUMBER)
++
++OPENVSWITCH_SOURCES += openvswitch-$(OPENVSWITCH_VERSION).tar.gz
++
++OPENVSWITCH_SPEC := openvswitch.spec
++
++OPENVSWITCH_SRPM := openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm
++
++.PHONY: build
++build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST
++	@ :
++
++.PHONY: clean
++clean:
++	-make -C $(REPO) maintainer-clean
++	rm -f $(REPO)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz
++	rm -f $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp
++	rm -f $(OPENVSWITCH_SOURCES:%=$(RPM_SOURCESDIR)/%)
++	rm -f $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
++
++$(RPM_SOURCESDIR)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz: $(REPOSTAMP)
++	cd $(REPO) && ./boot.sh && make dist
++	mv $(REPO)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz $@
++
++
++
++$(RPM_SOURCESDIR)/%: %
++	cp $< $@
++
++$(RPM_SPECSDIR)/%.spec: $(RPM_SPECSDIR)/.dirstamp %.spec.in
++	sed -e 's/@OPENVSWITCH_VERSION@/$(OPENVSWITCH_VERSION)/g' \
++	    -e 's/@OPENVSWITCH_RELEASE@/$(OPENVSWITCH_RELEASE)/g' \
++		< $*.spec.in \
++		>$(RPM_SPECSDIR)/$*.spec
++
++$(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM): $(RPM_SRPMSDIR)/.dirstamp \
++				  $(OPENVSWITCH_SOURCES:%=$(RPM_SOURCESDIR)/%) \
++				  $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
++	$(RPMBUILD) -bs $(RPM_SPECSDIR)/openvswitch.spec
++
++$(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp: $(RPM_DIRECTORIES) $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
++	$(RPMBUILD) --rebuild $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
++	touch $@
++
++$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
++	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
+diff -r be90da2a5daa mk/openvswitch.spec.in
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/mk/openvswitch.spec.in	Thu Jul 30 15:47:31 2009 +0100
+@@ -0,0 +1,86 @@
++Name: openvswitch
++Summary: Virtual switch
++Group: System Environment/Daemons
++URL: http://www.openvswitch.org/
++Version: @OPENVSWITCH_VERSION@
++License: GPL3
++Release: @OPENVSWITCH_RELEASE@
++Source: openvswitch-%{version}.tar.gz
++Group: Applications/System
++Buildroot: /tmp/vswitch-xen-rpm
++BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
++
++%description
++The vswitch provides standard network bridging functions augmented with
++support for the OpenFlow protocol for remote per-flow control of
++traffic.
++
++%prep
++%setup -n openvswitch-@OPENVSWITCH_VERSION@
++
++%build
++%configure --enable-ssl --without-pcre --without-ncurses
++make %{_smp_mflags}
++
++%install
++rm -rf %{buildroot}
++%makeinstall
++
++# Get rid of stuff we don't want to make RPM happy.
++rm -rf \
++    $RPM_BUILD_ROOT/%{_bindir}/ezio-term \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-controller \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-discover \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-kill \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-openflowd \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-pki \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-switchui \
++    $RPM_BUILD_ROOT/%{_bindir}/ovs-wdt \
++    $RPM_BUILD_ROOT/%{_bindir}/secchan \
++    $RPM_BUILD_ROOT/%{_sbindir}/ovs-monitor \
++    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-controller.8 \
++    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-discover.8 \
++    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-kill.8 \
++    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-openflowd.8 \
++    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-pki.8 \
++    $RPM_BUILD_ROOT/%{_mandir}/man8/secchan.8 \
++    $RPM_BUILD_ROOT/usr/share/openvswitch
++
++install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}
++
++install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/init.d
++install -m 755 xenserver/etc_init.d_vswitch \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/vswitch
++
++install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig
++install -m 755 xenserver/etc_sysconfig_vswitch.example \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/vswitch
++
++install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d
++install -m 755 xenserver/etc_logrotate.d_vswitch \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/vswitch
++
++%clean
++rm -rf %{buildroot}
++
++%files
++%defattr(-,root,root)
++%doc COPYING README
++%config %{_sysconfdir}/init.d/vswitch
++%config %{_sysconfdir}/sysconfig/vswitch
++%config %{_sysconfdir}/logrotate.d/vswitch
++%{_bindir}/ovs-appctl
++%{_bindir}/ovs-dpctl
++%{_bindir}/ovs-ofctl
++%{_bindir}/ovs-cfg-mod
++%{_sbindir}/ovs-brcompatd
++%{_sbindir}/ovs-vswitchd
++%{_mandir}/man5/ovs-vswitchd.conf.5.gz
++%{_mandir}/man8/ovs-appctl.8.gz
++%{_mandir}/man8/ovs-brcompatd.8.gz
++%{_mandir}/man8/ovs-cfg-mod.8.gz
++%{_mandir}/man8/ovs-dpctl.8.gz
++%{_mandir}/man8/ovs-ofctl.8.gz
++%{_mandir}/man8/ovs-vswitchd.8.gz
++
++%changelog

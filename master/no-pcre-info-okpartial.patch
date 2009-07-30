@@ -1,0 +1,23 @@
+diff -purN openvswitch-0.90.1.orig/extras/ezio/ovs-switchui.c openvswitch-0.90.1/extras/ezio/ovs-switchui.c
+--- openvswitch-0.90.1.orig/extras/ezio/ovs-switchui.c	2009-06-29 06:18:10.000000000 -0400
++++ openvswitch-0.90.1/extras/ezio/ovs-switchui.c	2009-06-29 07:01:36.000000000 -0400
+@@ -2241,8 +2241,6 @@ prompt(const char *prompt, const char *i
+     const char *error;
+     int erroffset;
+     pcre *re;
+-    int retval;
+-    int okpartial;
+     char *p;
+ 
+     set_icon(0,
+@@ -2262,10 +2260,6 @@ prompt(const char *prompt, const char *i
+         return xstrdup(initial);
+     }
+ 
+-    retval = pcre_fullinfo(re, NULL, PCRE_INFO_OKPARTIAL, &okpartial);
+-    assert(!retval);
+-    assert(okpartial);
+-
+     pos = 0;
+     ds_init(&ds);
+     ds_put_cstr(&ds, initial);

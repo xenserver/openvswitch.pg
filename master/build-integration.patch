@@ -1,7 +1,7 @@
-diff -r be90da2a5daa mk/Makefile
+diff -r bf3b91b075ea mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Thu Jul 30 15:47:31 2009 +0100
-@@ -0,0 +1,60 @@
++++ b/mk/Makefile	Fri Jul 31 10:22:49 2009 +0100
+@@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
 +
@@ -37,10 +37,8 @@ diff -r be90da2a5daa mk/Makefile
 +	rm -f $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
 +
 +$(RPM_SOURCESDIR)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz: $(REPOSTAMP)
-+	cd $(REPO) && ./boot.sh && make dist
++	cd $(REPO) && ./boot.sh && ./configure && make dist
 +	mv $(REPO)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz $@
-+
-+
 +
 +$(RPM_SOURCESDIR)/%: %
 +	cp $< $@
@@ -62,9 +60,9 @@ diff -r be90da2a5daa mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r be90da2a5daa mk/openvswitch.spec.in
+diff -r bf3b91b075ea mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Thu Jul 30 15:47:31 2009 +0100
++++ b/mk/openvswitch.spec.in	Fri Jul 31 10:22:49 2009 +0100
 @@ -0,0 +1,86 @@
 +Name: openvswitch
 +Summary: Virtual switch

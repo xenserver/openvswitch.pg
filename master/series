@@ -1,5 +1,4 @@
 install-in-usr.patch
 install-in-lib-modules.patch
-no-pcre-info-okpartial.patch
 autoconf-2.59.patch
 build-integration.patch

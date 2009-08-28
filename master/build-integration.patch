@@ -1,6 +1,6 @@
-diff -r bf3b91b075ea mk/Makefile
+diff -r afe6aebfbb20 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Fri Jul 31 10:22:49 2009 +0100
++++ b/mk/Makefile	Tue Aug 04 13:19:36 2009 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r bf3b91b075ea mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r bf3b91b075ea mk/openvswitch.spec.in
+diff -r afe6aebfbb20 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Fri Jul 31 10:22:49 2009 +0100
-@@ -0,0 +1,86 @@
++++ b/mk/openvswitch.spec.in	Tue Aug 04 13:19:36 2009 +0100
+@@ -0,0 +1,89 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -114,6 +114,8 @@ diff -r bf3b91b075ea mk/openvswitch.spec.in
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}
 +
++touch $RPM_BUILD_ROOT/%{_sysconfdir}/ovs-vswitchd.conf
++
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/init.d
 +install -m 755 xenserver/etc_init.d_vswitch \
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/vswitch
@@ -132,6 +134,7 @@ diff -r bf3b91b075ea mk/openvswitch.spec.in
 +%files
 +%defattr(-,root,root)
 +%doc COPYING README
++%config %{_sysconfdir}/ovs-vswitchd.conf
 +%config %{_sysconfdir}/init.d/vswitch
 +%config %{_sysconfdir}/sysconfig/vswitch
 +%config %{_sysconfdir}/logrotate.d/vswitch

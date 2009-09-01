@@ -1,6 +1,6 @@
-diff -r afe6aebfbb20 mk/Makefile
+diff -r ef1c15fb6870 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Tue Aug 04 13:19:36 2009 +0100
++++ b/mk/Makefile	Tue Sep 01 14:55:51 2009 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r afe6aebfbb20 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r afe6aebfbb20 mk/openvswitch.spec.in
+diff -r ef1c15fb6870 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Tue Aug 04 13:19:36 2009 +0100
-@@ -0,0 +1,89 @@
++++ b/mk/openvswitch.spec.in	Tue Sep 01 14:55:51 2009 +0100
+@@ -0,0 +1,96 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -115,6 +115,7 @@ diff -r afe6aebfbb20 mk/openvswitch.spec.in
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}
 +
 +touch $RPM_BUILD_ROOT/%{_sysconfdir}/ovs-vswitchd.conf
++install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/init.d
 +install -m 755 xenserver/etc_init.d_vswitch \
@@ -128,6 +129,10 @@ diff -r afe6aebfbb20 mk/openvswitch.spec.in
 +install -m 755 xenserver/etc_logrotate.d_vswitch \
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/vswitch
 +
++install -d -m 755 $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
++install -m 755 xenserver/root_vswitch_scripts_dump-vif-details \
++         $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/dump-vif-details
++
 +%clean
 +rm -rf %{buildroot}
 +
@@ -138,12 +143,14 @@ diff -r afe6aebfbb20 mk/openvswitch.spec.in
 +%config %{_sysconfdir}/init.d/vswitch
 +%config %{_sysconfdir}/sysconfig/vswitch
 +%config %{_sysconfdir}/logrotate.d/vswitch
++%dir /var/lib/openvswitch
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl
 +%{_bindir}/ovs-ofctl
 +%{_bindir}/ovs-cfg-mod
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
++%{_libexecdir}/%{name}/dump-vif-details
 +%{_mandir}/man5/ovs-vswitchd.conf.5.gz
 +%{_mandir}/man8/ovs-appctl.8.gz
 +%{_mandir}/man8/ovs-brcompatd.8.gz

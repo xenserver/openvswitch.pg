@@ -1,30 +1,30 @@
-diff -r 5f6403c30612 xenserver/etc_init.d_vswitch
---- a/xenserver/etc_init.d_vswitch	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/etc_init.d_vswitch	Thu Jul 30 14:30:48 2009 +0100
+diff -r e95868138a10 xenserver/etc_init.d_vswitch
+--- a/xenserver/etc_init.d_vswitch	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/etc_init.d_vswitch	Wed Sep 09 08:47:00 2009 +0100
 @@ -24,7 +24,7 @@
  test -e /etc/sysconfig/vswitch && . /etc/sysconfig/vswitch
  
  # General config variables in /etc/sysconfig/vswitch
--VSWITCH_BASE="${VSWITCH_BASE:-/root/vswitch}"
-+VSWITCH_BASE="${VSWITCH_BASE:-/usr}"
- ENABLE_BRCOMPAT="${ENABLE_BRCOMPAT:-y}"
- ENABLE_FAKE_PROC_NET="${ENABLE_FAKE_PROC_NET:-y}"
- FORCE_COREFILES="${FORCE_COREFILES:-n}"
-diff -r 5f6403c30612 xenserver/etc_init.d_vswitch-xapi-update
---- a/xenserver/etc_init.d_vswitch-xapi-update	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/etc_init.d_vswitch-xapi-update	Thu Jul 30 14:30:48 2009 +0100
+-: ${VSWITCH_BASE:=/root/vswitch}
++: ${VSWITCH_BASE:=/usr}
+ : ${ENABLE_BRCOMPAT:=y}
+ : ${ENABLE_FAKE_PROC_NET:=y}
+ : ${FORCE_COREFILES:=y}
+diff -r e95868138a10 xenserver/etc_init.d_vswitch-xapi-update
+--- a/xenserver/etc_init.d_vswitch-xapi-update	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/etc_init.d_vswitch-xapi-update	Wed Sep 09 08:47:00 2009 +0100
 @@ -22,7 +22,7 @@
  . /etc/init.d/functions
  
  test -e /etc/sysconfig/vswitch && . /etc/sysconfig/vswitch
--VSWITCH_BASE="${VSWITCH_BASE:-/root/vswitch}"
-+VSWITCH_BASE="${VSWITCH_BASE:-/usr}"
- VSWITCHD_CONF="${VSWITCHD_CONF:-/etc/ovs-vswitchd.conf}"
- VSWITCHD_PIDFILE="${VSWITCHD_PIDFILE:-/var/run/ovs-vswitchd.pid}"
- VSWITCHD_PRIORITY="${VSWITCHD_PRIORITY:--5}"
-diff -r 5f6403c30612 xenserver/etc_profile.d_vswitch.sh
---- a/xenserver/etc_profile.d_vswitch.sh	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/etc_profile.d_vswitch.sh	Thu Jul 30 14:30:48 2009 +0100
+-: ${VSWITCH_BASE:=/root/vswitch}
++: ${VSWITCH_BASE:=/usr}
+ : ${VSWITCHD_CONF:=/etc/ovs-vswitchd.conf}
+ : ${VSWITCHD_PIDFILE:=/var/run/ovs-vswitchd.pid}
+ : ${VSWITCHD_PRIORITY:=-5}
+diff -r e95868138a10 xenserver/etc_profile.d_vswitch.sh
+--- a/xenserver/etc_profile.d_vswitch.sh	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/etc_profile.d_vswitch.sh	Wed Sep 09 08:47:00 2009 +0100
 @@ -4,11 +4,6 @@
  # are permitted in any medium without royalty provided the copyright
  # notice and this notice are preserved.  This file is offered as-is,
@@ -37,21 +37,9 @@ diff -r 5f6403c30612 xenserver/etc_profile.d_vswitch.sh
  
  alias vswitch='service vswitch'
  
-diff -r 5f6403c30612 xenserver/etc_sysconfig_vswitch.example
---- a/xenserver/etc_sysconfig_vswitch.example	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/etc_sysconfig_vswitch.example	Thu Jul 30 14:30:48 2009 +0100
-@@ -8,7 +8,7 @@
- # without warranty of any kind.
- 
- # VSWITCH_BASE: Root directory where vswitch binaries are installed
--# VSWITCH_BASE=/root/vswitch/openvswitch/build
-+# VSWITCH_BASE=/usr
- 
- # ENABLE_BRCOMPAT: If 'y' than emulate linux bridging interfaces
- #    using the brcompat kernel module and ovs-brcompatd daemon
-diff -r 5f6403c30612 xenserver/etc_xapi.d_plugins_vswitch-cfg-update
---- a/xenserver/etc_xapi.d_plugins_vswitch-cfg-update	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/etc_xapi.d_plugins_vswitch-cfg-update	Thu Jul 30 14:30:48 2009 +0100
+diff -r e95868138a10 xenserver/etc_xapi.d_plugins_vswitch-cfg-update
+--- a/xenserver/etc_xapi.d_plugins_vswitch-cfg-update	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/etc_xapi.d_plugins_vswitch-cfg-update	Wed Sep 09 08:47:00 2009 +0100
 @@ -30,7 +30,7 @@
  import os
  import subprocess
@@ -61,10 +49,10 @@ diff -r 5f6403c30612 xenserver/etc_xapi.d_plugins_vswitch-cfg-update
  vswitchd_cfg_filename="/etc/ovs-vswitchd.conf"
  cacert_filename="/etc/ovs-vswitchd.cacert"
  
-diff -r 5f6403c30612 xenserver/etc_xensource_scripts_vif
---- a/xenserver/etc_xensource_scripts_vif	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/etc_xensource_scripts_vif	Thu Jul 30 14:30:48 2009 +0100
-@@ -13,7 +13,7 @@
+diff -r e95868138a10 xenserver/etc_xensource_scripts_vif
+--- a/xenserver/etc_xensource_scripts_vif	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/etc_xensource_scripts_vif	Wed Sep 09 08:47:00 2009 +0100
+@@ -11,7 +11,7 @@
  
  # Keep other-config/ keys in sync with device.ml:vif_udev_keys
  
@@ -73,9 +61,21 @@ diff -r 5f6403c30612 xenserver/etc_xensource_scripts_vif
  dump_vif_details="/root/vswitch/scripts/dump-vif-details"
  service="/sbin/service"
  
-diff -r 5f6403c30612 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
---- a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Wed Jul 29 12:33:32 2009 -0700
-+++ b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Thu Jul 30 14:30:48 2009 +0100
+diff -r e95868138a10 xenserver/root_vswitch_scripts_sysconfig.template
+--- a/xenserver/root_vswitch_scripts_sysconfig.template	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/root_vswitch_scripts_sysconfig.template	Wed Sep 09 08:47:00 2009 +0100
+@@ -8,7 +8,7 @@
+ # without warranty of any kind.
+ 
+ # VSWITCH_BASE: Root directory where vswitch binaries are installed
+-# VSWITCH_BASE=/root/vswitch/openvswitch/build
++# VSWITCH_BASE=/usr
+ 
+ # ENABLE_BRCOMPAT: If 'y' than emulate linux bridging interfaces
+ #    using the brcompat kernel module and ovs-brcompatd daemon
+diff -r e95868138a10 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
+--- a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Wed Sep 09 08:47:00 2009 +0100
 @@ -15,7 +15,7 @@
  import socket
  import subprocess

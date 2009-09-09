@@ -1,0 +1,69 @@
+diff -r e95868138a10 xenserver/etc_init.d_vswitch
+--- a/xenserver/etc_init.d_vswitch	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/etc_init.d_vswitch	Wed Sep 09 15:43:53 2009 +0100
+@@ -34,7 +34,6 @@
+ : ${VSWITCHD_PIDFILE:=/var/run/ovs-vswitchd.pid}
+ : ${VSWITCHD_RUN_DIR:=/var/xen/vswitch}
+ : ${VSWITCHD_PRIORITY:=-5}
+-: ${VSWITCHD_NETBACK_PRIORITY:=0}
+ : ${VSWITCHD_LOGFILE:=/var/log/ovs-vswitchd.log}
+ : ${VSWITCHD_FILE_LOGLEVEL:=}
+ : ${VSWITCHD_SYSLOG_LOGLEVEL:=WARN}
+@@ -113,28 +112,6 @@
+     fi
+ }
+ 
+-function quietly {
+-    "$@" > /dev/null
+-}
+-
+-# renice_netback PRIORITY PID [PID...]
+-#
+-# Renices the netback processes given as each PID to nice level PRIORITY.
+-function renice_netback {
+-    local pri=$1
+-    shift
+-
+-    if test $# = 0; then
+-        warning "Netback not running, nothing to renice"
+-        return
+-    fi
+-
+-    for pid
+-    do
+-        action "Renicing netback (pid $pid) to priority $pri" quietly renice $pri -p $pid
+-    done
+-}
+-
+ function start_vswitchd {
+     local syslog_opt="-vANY:SYSLOG:${VSWITCHD_SYSLOG_LOGLEVEL}"
+     local logfile_file_opt=""
+@@ -171,11 +148,6 @@
+     local fake_proc_net_opt=""
+     if [ "$ENABLE_FAKE_PROC_NET" = "y" ]; then
+         fake_proc_net_opt="--fake-proc-net"
+-    fi
+-    if [ "$VSWITCHD_NETBACK_PRIORITY" != default ]; then
+-        renice_netback $VSWITCHD_NETBACK_PRIORITY $(pidof netback)
+-    else
+-        warning "Netback renicing disabled (see /etc/sysconfig/vswitch)"
+     fi
+     if [ "$daemonize" != "y" ]; then
+         # Start in background and force a "success" message
+diff -r e95868138a10 xenserver/root_vswitch_scripts_sysconfig.template
+--- a/xenserver/root_vswitch_scripts_sysconfig.template	Tue Sep 08 13:34:12 2009 -0700
++++ b/xenserver/root_vswitch_scripts_sysconfig.template	Wed Sep 09 15:43:53 2009 +0100
+@@ -42,13 +42,6 @@
+ # VSWITCHD_PRIORITY: "nice" priority at which to run ovs-vswitchd and related
+ #     processes.
+ # VSWITCHD_PRIORITY=-5
+-
+-# VSWITCHD_NETBACK_PRIORITY: "nice" priority at which to run netback.
+-#     It is a good idea to run ovs-vswitchd at a higher priority than
+-#     netback to ensure that it gets enough CPU time to set up flows
+-#     (bug #1656).  Set this to 'default' to avoid changing netback's
+-#     priority.
+-# VSWITCHD_NETBACK_PRIORITY=0
+ 
+ # VSWITCHD_LOGFILE: File to send the FILE_LOGLEVEL log messages to.
+ # VSWITCHD_LOGFILE=/var/log/ovs-vswitchd.log

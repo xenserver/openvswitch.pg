@@ -1,0 +1,42 @@
+diff -r 6298a6fc6726 xenserver/etc_init.d_vswitch
+--- a/xenserver/etc_init.d_vswitch	Wed Sep 09 15:44:04 2009 +0100
++++ b/xenserver/etc_init.d_vswitch	Wed Sep 09 15:45:06 2009 +0100
+@@ -33,7 +33,7 @@
+ : ${VSWITCHD_CONF:=/etc/ovs-vswitchd.conf}
+ : ${VSWITCHD_PIDFILE:=/var/run/ovs-vswitchd.pid}
+ : ${VSWITCHD_RUN_DIR:=/var/xen/vswitch}
+-: ${VSWITCHD_PRIORITY:=-5}
++: ${VSWITCHD_PRIORITY:=-10}
+ : ${VSWITCHD_LOGFILE:=/var/log/ovs-vswitchd.log}
+ : ${VSWITCHD_FILE_LOGLEVEL:=}
+ : ${VSWITCHD_SYSLOG_LOGLEVEL:=WARN}
+@@ -46,7 +46,7 @@
+ # Config variables specific to ovs-brcompatd
+ : ${BRCOMPATD_PIDFILE:=/var/run/ovs-brcompatd.pid}
+ : ${BRCOMPATD_RUN_DIR:=/var/xen/vswitch}
+-: ${BRCOMPATD_PRIORITY:=-5}
++: ${BRCOMPATD_PRIORITY:=-10}
+ : ${BRCOMPATD_LOGFILE:=/var/log/ovs-brcompatd.log}
+ : ${BRCOMPATD_FILE_LOGLEVEL:=}
+ : ${BRCOMPATD_SYSLOG_LOGLEVEL:=INFO}
+diff -r 6298a6fc6726 xenserver/root_vswitch_scripts_sysconfig.template
+--- a/xenserver/root_vswitch_scripts_sysconfig.template	Wed Sep 09 15:44:04 2009 +0100
++++ b/xenserver/root_vswitch_scripts_sysconfig.template	Wed Sep 09 15:45:06 2009 +0100
+@@ -41,7 +41,7 @@
+ 
+ # VSWITCHD_PRIORITY: "nice" priority at which to run ovs-vswitchd and related
+ #     processes.
+-# VSWITCHD_PRIORITY=-5
++# VSWITCHD_PRIORITY=-10
+ 
+ # VSWITCHD_LOGFILE: File to send the FILE_LOGLEVEL log messages to.
+ # VSWITCHD_LOGFILE=/var/log/ovs-vswitchd.log
+@@ -103,7 +103,7 @@
+ 
+ # BRCOMPATD_PRIORITY: "nice" priority at which to run ovs-vswitchd and related
+ #     processes.
+-# BRCOMPATD_PRIORITY=-5
++# BRCOMPATD_PRIORITY=-10
+ 
+ # BRCOMPATD_LOGFILE: File to send the FILE_LOGLEVEL log messages to.
+ # BRCOMPATD_LOGFILE=/var/log/ovs-brcompatd.log

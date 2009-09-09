@@ -1,3 +1,5 @@
+revert-netback-priority.patch
+increase-vswitchd-priority.patch
 install-in-usr.patch
 install-in-lib-modules.patch
 autoconf-2.59.patch

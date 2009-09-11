@@ -6,6 +6,7 @@ ovs-vsctl__Be_a_little_more_positive_about_the_code.patch
 ovs-vsctl__Omit_the_bridge_in__list-ports__or__list-ifaces__output.patch
 ovs-vsctl__Add_commands__port-to-br__iface-to-br_.patch
 ovs-vsctl__Style_fixes_for_testsuite.patch
+reduce-syslog-logging.patch
 install-in-usr.patch
 install-in-lib-modules.patch
 autoconf-2.59.patch

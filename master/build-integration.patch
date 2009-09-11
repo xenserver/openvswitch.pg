@@ -1,6 +1,6 @@
 diff -r a6792a9a8372 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Fri Sep 11 10:53:51 2009 +0100
++++ b/mk/Makefile	Fri Sep 11 14:37:16 2009 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -62,8 +62,8 @@ diff -r a6792a9a8372 mk/Makefile
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
 diff -r a6792a9a8372 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Fri Sep 11 10:53:51 2009 +0100
-@@ -0,0 +1,98 @@
++++ b/mk/openvswitch.spec.in	Fri Sep 11 14:37:16 2009 +0100
+@@ -0,0 +1,99 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -85,7 +85,8 @@ diff -r a6792a9a8372 mk/openvswitch.spec.in
 +%setup -n openvswitch-@OPENVSWITCH_VERSION@
 +
 +%build
-+%configure --enable-ssl --without-pcre --without-ncurses
++%configure --enable-ssl --without-pcre --without-ncurses --with-logdir=/var/log
++
 +make %{_smp_mflags}
 +
 +%install

@@ -1,0 +1,246 @@
+From blp@nicira.com Thu Sep 10 23:25:10 2009
+Received: from FTLPMAILMX02.citrite.net (10.9.154.224) by
+	LONPMAILMX02.citrite.net (10.30.224.163) with Microsoft SMTP Server (TLS)
+	id 8.1.393.1; Thu, 10 Sep 2009 23:25:10 +0100
+Received: from SMTP02.CITRIX.COM (10.9.154.239) by FTLPMAILMX02.citrite.net
+	(10.9.154.224) with Microsoft SMTP Server id 8.1.393.1; Thu, 10 Sep 2009
+	18:25:08 -0400
+Received: from mail.geoviz.com (HELO leadville.nicira.com)
+	([209.172.104.10]) by SMTP02.CITRIX.COM with ESMTP; 10 Sep 2009 18:25:07
+	-0400
+Received: from hardrock.nicira.com ([172.16.0.20])	by leadville.nicira.com
+	with esmtp (Exim 4.67)	(envelope-from <blp@nicira.com>)	id
+	1Mls4c-0005vB-0N; Thu, 10 Sep 2009 15:25:02 -0700
+Received: from blp by hardrock.nicira.com with local (Exim 4.67)
+	(envelope-from <blp@hardrock.nicira.com>)	id 1Mls4f-0004Ua-T9; Thu, 10 Sep
+	2009 15:25:05 -0700
+From: Ben Pfaff <blp@nicira.com>
+To: "jpettit@nicira.com" <jpettit@nicira.com>, Ian Campbell <Ian.Campbell@eu.citrix.com>
+CC: Ben Pfaff <blp@nicira.com>
+Date: Thu, 10 Sep 2009 23:24:49 +0100
+Subject: [PATCH 4/6] ovs-vsctl: Omit the bridge in "list-ports" or
+	"list-ifaces" output.
+Thread-Topic: [PATCH 4/6] ovs-vsctl: Omit the bridge in "list-ports" or
+	"list-ifaces" output.
+Thread-Index: AcoyZY+UW/kUJDEKTUeKxbIX9vPZoQ==
+Message-ID: <1252621491-17203-4-git-send-email-blp@nicira.com>
+References: <1252621491-17203-1-git-send-email-blp@nicira.com>
+In-Reply-To: <1252621491-17203-1-git-send-email-blp@nicira.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Exchange-Organization-AuthSource: FTLPMAILMX02.citrite.net
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-sbrs: None
+x-mesageid: 64739373
+x-ironport-server: ftlpip02.citrite.net
+x-remote-ip: 209.172.104.10
+x-policy: $LOW_THROTTLE
+x-ironport-anti-spam-filtered: true
+x-ironport-anti-spam-result: AvYFAF8ZqUrRrGgK/2dsb2JhbACBU5UnhUXDA4QYBYFU
+x-ironport-av: E=Sophos;i="4.44,366,1249272000";   
+	d="scan'208";a="64739373"
+Content-Type: text/plain; charset="iso-8859-1"
+MIME-Version: 1.0
+X-Evolution-Source: imap://ianca@lonpmailmx01.citrite.net/
+Content-Transfer-Encoding: 8bit
+
+Preferred by Justin, Ian.
+---
+ tests/ovs-vsctl.at       |   58 +++++++++++++++++++++++-----------------------
+ utilities/ovs-vsctl.8.in |    5 ++-
+ utilities/ovs-vsctl.in   |    8 ++++--
+ 3 files changed, 37 insertions(+), 34 deletions(-)
+
+diff --git a/tests/ovs-vsctl.at b/tests/ovs-vsctl.at
+index 3cc1e92..1e49d59 100644
+--- a/tests/ovs-vsctl.at
++++ b/tests/ovs-vsctl.at
+@@ -35,8 +35,8 @@ AT_CHECK([cat conf], [0],
+   [bridge.a.port=a
+ ])
+ CHECK_BRIDGES([a])
+-CHECK_PORTS([a], [a])
+-CHECK_IFACES([a], [a])
++CHECK_PORTS([a])
++CHECK_IFACES([a])
+ AT_CLEANUP
+ 
+ AT_SETUP([add-br a, add-br b])
+@@ -47,10 +47,10 @@ AT_CHECK([cat conf], [0],
+ bridge.b.port=b
+ ])
+ CHECK_BRIDGES([a], [b])
+-CHECK_PORTS([a], [a])
+-CHECK_IFACES([a], [a])
+-CHECK_PORTS([b], [b])
+-CHECK_IFACES([b], [b])
++CHECK_PORTS([a])
++CHECK_IFACES([a])
++CHECK_PORTS([b])
++CHECK_IFACES([b])
+ AT_CLEANUP
+ 
+ AT_SETUP([add-br a, add-br b, del-br a])
+@@ -60,8 +60,8 @@ AT_CHECK([cat conf], [0], [dnl
+ bridge.b.port=b
+ ])
+ CHECK_BRIDGES([b])
+-CHECK_PORTS([b], [b])
+-CHECK_IFACES([b], [b])
++CHECK_PORTS([b])
++CHECK_IFACES([b])
+ AT_CLEANUP
+ 
+ AT_SETUP([add-br a b, add-port a a1, add-port b b1, del-br a])
+@@ -77,8 +77,8 @@ AT_CHECK([cat conf], [0],
+ bridge.b.port=b1
+ ])
+ CHECK_BRIDGES([b])
+-CHECK_PORTS([b], [b], [b1])
+-CHECK_IFACES([b], [b], [b1])
++CHECK_PORTS([b], [b1])
++CHECK_IFACES([b], [b1])
+ AT_CLEANUP
+ 
+ AT_SETUP([add-br a, add-bond a bond0 a1 a2 a3])
+@@ -94,8 +94,8 @@ bridge.a.port=a
+ bridge.a.port=bond0
+ ])
+ CHECK_BRIDGES([a])
+-CHECK_PORTS([a], [a], [bond0])
+-CHECK_IFACES([a], [a], [a1], [a2], [a3])
++CHECK_PORTS([a], [bond0])
++CHECK_IFACES([a], [a1], [a2], [a3])
+ AT_CLEANUP
+ 
+ AT_SETUP([add-br a b, add-port a a1, add-port b b1, del-port a a1])
+@@ -112,10 +112,10 @@ bridge.b.port=b
+ bridge.b.port=b1
+ ])
+ CHECK_BRIDGES([a], [b])
+-CHECK_PORTS([a], [a])
+-CHECK_IFACES([a], [a])
+-CHECK_PORTS([b], [b], [b1])
+-CHECK_IFACES([b], [b], [b1])
++CHECK_PORTS([a])
++CHECK_IFACES([a])
++CHECK_PORTS([b], [b1])
++CHECK_IFACES([b], [b1])
+ AT_CLEANUP
+ 
+ AT_SETUP([add-br a, add-bond a bond0 a1 a2 a3, del-port a bond0])
+@@ -128,7 +128,7 @@ AT_CHECK([cat conf], [0],
+   [bridge.a.port=a
+ ])
+ CHECK_BRIDGES([a])
+-CHECK_PORTS([a], [a])
++CHECK_PORTS([a])
+ AT_CLEANUP
+ 
+ AT_BANNER([ovs-vsctl unit tests -- fake bridges])
+@@ -153,10 +153,10 @@ AT_CHECK([RUN_OVS_VSCTL(
+   [add-port xapi1 eth0.9])])
+ AT_CHECK([cat conf], [0], [SIMPLE_FAKE_CONF])
+ CHECK_BRIDGES([xenbr0], [xapi1])
+-CHECK_PORTS([xenbr0], [eth0], [xenbr0])
+-CHECK_IFACES([xenbr0], [eth0], [xenbr0])
+-CHECK_PORTS([xapi1], [eth0.9], [xapi1])
+-CHECK_IFACES([xapi1], [eth0.9], [xapi1])
++CHECK_PORTS([xenbr0], [eth0])
++CHECK_IFACES([xenbr0], [eth0])
++CHECK_PORTS([xapi1], [eth0.9])
++CHECK_IFACES([xapi1], [eth0.9])
+ AT_CLEANUP
+ 
+ AT_SETUP([simple fake bridge + del-br fake bridge])
+@@ -168,8 +168,8 @@ bridge.xenbr0.port=eth0
+ bridge.xenbr0.port=xenbr0
+ ])
+ CHECK_BRIDGES([xenbr0])
+-CHECK_PORTS([xenbr0], [eth0], [xenbr0])
+-CHECK_IFACES([xenbr0], [eth0], [xenbr0])
++CHECK_PORTS([xenbr0], [eth0])
++CHECK_IFACES([xenbr0], [eth0])
+ AT_CLEANUP
+ 
+ AT_SETUP([simple fake bridge + del-br real bridge])
+@@ -202,10 +202,10 @@ AT_CHECK([RUN_OVS_VSCTL(
+   [add-port xapi2 bond0.11])])
+ AT_CHECK([cat conf], [0], [BOND_FAKE_CONF])
+ CHECK_BRIDGES([xapi1], [xapi2])
+-CHECK_PORTS([xapi1], [bond0], [xapi1])
+-CHECK_IFACES([xapi1], [eth0], [eth1], [xapi1])
+-CHECK_PORTS([xapi2], [bond0.11], [xapi2])
+-CHECK_IFACES([xapi2], [bond0.11], [xapi2])
++CHECK_PORTS([xapi1], [bond0])
++CHECK_IFACES([xapi1], [eth0], [eth1])
++CHECK_PORTS([xapi2], [bond0.11])
++CHECK_IFACES([xapi2], [bond0.11])
+ AT_CLEANUP
+ 
+ AT_SETUP([fake bridge on bond + del-br fake bridge])
+@@ -213,8 +213,8 @@ AT_KEYWORDS([ovs-vsctl fake-bridge])
+ AT_DATA([conf], [BOND_FAKE_CONF])
+ AT_CHECK([RUN_OVS_VSCTL([del-br xapi2])])
+ CHECK_BRIDGES([xapi1])
+-CHECK_PORTS([xapi1], [bond0], [xapi1])
+-CHECK_IFACES([xapi1], [eth0], [eth1], [xapi1])
++CHECK_PORTS([xapi1], [bond0])
++CHECK_IFACES([xapi1], [eth0], [eth1])
+ AT_CLEANUP
+ 
+ AT_SETUP([fake bridge on bond + del-br real bridge])
+diff --git a/utilities/ovs-vsctl.8.in b/utilities/ovs-vsctl.8.in
+index 587fa12..461c5ab 100644
+--- a/utilities/ovs-vsctl.8.in
++++ b/utilities/ovs-vsctl.8.in
+@@ -133,7 +133,7 @@ commands treat a bonded port as a single entity.
+ .
+ .IP "\fBlist-ports \fIbridge\fR"
+ Lists all of the ports within \fIbridge\fR on standard output, one per
+-line.
++line.  The local port \fIbridge\fR is not included in the list.
+ .
+ .IP "\fBadd-port \fIbridge port\fR"
+ Creates on \fIbridge\fR a new port named \fIport\fR from the network
+@@ -155,7 +155,8 @@ more interfaces, rather than as a single port.
+ .
+ .IP "\fBlist-ifaces \fIbridge\fR"
+ Lists all of the interfaces within \fIbridge\fR on standard output,
+-one per line.
++one per line.  The local port \fIbridge\fR is not included in the
++list.
+ .
+ .SH "EXIT STATUS"
+ .IP "0"
+diff --git a/utilities/ovs-vsctl.in b/utilities/ovs-vsctl.in
+index 5f412a9..e59c747 100755
+--- a/utilities/ovs-vsctl.in
++++ b/utilities/ovs-vsctl.in
+@@ -367,7 +367,8 @@ def cmd_list_ports(bridge):
+     cfg = cfg_read(VSWITCHD_CONF)
+     parent, vlan = find_bridge(cfg, bridge)
+     for port in get_bridge_ports(cfg, parent, vlan):
+-        print port
++        if port != bridge:
++            print port
+ 
+ def do_add_port(cfg, bridge, parent, port, vlan):
+     check_conflicts(cfg, port, "cannot create a port named %s" % port)
+@@ -402,8 +403,9 @@ def cmd_del_port(bridge, port):
+ def cmd_list_ifaces(bridge):
+     cfg = cfg_read(VSWITCHD_CONF)
+     parent, vlan = find_bridge(cfg, bridge)
+-    for port in get_bridge_ifaces(cfg, parent, vlan):
+-        print port
++    for iface in get_bridge_ifaces(cfg, parent, vlan):
++        if iface != bridge:
++            print iface
+ 
+ def main():
+     # Parse command line.
+-- 
+1.6.3.3
+

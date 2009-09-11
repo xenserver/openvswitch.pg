@@ -1,0 +1,1109 @@
+From blp@nicira.com Thu Sep 10 23:25:09 2009
+Received: from FTLPMAILMX02.citrite.net (10.9.154.224) by
+	LONPMAILMX02.citrite.net (10.30.224.163) with Microsoft SMTP Server (TLS)
+	id 8.1.393.1; Thu, 10 Sep 2009 23:25:09 +0100
+Received: from SMTP02.CITRIX.COM (10.9.154.239) by FTLPMAILMX02.citrite.net
+	(10.9.154.224) with Microsoft SMTP Server id 8.1.393.1; Thu, 10 Sep 2009
+	18:25:08 -0400
+Received: from mail.geoviz.com (HELO leadville.nicira.com)
+	([209.172.104.10]) by SMTP02.CITRIX.COM with ESMTP; 10 Sep 2009 18:25:05
+	-0400
+Received: from hardrock.nicira.com ([172.16.0.20])	by leadville.nicira.com
+	with esmtp (Exim 4.67)	(envelope-from <blp@nicira.com>)	id
+	1Mls4Y-0005uz-0i; Thu, 10 Sep 2009 15:24:58 -0700
+Received: from blp by hardrock.nicira.com with local (Exim 4.67)
+	(envelope-from <blp@hardrock.nicira.com>)	id 1Mls4b-0004UL-TV; Thu, 10 Sep
+	2009 15:25:01 -0700
+From: Ben Pfaff <blp@nicira.com>
+To: "jpettit@nicira.com" <jpettit@nicira.com>, Ian Campbell <Ian.Campbell@eu.citrix.com>
+CC: Ben Pfaff <blp@nicira.com>
+Date: Thu, 10 Sep 2009 23:24:46 +0100
+Subject: [PATCH 1/6] New utility ovs-vsctl--first draft.
+Thread-Topic: [PATCH 1/6] New utility ovs-vsctl--first draft.
+Thread-Index: AcoyZY7MUO+RX8slTk+YcHf5cGYWLg==
+Message-ID: <1252621491-17203-1-git-send-email-blp@nicira.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Exchange-Organization-AuthSource: FTLPMAILMX02.citrite.net
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-sbrs: None
+x-mesageid: 64739369
+x-ironport-server: ftlpip02.citrite.net
+x-remote-ip: 209.172.104.10
+x-policy: $LOW_THROTTLE
+x-ironport-anti-spam-filtered: true
+x-ironport-anti-spam-result: AhkFAF8ZqUrRrGgK/2dsb2JhbACBU5UnuCSQJII7gV0FgVQ
+x-ironport-av: E=Sophos;i="4.44,366,1249272000";   
+	d="scan'208";a="64739369"
+Content-Type: text/plain; charset="iso-8859-1"
+MIME-Version: 1.0
+X-Evolution-Source: imap://ianca@lonpmailmx01.citrite.net/
+Content-Transfer-Encoding: 8bit
+
+Most commands are at least lightly tested by the regression suite--see
+tests/ovs-vsctl.at.
+
+I haven't tested this on a XenServer at all.
+
+The reload functionality hasn't been tested at all either.
+
+The file locking should match what cfg_lock() does, but I haven't actually
+verified that by testing.
+
+I haven't run "make dist" or "make distcheck" to verify that all the
+Autoconf and Automake stuff is exactly right.
+
+Hope this helps.
+---
+ Makefile.am              |   14 ++-
+ configure.ac             |    1 +
+ m4/openvswitch.m4        |   28 +++
+ tests/automake.mk        |    1 +
+ tests/ovs-vsctl.at       |  225 ++++++++++++++++++++++
+ tests/testsuite.at       |    2 +
+ utilities/automake.mk    |   13 +-
+ utilities/ovs-vsctl.8.in |  163 ++++++++++++++++
+ utilities/ovs-vsctl.in   |  479 ++++++++++++++++++++++++++++++++++++++++++++++
+ 9 files changed, 920 insertions(+), 6 deletions(-)
+ create mode 100644 tests/ovs-vsctl.at
+ create mode 100644 utilities/ovs-vsctl.8.in
+ create mode 100755 utilities/ovs-vsctl.in
+
+diff --git a/Makefile.am b/Makefile.am
+index 1b49456..947337c 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -51,8 +51,18 @@ ro_c = echo '/* -*- mode: c; buffer-read-only: t -*- */'
+ SUFFIXES = .in
+ .in:
+ 	$(PERL) $(srcdir)/soexpand.pl -I$(srcdir) < $< | \
+-	    sed -e 's,[@]LOGDIR[@],$(LOGDIR),g' \
++	    sed \
+ 		-e 's,[@]PKIDIR[@],$(PKIDIR),g' \
++	         -e 's,[@]LOGDIR[@],$(LOGDIR),g' \
++	         -e 's,[@]PERL[@],$(PERL),g' \
++	         -e 's,[@]PYTHON[@],$(PYTHON),g' \
+                 -e 's,[@]RUNDIR[@],$(RUNDIR),g' \
++	         -e 's,[@]VERSION[@],$(VERSION),g' \
++	         -e 's,[@]localstatedir[@],$(localstatedir),g' \
+                 -e 's,[@]pkgdatadir[@],$(pkgdatadir),g' \
+-                -e 's,[@]PERL[@],$(PERL),g' > $@
++	     > $@.tmp
++	@if head -n 1 $@.tmp | grep -q '#!'; then \
++	    echo chmod +x $@.tmp; \
++	    chmod +x $@.tmp; \
++	fi
++	mv $@.tmp $@
+
+ include lib/automake.mk
+ include ofproto/automake.mk
+diff --git a/configure.ac b/configure.ac
+index d674ab4..d5b5938 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -46,6 +46,7 @@ OVS_CHECK_LOGDIR
+ OVS_CHECK_CURSES
+ OVS_CHECK_LINUX_VT_H
+ OVS_CHECK_PCRE
++OVS_CHECK_PYTHON
+ OVS_CHECK_IF_PACKET
+ OVS_CHECK_STRTOK_R
+
+diff --git a/m4/openvswitch.m4 b/m4/openvswitch.m4
+index d65baba..b726743 100644
+--- a/m4/openvswitch.m4
++++ b/m4/openvswitch.m4
+@@ -233,3 +233,31 @@ AC_DEFUN([OVS_CHECK_PCRE],
+    if test "$HAVE_PCRE" = yes; then
+       AC_DEFINE([HAVE_PCRE], [1], [Define to 1 if libpcre is installed.])
+    fi])
++
++dnl Checks for Python 2.x, x >= 4.
++AC_DEFUN([OVS_CHECK_PYTHON],
++  [AC_ARG_VAR([PYTHON], [path to Python 2.x])
++   AC_CACHE_CHECK(
++     [for Python 2.x for x >= 4],
++     [ovs_cv_python],
++     [if test -n "$PYTHON"; then
++        ovs_cv_python=$PYTHON
++      else
++        ovs_cv_python=no
++        for binary in python python2.4 python2.5; do
++          ovs_save_IFS=$IFS; IFS=$PATH_SEPARATOR
++          for dir in $PATH; do
++            IFS=$ovs_save_IFS
++            test -z "$dir" && dir=.
++            if test -x $dir/$binary && $dir/$binary -c 'import sys
++if sys.hexversion >= 0x02040000 and sys.hexversion < 0x03000000:
++    sys.exit(0)
++else:
++    sys.exit(1)'; then
++              ovs_cv_python=$dir/$binary
++              break 2
++            fi
++          done
++        done
++      fi])
++   PYTHON=$ovs_cv_python])
+diff --git a/tests/automake.mk b/tests/automake.mk
+index 07e56ff..7659a26 100644
+--- a/tests/automake.mk
++++ b/tests/automake.mk
+@@ -9,6 +9,7 @@ TESTSUITE_AT = \
+ 	tests/lcov-pre.at \
+ 	tests/library.at \
+ 	tests/stp.at \
++       tests/ovs-vsctl.at \
+ 	tests/lcov-post.at
+ TESTSUITE = $(srcdir)/tests/testsuite
+ DISTCLEANFILES += tests/atconfig tests/atlocal $(TESTSUITE)
+diff --git a/tests/ovs-vsctl.at b/tests/ovs-vsctl.at
+new file mode 100644
+index 0000000..28fc322
+--- /dev/null
++++ b/tests/ovs-vsctl.at
+@@ -0,0 +1,225 @@
++AT_BANNER([ovs-vsctl unit tests -- real bridges])
++
++m4_define([RUN_OVS_VSCTL],
++  [: >> conf
++m4_foreach([command], [$@], [ovs-vsctl --no-reload --config=conf command
++])])
++
++m4_define([CHECK_BRIDGES],
++  [AT_CHECK(
++     [RUN_OVS_VSCTL([list-br])],
++     [0],
++     [m4_foreach([port], [$@], [port
++])])
++   m4_foreach([port], [$@], [AT_CHECK([RUN_OVS_VSCTL([br-exists port])])])
++   AT_CHECK([RUN_OVS_VSCTL([br-exists nonexistent])], [1])])
++
++m4_define([CHECK_PORTS],
++  [AT_CHECK(
++     [RUN_OVS_VSCTL([list-ports $1])],
++     [0],
++     [m4_foreach([port], m4_cdr($@), [port
++])])])
++
++m4_define([CHECK_IFACES],
++  [AT_CHECK(
++     [RUN_OVS_VSCTL([list-ifaces $1])],
++     [0],
++     [m4_foreach([iface], m4_cdr($@), [iface
++])])])
++
++AT_SETUP([add-br a])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL([add-br a])])
++AT_CHECK([cat conf], [0],
++  [bridge.a.port=a
++])
++CHECK_BRIDGES([a])
++CHECK_PORTS([a], [a])
++CHECK_IFACES([a], [a])
++AT_CLEANUP
++
++AT_SETUP([add-br a, add-br b])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL([add-br a], [add-br b])])
++AT_CHECK([cat conf], [0],
++  [bridge.a.port=a
++bridge.b.port=b
++])
++CHECK_BRIDGES([a], [b])
++CHECK_PORTS([a], [a])
++CHECK_IFACES([a], [a])
++CHECK_PORTS([b], [b])
++CHECK_IFACES([b], [b])
++AT_CLEANUP
++
++AT_SETUP([add-br a, add-br b, del-br a])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL([add-br a], [add-br b], [del-br a])])
++AT_CHECK([cat conf], [0], [dnl
++bridge.b.port=b
++])
++CHECK_BRIDGES([b])
++CHECK_PORTS([b], [b])
++CHECK_IFACES([b], [b])
++AT_CLEANUP
++
++AT_SETUP([add-br a b, add-port a a1, add-port b b1, del-br a])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL(
++   [add-br a],
++   [add-br b],
++   [add-port a a1],
++   [add-port b b1],
++   [del-br a])])
++AT_CHECK([cat conf], [0],
++  [bridge.b.port=b
++bridge.b.port=b1
++])
++CHECK_BRIDGES([b])
++CHECK_PORTS([b], [b], [b1])
++CHECK_IFACES([b], [b], [b1])
++AT_CLEANUP
++
++AT_SETUP([add-br a, add-bond a bond0 a1 a2 a3])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL(
++   [add-br a],
++   [add-bond a bond0 a1 a2 a3])])
++AT_CHECK([cat conf], [0],
++  [bonding.bond0.slave=a1
++bonding.bond0.slave=a2
++bonding.bond0.slave=a3
++bridge.a.port=a
++bridge.a.port=bond0
++])
++CHECK_BRIDGES([a])
++CHECK_PORTS([a], [a], [bond0])
++CHECK_IFACES([a], [a], [a1], [a2], [a3])
++AT_CLEANUP
++
++AT_SETUP([add-br a b, add-port a a1, add-port b b1, del-port a a1])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL(
++  [add-br a],
++  [add-br b],
++  [add-port a a1],
++  [add-port b b1],
++  [del-port a a1])])
++AT_CHECK([cat conf], [0],
++  [bridge.a.port=a
++bridge.b.port=b
++bridge.b.port=b1
++])
++CHECK_BRIDGES([a], [b])
++CHECK_PORTS([a], [a])
++CHECK_IFACES([a], [a])
++CHECK_PORTS([b], [b], [b1])
++CHECK_IFACES([b], [b], [b1])
++AT_CLEANUP
++
++AT_SETUP([add-br a, add-bond a bond0 a1 a2 a3, del-port a bond0])
++AT_KEYWORDS([ovs-vsctl])
++AT_CHECK([RUN_OVS_VSCTL(
++  [add-br a],
++  [add-bond a bond0 a1 a2 a3],
++  [del-port a bond0])])
++AT_CHECK([cat conf], [0],
++  [bridge.a.port=a
++])
++CHECK_BRIDGES([a])
++CHECK_PORTS([a], [a])
++AT_CLEANUP
++
++AT_BANNER([ovs-vsctl unit tests -- fake bridges])
++
++m4_define([SIMPLE_FAKE_CONF], [dnl
++bridge.xenbr0.port=eth0
++bridge.xenbr0.port=eth0.9
++bridge.xenbr0.port=xapi1
++bridge.xenbr0.port=xenbr0
++iface.xapi1.fake-bridge=true
++iface.xapi1.internal=true
++vlan.eth0.9.tag=9
++vlan.xapi1.tag=9
++])
++
++AT_SETUP([simple fake bridge])
++AT_KEYWORDS([ovs-vsctl fake-bridge])
++AT_CHECK([RUN_OVS_VSCTL(
++  [add-br xenbr0],
++  [add-port xenbr0 eth0],
++  [add-br xapi1 xenbr0 9],
++  [add-port xapi1 eth0.9])])
++AT_CHECK([cat conf], [0], [SIMPLE_FAKE_CONF])
++CHECK_BRIDGES([xenbr0], [xapi1])
++CHECK_PORTS([xenbr0], [eth0], [xenbr0])
++CHECK_IFACES([xenbr0], [eth0], [xenbr0])
++CHECK_PORTS([xapi1], [eth0.9], [xapi1])
++CHECK_IFACES([xapi1], [eth0.9], [xapi1])
++AT_CLEANUP
++
++AT_SETUP([simple fake bridge + del-br fake bridge])
++AT_KEYWORDS([ovs-vsctl fake-bridge])
++AT_DATA([conf], [SIMPLE_FAKE_CONF])
++AT_CHECK([RUN_OVS_VSCTL([del-br xapi1])])
++AT_CHECK([cat conf], [0], [dnl
++bridge.xenbr0.port=eth0
++bridge.xenbr0.port=xenbr0
++])
++CHECK_BRIDGES([xenbr0])
++CHECK_PORTS([xenbr0], [eth0], [xenbr0])
++CHECK_IFACES([xenbr0], [eth0], [xenbr0])
++AT_CLEANUP
++
++AT_SETUP([simple fake bridge + del-br real bridge])
++AT_KEYWORDS([ovs-vsctl fake-bridge])
++AT_DATA([conf], [SIMPLE_FAKE_CONF])
++AT_CHECK([RUN_OVS_VSCTL([del-br xenbr0])])
++AT_CHECK([cat conf], [0], [])
++CHECK_BRIDGES
++AT_CLEANUP
++
++m4_define([BOND_FAKE_CONF], [dnl
++bonding.bond0.slave=eth0
++bonding.bond0.slave=eth1
++bridge.xapi1.port=bond0
++bridge.xapi1.port=bond0.11
++bridge.xapi1.port=xapi1
++bridge.xapi1.port=xapi2
++iface.xapi2.fake-bridge=true
++iface.xapi2.internal=true
++vlan.bond0.11.tag=11
++vlan.xapi2.tag=11
++])
++
++AT_SETUP([fake bridge on bond])
++AT_KEYWORDS([ovs-vsctl fake-bridge])
++AT_CHECK([RUN_OVS_VSCTL(
++  [add-br xapi1],
++  [add-bond xapi1 bond0 eth0 eth1],
++  [add-br xapi2 xapi1 11],
++  [add-port xapi2 bond0.11])])
++AT_CHECK([cat conf], [0], [BOND_FAKE_CONF])
++CHECK_BRIDGES([xapi1], [xapi2])
++CHECK_PORTS([xapi1], [bond0], [xapi1])
++CHECK_IFACES([xapi1], [eth0], [eth1], [xapi1])
++CHECK_PORTS([xapi2], [bond0.11], [xapi2])
++CHECK_IFACES([xapi2], [bond0.11], [xapi2])
++AT_CLEANUP
++
++AT_SETUP([fake bridge on bond + del-br fake bridge])
++AT_KEYWORDS([ovs-vsctl fake-bridge])
++AT_DATA([conf], [BOND_FAKE_CONF])
++AT_CHECK([RUN_OVS_VSCTL([del-br xapi2])])
++CHECK_BRIDGES([xapi1])
++CHECK_PORTS([xapi1], [bond0], [xapi1])
++CHECK_IFACES([xapi1], [eth0], [eth1], [xapi1])
++AT_CLEANUP
++
++AT_SETUP([fake bridge on bond + del-br real bridge])
++AT_KEYWORDS([ovs-vsctl fake-bridge])
++AT_DATA([conf], [BOND_FAKE_CONF])
++AT_CHECK([RUN_OVS_VSCTL([del-br xapi1])])
++CHECK_BRIDGES
++AT_CLEANUP
+diff --git a/tests/testsuite.at b/tests/testsuite.at
+index f894c2a..c232a87 100644
+--- a/tests/testsuite.at
++++ b/tests/testsuite.at
+@@ -15,8 +15,10 @@ See the License for the specific language governing permissions and
+ limitations under the License.])
+
+ AT_TESTED([ovs-vswitchd])
++AT_TESTED([ovs-vsctl])
+
+ m4_include([tests/lcov-pre.at])
+ m4_include([tests/library.at])
+ m4_include([tests/stp.at])
++m4_include([tests/ovs-vsctl.at])
+ m4_include([tests/lcov-post.at])
+diff --git a/utilities/automake.mk b/utilities/automake.mk
+index 5bf3cbb..556b3b5 100644
+--- a/utilities/automake.mk
++++ b/utilities/automake.mk
+@@ -9,6 +9,6 @@ bin_PROGRAMS += \
+ 	utilities/ovs-openflowd \
+ 	utilities/ovs-wdt
+ noinst_PROGRAMS += utilities/nlmon
+-bin_SCRIPTS += utilities/ovs-pki
++bin_SCRIPTS += utilities/ovs-pki utilities/ovs-vsctl
+ noinst_SCRIPTS += utilities/ovs-pki-cgi utilities/ovs-parse-leaks
+ dist_sbin_SCRIPTS += utilities/ovs-monitor
+
+@@ -25,7 +25,9 @@ EXTRA_DIST += \
+ 	utilities/ovs-parse-leaks.in \
+ 	utilities/ovs-pki-cgi.in \
+ 	utilities/ovs-pki.8.in \
+-	utilities/ovs-pki.in
++	utilities/ovs-pki.in \
++	utilities/ovs-vsctl.8.in \
++	utilities/ovs-vsctl.in
+ DISTCLEANFILES += \
+ 	utilities/ovs-appctl.8 \
+ 	utilities/ovs-cfg-mod.8 \
+@@ -38,7 +40,9 @@ DISTCLEANFILES += \
+ 	utilities/ovs-parse-leaks \
+ 	utilities/ovs-pki \
+ 	utilities/ovs-pki.8 \
+-	utilities/ovs-pki-cgi
++	utilities/ovs-pki-cgi \
++	utilities/ovs-dpctl.8.in \
++	utilities/ovs-vsctl
+
+ man_MANS += \
+ 	utilities/ovs-appctl.8 \
+@@ -49,7 +53,8 @@ man_MANS += \
+ 	utilities/ovs-kill.8 \
+ 	utilities/ovs-ofctl.8 \
+ 	utilities/ovs-openflowd.8 \
+-	utilities/ovs-pki.8
++	utilities/ovs-pki.8 \
++	utilities/ovs-vsctl.8
+
+ utilities_ovs_appctl_SOURCES = utilities/ovs-appctl.c
+ utilities_ovs_appctl_LDADD = lib/libopenvswitch.a
+diff --git a/utilities/ovs-vsctl.8.in b/utilities/ovs-vsctl.8.in
+new file mode 100644
+index 0000000..7ed64da
+--- /dev/null
++++ b/utilities/ovs-vsctl.8.in
+@@ -0,0 +1,163 @@
++.\" -*- nroff -*-
++.de IQ
++.  br
++.  ns
++.  IP "\\$1"
++..
++.TH ovs\-vsctl 8 "September 2009" "Open vSwitch" "Open vSwitch Manual"
++.ds PN ovs\-vsctl
++.
++.SH NAME
++ovs\-vsctl \- utility for configuring \fBovs\-vswitchd\fR
++.
++.SH SYNOPSIS
++\fBovs\-vsctl\fR [\fIoptions\fR] \fIcommand \fR[\fIargs\fR\&...]
++.
++.SH DESCRIPTION
++The \fBovs\-vsctl\fR program configures \fBovs\-vswitchd\fR(8), mainly
++by providing a high-level interface to editing its configuration file
++\fBovs\-vswitchd.conf\fR(5).  This program is mainly intended for use
++when \fBovs\-vswitchd\fR is running, but it can also be used when
++\fBovs\-vswitchd\fR is not running.  In the latter case configuration
++changes will only take effect when \fBovs\-vswitchd\fR is started.
++.
++By default, each time \fBovs\-vsctl\fR runs, it examines and,
++depending on the requested command, possibly applies changes to an
++\fBovs\-vswitchd.conf\fR file.  Then, if it applied any changes and if
++\fBovs\-vswitchd\fR is running, it tells \fBovs\-vswitchd\fR to reload
++the modified configuration file and waits for the reload to complete
++before exiting.
++.
++.SS "Linux Bridging Compatibility"
++The \fBovs\-vsctl\fR program supports the model of a bridge
++implemented by Open vSwitch, in which a single bridge supports ports
++on multiple VLANs.  In this model, each port on a bridge is either a
++trunk port that potentially passes packets tagged with 802.1Q headers
++that designate VLANs or it is assigned a single implicit VLAN that is
++never tagged with an 802.1Q header.
++.
++For compatibility with software designed for the Linux bridge,
++\fBovs\-vsctl\fR also supports a model in which traffic associated
++with a given 802.1Q VLAN is segregated into a separate bridge.  A
++special form of the \fBadd-br\fR command (see below) creates a ``fake
++bridge'' within an Open vSwitch bridge to simulate this behavior.
++When such a ``fake bridge'' is active, \fBovs-vsctl\fR will treat it
++much like a bridge separate from its ``parent bridge,'' but the actual
++implementation in Open vSwitch uses only a single bridge, with ports on
++the fake bridge assigned the implicit VLAN of the fake bridge of which
++they are members.
++.
++.SH OPTIONS
++.
++The following options affect the general outline of \fBovs\-vsctl\fR's
++activities:
++.
++.IP "\fB-c \fIfile\fR"
++.IQ "\fB--config=\fIfile\fR"
++Sets the configuration file that \fBovs\-vsctl\fR reads and possibly
++modifies.  The default is \fB@localstatedir@/ovs-vswitchd.conf\fR.
++.IP
++If \fIfile\fR is specified as \fB\-\fR, then \fBovs\-vsctl\fR reads
++the configuration file from standard input and, if there are any
++changes, writes the new one to standard output.  This is useful for
++testing but it should not be used in production because it bypasses
++the Open vSwitch configuration file locking protocol.
++.
++.IP "\fB-t \fItarget\fR"
++.IQ "\fB--target=\fItarget\fR"
++Configures how \fBovs\-vsctl\fR contacts \fBovs\-vswitchd\fR to
++instruct it to reload its configuration file.  The \fItarget\fR takes
++one of two forms:
++.RS
++.IP \(bu
++The name of a Unix domain socket on which \Bovs\-vswitchd\fR is
++listening for control channel connections.  By default,
++\fBovs\-vswitchd\fR listens on a Unix domain socket named
++\fB@RUNDIR@/ovs\-vswitchd.\fIpid\fR.ctl\fR, where \fIpid\fR is the
++\fBovs\-vswitchd\fR process's process ID.
++.IP \(bu
++The name of a pidfile, that is, a file whose contents are the process
++ID of a running process as a decimal number.  \fBovs\-vswitchd\fR
++creates a pidfile if it is invoked with the \fB--pidfile\fR option.
++\fBovs\-vsctl\fR reads the pidfile, then looks for a Unix socket named
++\fB@RUNDIR@/ovs\-vswitchd.\fIpid\fR.ctl\fR, where \fIpid\fR is
++replaced by the process ID read from \fItarget\fR, and uses that file
++as if it had been specified directly as the target.
++.RE
++.IP
++If \fItarget\fR does not begin with \fB/\fR, then \fB@RUNDIR@/\fR is
++implicitly prefixed to it.
++.IP
++If neither \fB-t\fR nor \fB--target\fR is specified, the default target is
++\fB@RUNDIR@/ovs\-vswitchd.pid\fR.
++.IP "\fB--no-reload\fR"
++Prevents \fBovs\-vsctl\fR from telling \fBovs\-vswitchd\fR to reload
++its configuration file.
++.
++.SH COMMANDS
++The commands implemented by \fBovs\-vsctl\fR are described in the
++sections below.
++.
++.SS "Bridge Commands"
++These commands examine and manipulate Open vSwitch bridges.
++.
++.IP "\fBadd-br \fIbridge\fR"
++Creates a new bridge named \fIbridge\fR.  Initially the bridge will
++have no ports (other than \fIbridge\fR itself).
++.
++.IP "\fBadd-br \fIbridge parent vlan\fR"
++Creates a ``fake bridge'' named \fIbridge\fR within the existing Open
++vSwitch bridge \fIparent\fR, which must already exist and must not
++itself be a fake bridge.  The new fake bridge will be on 802.1Q VLAN
++\fIvlan\fR, which must be an integer between 1 and 4095.  Initially
++\fIbridge\fR will have no ports (other than \fIbridge\fR itself).
++.
++.IP "\fBdel-br \fIbridge\fR"
++Deletes \fIbridge\fR and all of its ports.  If \fIbridge\fR is a real
++bridge, this command also deletes any fake bridges that were created
++with \fIbridge\fR as parent, including all of their ports.
++.
++.IP "\fBlist-br \fIbridge\fR"
++Lists all existing real and fake bridges on standard output, one per
++line.
++.
++.IP "\fBbr-exists \fIbridge\fR"
++Tests whether \fIbridge\fR exists as a real or fake bridge.  If so,
++\fBovs\-vsctl\fR exits successfully with exit code 0.  If not,
++\fBovs-ctl\fR exits unsuccessfully with exit code 1.
++.
++.SS "Port Commands"
++.
++These commands examine and manipulate Open vSwitch ports.  These
++commands treat a bonded port as a single entity.
++.
++.IP "\fBlist-ports \fIbridge\fR"
++Lists all of the ports within \fIbridge\fR on standard output, one per
++line.
++.
++.IP "\fBadd-port \fIbridge port\fR"
++Creates on \fIbridge\fR a new port named \fIport\fR from the network
++device of the same name.
++.
++.IP "\fBadd-bond \fIbridge port iface\fR\&..."
++Creates on \fIbridge\fR a new port named \fIport\fR that bonds
++together the network devices given as each \fIiface\fR.  At least two
++interfaces must be named.
++.
++.IP "\fBdel-port \fIbridge port\fR"
++Deletes \fBport\fR from \fIbridge\fR.
++.
++.SS "Interface Commands"
++.
++These commands examine the interfaces attached to an Open vSwitch
++bridge.  These commands treat a bonded port as a collection of two or
++more interfaces, rather than as a single port.
++.
++.IP "\fBlist-ifaces \fIbridge\fR"
++Lists all of the interfaces within \fIbridge\fR on standard output,
++one per line.
++.
++.SH "SEE ALSO"
++.
++.BR ovs\-vswitchd.conf (5),
++.BR ovs\-vswitchd (8).
+diff --git a/utilities/ovs-vsctl.in b/utilities/ovs-vsctl.in
+new file mode 100755
+index 0000000..3519b06
+--- /dev/null
++++ b/utilities/ovs-vsctl.in
+@@ -0,0 +1,479 @@
++#! @PYTHON@
++# Copyright (c) 2009 Nicira Networks.                       -*- python -*-
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at:
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import errno
++import fcntl
++import fnmatch
++import getopt
++import os
++import re
++import stat
++import sys
++
++argv0 = sys.argv[0]
++
++DEFAULT_VSWITCHD_CONF = "@localstatedir@/ovs-vswitchd.conf"
++VSWITCHD_CONF = DEFAULT_VSWITCHD_CONF
++
++DEFAULT_VSWITCHD_TARGET = "@RUNDIR@/ovs-vswitchd.pid"
++VSWITCHD_TARGET = DEFAULT_VSWITCHD_TARGET
++
++RELOAD_VSWITCHD = True
++
++class Error(Exception):
++    def __init__(self, msg):
++        Exception.__init__(self)
++        self.msg = msg
++
++### XXX This code is a bunch of crap.  There should be a
++### VSwitchConfiguration object with logically named fields and
++### methods instead.
++
++# Locks 'filename' for writing.
++def cfg_lock(filename):
++    if filename == '-':
++        return
++
++    if '/' in filename:
++        lastSlash = filename.rfind('/')
++        prefix = filename[:lastSlash]
++        suffix = filename[lastSlash + 1:]
++        lock_name = "%s/.%s.~lock~" % (prefix, suffix)
++    else:
++        lock_name = ".%s.~lock~" % filename
++
++    while True:
++        # Try to open an existing lock file.
++        try:
++            f = open(lock_name, 'r')
++        except IOError, e:
++            if e.errno != errno.ENOENT:
++                raise
++
++            # Try to create a new lock file.
++            try:
++                fd = os.open(lock_name, os.O_RDWR | os.O_CREAT | os.O_EXCL, 0600)
++            except OSError, e:
++                if e.errno != errno.EEXIST:
++                    raise
++                # Someone else created the lock file, try again.
++            os.close(fd)
++            continue
++
++        fcntl.flock(f, fcntl.LOCK_EX)
++        return
++
++# Read the ovs-vswitchd.conf file named 'filename' and return its contents as a
++# dictionary that maps from string keys to lists of string values.  (Even
++# singleton values are represented as lists.)
++def cfg_read(filename, lock=False):
++    if lock:
++        cfg_lock(filename)
++
++    try:
++        if filename == '-':
++            f = open('/dev/stdin')
++        else:
++            f = open(filename)
++    except IOError, e:
++        sys.stderr.write("%s: could not open %s (%s)\n"
++                         % (argv0, filename, e.strerror))
++        sys.exit(1)
++
++    cfg = {}
++    rx = re.compile('([-._@$:+a-zA-Z0-9]+)(?:[ \t\r\n\v]*)=(?:[ \t\r\n\v]*)(.*)$')
++    for line in f:
++        line = line.strip()
++        if len(line) == 0 or line[0] == '#':
++            continue
++
++        match = rx.match(line)
++        if match == None:
++            continue
++
++        key, value = match.groups()
++        if key not in cfg:
++            cfg[key] = []
++        cfg[key].append(value)
++    return cfg
++
++def do_cfg_save(cfg, file):
++    for key in sorted(cfg.keys()):
++        for value in sorted(cfg[key]):
++            file.write("%s=%s\n" % (key, value))
++
++def cfg_reload():
++    target = VSWITCHD_TARGET
++    s = os.stat(target)
++    if stat.S_ISREG(s.st_mode):
++        pid = read_first_line_of_file(target)
++        target = "@RUNDIR@/ovs-vswitchd.%s.ctl" % pid
++        s = os.stat(target)
++    if not stat.S_ISSOCK(s.st_mode):
++        raise Error("%s is not a Unix domain socket, cannot reload" % target)
++    f = open(target, "r+")
++    f.write("vswitchd/reload\n")
++    f.flush()
++    f.readline()
++    f.close()
++
++def cfg_save(cfg, filename):
++    if filename == '-':
++        do_cfg_save(cfg, sys.stdout)
++    else:
++        tmp_name = filename + ".~tmp~"
++        f = open(tmp_name, 'w')
++        do_cfg_save(cfg, f)
++        f.close()
++        os.rename(tmp_name, filename)
++        if RELOAD_VSWITCHD:
++            cfg_reload()
++
++# Returns a set of the immediate subsections of 'section' within 'cfg'.  For
++# example, if 'section' is "bridge" and keys bridge.a, bridge.b, bridge.b.c,
++# and bridge.c.x.y.z exist, returns set(['a', 'b', 'c']).
++def cfg_get_subsections(cfg, section):
++    subsections = set()
++    for key in cfg:
++        if key.startswith(section + "."):
++            dot = key.find(".", len(section) + 1)
++            if dot == -1:
++                dot = len(key)
++            subsections.add(key[len(section) + 1:dot])
++    return subsections
++
++# Returns True if 'cfg' contains a key whose single value is 'true'.  Otherwise
++# returns False.
++def cfg_get_bool(cfg, name):
++    return name in cfg and cfg[name] == ['true']
++
++# If 'cfg' has a port named 'port' configured with an implicit VLAN, returns
++# that VLAN number.  Otherwise, returns 0.
++def get_port_vlan(cfg, port):
++    try:
++        return int(cfg["vlan.%s.tag" % port][0])
++    except (ValueError, KeyError):
++        return 0
++
++# Returns all the ports within 'bridge' in 'cfg'.  If 'vlan' is nonnegative,
++# the ports returned are only those configured with implicit VLAN 'vlan'.
++def get_bridge_ports(cfg, bridge, vlan):
++    ports = []
++    for port in cfg["bridge.%s.port" % bridge]:
++        if vlan < 0 or get_port_vlan(cfg, port) == vlan:
++            ports.append(port)
++    return ports
++
++# Returns all the interfaces within 'bridge' in 'cfg'.  If 'vlan' is
++# nonnegative, the interfaces returned are only those whose ports are
++# configured with implicit VLAN 'vlan'.
++def get_bridge_ifaces(cfg, bridge, vlan):
++    ifaces = []
++    for port in get_bridge_ports(cfg, bridge, vlan):
++        ifaces.extend(cfg.get("bonding.%s.slave" % port, [port]))
++    return ifaces
++
++# Returns the first line of the file named 'name', with the trailing new-line
++# (if any) stripped off.
++def read_first_line_of_file(name):
++    file = None
++    try:
++        file = open(name, 'r')
++        return file.readline().rstrip('\n')
++    finally:
++        if file != None:
++            file.close()
++
++# Returns a bridge ID constructed from the MAC address of network device
++# 'netdev', in the format "8000.000102030405".
++def get_bridge_id(netdev):
++    try:
++        hwaddr = read_first_line_of_file("/sys/class/net/%s/address" % netdev)
++        return "8000.%s" % (hwaddr.replace(":", ""))
++    except:
++        return "8000.002320ffffff"
++
++# Returns a list of 3-tuples based on 'cfg'.  Each 3-tuple represents
++# one real bridge or one fake bridge and has the form (bridge, parent,
++# vlan), where 'bridge' is the real or fake bridge name, 'parent' is
++# the same as 'bridge' for a real bridge or the name of the containing
++# bridge for a fake bridge, and 'vlan' is 0 for a real bridge or a
++# VLAN number for a fake bridge.
++def get_bridge_info(cfg):
++    real_bridges = [(br, br, 0) for br in get_real_bridges(cfg)]
++    fake_bridges = []
++    for linux_bridge, ovs_bridge, vlan in real_bridges:
++        for iface in get_bridge_ifaces(cfg, ovs_bridge, -1):
++            if cfg_get_bool(cfg, "iface.%s.fake-bridge" % iface):
++                fake_bridges.append((iface, ovs_bridge,
++                                     get_port_vlan(cfg, iface)))
++    return real_bridges + fake_bridges
++
++# Returns the real bridges configured in 'cfg'.
++def get_real_bridges(cfg):
++    return cfg_get_subsections(cfg, "bridge")
++
++# Returns the fake bridges configured in 'cfg'.
++def get_fake_bridges(cfg):
++    return [bridge for bridge, parent, vlan in get_bridge_info(cfg)
++            if bridge != parent]
++
++# Returns all the real and fake bridges configured in 'cfg'.
++def get_all_bridges(cfg):
++    return [bridge for bridge, parent, vlan in get_bridge_info(cfg)]
++
++# Returns the parent bridge and VLAN of real or fake 'bridge' in
++# 'cfg', where the parent bridge and VLAN are as defined in the
++# description of get_bridge_info().  Raises an error if no bridge
++# named 'bridge' exists in 'cfg'.
++def find_bridge(cfg, bridge):
++    for br, parent, vlan in get_bridge_info(cfg):
++        if br == bridge:
++            return parent, vlan
++    raise Error("no bridge named %s" % bridge)
++
++def del_matching_keys(cfg, pattern):
++    for key in [key for key in cfg.keys() if fnmatch.fnmatch(key, pattern)]:
++        del cfg[key]
++
++# Deletes anything related to a port named 'port' from 'cfg'.  No port
++# named 'port' need actually exist; this function will clean up
++# regardless.
++def del_port(cfg, port):
++    # The use of [!0-9] keeps an interface of 'eth0' from matching
++    # VLANs attached to eth0 (such as 'eth0.123'), which are distinct
++    # interfaces.
++    for iface in cfg.get('bonding.%s.slave' % port, [port]):
++        del_matching_keys(cfg, 'iface.%s.[!0-9]*' % iface)
++        # Yes, this "port" setting applies to interfaces, not ports, *sigh*.
++        del_matching_keys(cfg, 'port.%s.ingress-policing*' % iface)
++    del_matching_keys(cfg, 'bonding.%s.[!0-9]*' % port)
++    del_matching_keys(cfg, 'vlan.%s.[!0-9]*' % port)
++    for key in cfg.keys():
++        if fnmatch.fnmatch(key, 'bridge.*.port'):
++            cfg[key] = [s for s in cfg[key] if s != port]
++
++def usage():
++    print """%(argv0)s: ovs-vswitchd management utility
++usage: %(argv0)s [OPTIONS] COMMAND [ARG...]
++
++Bridge commands:
++  add-br BRIDGE               create a new bridge named BRIDGE
++  add-br BRIDGE PARENT VLAN   create new fake bridge BRIDGE in PARENT on VLAN
++  del-br BRIDGE               delete BRIDGE and all of its ports
++  list-br                     print the names of all the bridges
++  br-exists BRIDGE            test whether BRIDGE exists
++
++Port commands:
++  list-ports BRIDGE           print the names of all the ports on BRIDGE
++  add-port BRIDGE PORT        add network device PORT to BRIDGE
++  add-bond BRIDGE PORT IFACE...  add new bonded port PORT in BRIDGE from IFACES
++  del-port BRIDGE PORT        delete PORT (which may be bonded) from BRIDGE
++A bond is considered to be a single port.
++
++Interface commands (a bond consists of multiple interfaces):
++  list-ifaces BRIDGE          print the names of all the interfaces on BRIDGE
++A bond is considered to consist of interfaces.
++
++General options:
++  -c, --config=FILE           set configuration file
++                              (default: %(config)s)
++  -t, --target=PIDFILE|SOCKET set ovs-vswitchd target
++                              (default: %(target)s)
++  --no-reload                 do not make ovs-vswitchd reload its configuration
++  -h, --help                  display this help message and exit
++  -V, --version               display version information and exit
++Report bugs to bugs@openvswitch.org.""" % {'argv0': argv0,
++                                           'config': DEFAULT_VSWITCHD_CONF,
++                                           'target': DEFAULT_VSWITCHD_TARGET}
++    sys.exit(0)
++
++def version():
++    print "ovs-vsctl (Open vSwitch) @VERSION@"
++    sys.exit(0)
++
++def check_conflicts(cfg, name, op):
++    bridges = get_bridge_info(cfg)
++    if name in [bridge for bridge, parent, vlan in bridges]:
++        raise Error("%s because a bridge named %s already exists" % (op, name))
++
++    for bridge, parent, vlan in bridges:
++        if name in get_bridge_ports(cfg, parent, vlan):
++            raise Error("%s because a port named %s already exists on bridge %s" % (op, name, bridge))
++        if name in get_bridge_ifaces(cfg, parent, vlan):
++            raise Error("%s because an interface named %s already exists on bridge %s" % (op, name, bridge))
++
++def cmd_add_br(bridge, parent=None, vlan=None):
++    cfg = cfg_read(VSWITCHD_CONF, True)
++
++    check_conflicts(cfg, bridge, "cannot create a bridge named %s" % bridge)
++
++    if parent and vlan:
++        if parent in get_fake_bridges(cfg):
++            raise Error("cannot create bridge with fake bridge as parent")
++        if parent not in get_real_bridges(cfg):
++            raise Error("parent bridge %s does not exist" % bridge)
++        try:
++            if int(vlan) < 0 or int(vlan) > 4095:
++                raise ValueError
++        except ValueError:
++            raise Error("invalid VLAN number %s" % vlan)
++
++        # Create fake bridge internal port.
++        cfg['iface.%s.internal' % bridge] = ['true']
++        cfg['iface.%s.fake-bridge' % bridge] = ['true']
++        cfg['vlan.%s.tag' % bridge] = [vlan]
++
++        # Add fake bridge port to parent.
++        cfg['bridge.%s.port' % parent].append(bridge)
++    else:
++        cfg['bridge.%s.port' % bridge] = [bridge]
++    cfg_save(cfg, VSWITCHD_CONF)
++
++def cmd_del_br(bridge):
++    cfg = cfg_read(VSWITCHD_CONF, True)
++    parent, vlan = find_bridge(cfg, bridge)
++    if vlan == 0:
++        vlan = -1
++    for port in set(get_bridge_ports(cfg, parent, vlan) + [bridge]):
++        del_port(cfg, port)
++    if vlan < 0:
++        del_matching_keys(cfg, 'bridge.%s.[!0-9]*' % bridge)
++    cfg_save(cfg, VSWITCHD_CONF)
++
++def cmd_list_br():
++    cfg = cfg_read(VSWITCHD_CONF)
++    for bridge in get_all_bridges(cfg):
++        print bridge
++
++def cmd_br_exists(bridge):
++    cfg = cfg_read(VSWITCHD_CONF)
++    if bridge not in get_all_bridges(cfg):
++        sys.exit(1)
++
++def cmd_list_ports(bridge):
++    cfg = cfg_read(VSWITCHD_CONF)
++    parent, vlan = find_bridge(cfg, bridge)
++    for port in get_bridge_ports(cfg, parent, vlan):
++        print port
++
++def do_add_port(cfg, bridge, parent, port, vlan):
++    check_conflicts(cfg, port, "cannot create a port named %s" % port)
++    cfg['bridge.%s.port' % parent].append(port)
++    if vlan > 0:
++        cfg['vlan.%s.tag' % port] = [vlan]
++
++def cmd_add_port(bridge, port):
++    cfg = cfg_read(VSWITCHD_CONF, True)
++    parent, vlan = find_bridge(cfg, bridge)
++    do_add_port(cfg, bridge, parent, port, vlan)
++    cfg_save(cfg, VSWITCHD_CONF)
++
++def cmd_add_bond(bridge, port, *slaves):
++    cfg = cfg_read(VSWITCHD_CONF, True)
++    parent, vlan = find_bridge(cfg, bridge)
++    do_add_port(cfg, bridge, parent, port, vlan)
++    cfg['bonding.%s.slave' % port] = list(slaves)
++    cfg_save(cfg, VSWITCHD_CONF)
++
++def cmd_del_port(bridge, port):
++    cfg = cfg_read(VSWITCHD_CONF, True)
++    parent, vlan = find_bridge(cfg, bridge)
++    if port not in get_bridge_ports(cfg, parent, vlan):
++        if port in get_bridge_ports(cfg, parent, -1):
++            raise Error("bridge %s does not have a port %s (although its parent bridge %s does)" % (bridge, port, parent))
++        else:
++            raise Error("bridge %s does not have a port %s" % (bridge, port))
++    del_port(cfg, port)
++    cfg_save(cfg, VSWITCHD_CONF)
++
++def cmd_list_ifaces(bridge):
++    cfg = cfg_read(VSWITCHD_CONF)
++    parent, vlan = find_bridge(cfg, bridge)
++    for port in get_bridge_ifaces(cfg, parent, vlan):
++        print port
++
++def main():
++    # Parse command line.
++    try:
++        options, args = getopt.gnu_getopt(sys.argv[1:], "c:t:hV",
++                                          ["config=",
++                                           "target=",
++                                           "no-reload",
++                                           "help",
++                                           "version"])
++    except getopt.GetoptError, msg:
++        sys.stderr.write("%s: %s (use --help for help)\n" % (argv0, msg))
++        sys.exit(1)
++
++    # Handle options.
++    for opt, optarg in options:
++        if opt == "-c" or opt == "--config":
++            global VSWITCHD_CONF
++            VSWITCHD_CONF = optarg
++        elif opt == "-t" or opt == "--target":
++            global VSWITCHD_TARGET
++            if optarg[0] != '/':
++                optarg = '@RUNDIR@/' + optarg
++            VSWITCHD_TARGET = optarg
++        elif opt == "--no-reload":
++            global RELOAD_VSWITCHD
++            RELOAD_VSWITCHD = False
++        elif opt == "-h" or opt == "--help":
++            usage()
++        elif opt == "-V" or opt == "--version":
++            version()
++        else:
++            raise RuntimeError("unhandled option %s" % opt)
++
++    # Execute commands.
++    if not args:
++        sys.stderr.write("%s: missing command name (use --help for help)\n"
++                         % argv0)
++        sys.exit(1)
++
++    commands = {'add-br': (cmd_add_br, lambda n: n == 1 or n == 3),
++                'del-br': (cmd_del_br, 1),
++                'list-br': (cmd_list_br, 0),
++                'br-exists': (cmd_br_exists, 1),
++                'list-ports': (cmd_list_ports, 1),
++                'add-port': (cmd_add_port, 2),
++                'add-bond': (cmd_add_bond, lambda n: n >= 4),
++                'del-port': (cmd_del_port, 2),
++                'list-ifaces': (cmd_list_ifaces, 1)}
++    command = args[0]
++    args = args[1:]
++    if command not in commands:
++        sys.stderr.write("%s: unknown command '%s' (use --help for help)\n"
++                         % (argv0, command))
++        sys.exit(1)
++
++    function, nargs = commands[command]
++    if callable(nargs) and not nargs(len(args)):
++        sys.stderr.write("%s: '%s' command does not accept %d arguments (use --help for help)\n" % (argv0, command, len(args)))
++        sys.exit(1)
++    elif not callable(nargs) and len(args) != nargs:
++        sys.stderr.write("%s: '%s' command takes %d arguments but %d were supplied (use --help for help)\n" % (argv0, command, nargs, len(args)))
++        sys.exit(1)
++    else:
++        function(*args)
++        sys.exit(0)
++
++if __name__ == "__main__":
++    try:
++        main()
++    except Error, msg:
++        sys.stderr.write("%s: %s\n" % (argv0, msg.msg))
++        sys.exit(1)
+--
+1.6.3.3
+

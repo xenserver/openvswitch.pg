@@ -1,6 +1,6 @@
-diff -r 5f345e9e6270 mk/Makefile
+diff -r a6792a9a8372 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Wed Sep 09 08:47:29 2009 +0100
++++ b/mk/Makefile	Fri Sep 11 10:53:51 2009 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 5f345e9e6270 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 5f345e9e6270 mk/openvswitch.spec.in
+diff -r a6792a9a8372 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Wed Sep 09 08:47:29 2009 +0100
-@@ -0,0 +1,96 @@
++++ b/mk/openvswitch.spec.in	Fri Sep 11 10:53:51 2009 +0100
+@@ -0,0 +1,98 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -147,6 +147,7 @@ diff -r 5f345e9e6270 mk/openvswitch.spec.in
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl
 +%{_bindir}/ovs-ofctl
++%{_bindir}/ovs-vsctl
 +%{_bindir}/ovs-cfg-mod
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
@@ -157,6 +158,7 @@ diff -r 5f345e9e6270 mk/openvswitch.spec.in
 +%{_mandir}/man8/ovs-cfg-mod.8.gz
 +%{_mandir}/man8/ovs-dpctl.8.gz
 +%{_mandir}/man8/ovs-ofctl.8.gz
++%{_mandir}/man8/ovs-vsctl.8.gz
 +%{_mandir}/man8/ovs-vswitchd.8.gz
 +
 +%changelog

@@ -1,0 +1,11 @@
+--- a/utilities/ovs-vsctl.in	Fri Sep 11 15:06:21 2009 +0100
++++ b/utilities/ovs-vsctl.in	Fri Sep 11 17:36:32 2009 +0100
+@@ -405,7 +405,7 @@
+ def cmd_port_to_br(port):
+     cfg = cfg_read(VSWITCHD_CONF)
+     for bridge, parent, vlan in get_bridge_info(cfg):
+-        if port in get_bridge_ports(cfg, parent, vlan):
++        if port in get_bridge_ports(cfg, parent, vlan) and port != bridge:
+             print bridge
+             return
+     raise Error("no port named %s" % port)

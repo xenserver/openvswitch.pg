@@ -1,6 +1,6 @@
-diff -r a6792a9a8372 mk/Makefile
+diff -r 0d2b1ccfbd18 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Fri Sep 11 14:37:16 2009 +0100
++++ b/mk/Makefile	Mon Sep 14 10:41:04 2009 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,9 +60,9 @@ diff -r a6792a9a8372 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r a6792a9a8372 mk/openvswitch.spec.in
+diff -r 0d2b1ccfbd18 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Fri Sep 11 14:37:16 2009 +0100
++++ b/mk/openvswitch.spec.in	Mon Sep 14 10:41:04 2009 +0100
 @@ -0,0 +1,99 @@
 +Name: openvswitch
 +Summary: Virtual switch
@@ -123,16 +123,16 @@ diff -r a6792a9a8372 mk/openvswitch.spec.in
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/vswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig
-+install -m 755 xenserver/root_vswitch_scripts_sysconfig.template \
++install -m 755 xenserver/usr_share_vswitch_scripts_sysconfig.template \
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/vswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d
 +install -m 755 xenserver/etc_logrotate.d_vswitch \
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/vswitch
 +
-+install -d -m 755 $RPM_BUILD_ROOT/%{_libexecdir}/%{name}
-+install -m 755 xenserver/root_vswitch_scripts_dump-vif-details \
-+         $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/dump-vif-details
++install -d -m 755 $RPM_BUILD_ROOT/%{_datadir}/%{name}/scripts/
++install -m 755 xenserver/usr_share_vswitch_scripts_dump-vif-details \
++         $RPM_BUILD_ROOT/%{_datadir}/%{name}/scripts/dump-vif-details
 +
 +%clean
 +rm -rf %{buildroot}
@@ -152,7 +152,7 @@ diff -r a6792a9a8372 mk/openvswitch.spec.in
 +%{_bindir}/ovs-cfg-mod
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
-+%{_libexecdir}/%{name}/dump-vif-details
++%{_datadir}/%{name}/scripts/dump-vif-details
 +%{_mandir}/man5/ovs-vswitchd.conf.5.gz
 +%{_mandir}/man8/ovs-appctl.8.gz
 +%{_mandir}/man8/ovs-brcompatd.8.gz

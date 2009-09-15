@@ -6,5 +6,6 @@ ovs-vsctl__Add_commands__port-to-br__iface-to-br_.patch
 ovs-vsctl__Style_fixes_for_testsuite.patch
 ovs-vsctl-do-not-succeed-on-bridge-passed-to-port-to-br.patch
 ovs-vsctl-use-etc-ovs-vswitchd.conf.patch
+ovs-vsctl___var_run_ovs-vswitchd._.ctl_isa_Unix_domain_socket.patch
 autoconf-2.59.patch
 build-integration.patch

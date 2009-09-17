@@ -1,11 +1,2 @@
-ovs-vsctl--first-draft.patch
-ovs-vsctl__Change__br-exists__exit_code_to_2_when_the_bridge_doesn_t_exist.patch
-ovs-vsctl__Be_a_little_more_positive_about_the_code.patch
-ovs-vsctl__Omit_the_bridge_in__list-ports__or__list-ifaces__output.patch
-ovs-vsctl__Add_commands__port-to-br__iface-to-br_.patch
-ovs-vsctl__Style_fixes_for_testsuite.patch
-ovs-vsctl-do-not-succeed-on-bridge-passed-to-port-to-br.patch
-ovs-vsctl-use-etc-ovs-vswitchd.conf.patch
-ovs-vsctl___var_run_ovs-vswitchd._.ctl_isa_Unix_domain_socket.patch
 autoconf-2.59.patch
 build-integration.patch

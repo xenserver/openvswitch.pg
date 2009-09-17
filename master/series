@@ -1,2 +1,3 @@
+vswitchd__implement_bond_hash_unixctl.patch
 autoconf-2.59.patch
 build-integration.patch

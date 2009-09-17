@@ -1,6 +1,6 @@
-diff -r 0d2b1ccfbd18 mk/Makefile
+diff -r 123f5e9cff0e mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Mon Sep 14 10:41:04 2009 +0100
++++ b/mk/Makefile	Thu Sep 17 11:43:40 2009 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 0d2b1ccfbd18 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 0d2b1ccfbd18 mk/openvswitch.spec.in
+diff -r 123f5e9cff0e mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Mon Sep 14 10:41:04 2009 +0100
-@@ -0,0 +1,99 @@
++++ b/mk/openvswitch.spec.in	Thu Sep 17 11:43:40 2009 +0100
+@@ -0,0 +1,104 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -130,6 +130,10 @@ diff -r 0d2b1ccfbd18 mk/openvswitch.spec.in
 +install -m 755 xenserver/etc_logrotate.d_vswitch \
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/vswitch
 +
++install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/xapi.d/plugins
++install -m 755 xenserver/etc_xapi.d_plugins_vswitch-cfg-update \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/xapi.d/plugins/vswitch-cfg-update
++
 +install -d -m 755 $RPM_BUILD_ROOT/%{_datadir}/%{name}/scripts/
 +install -m 755 xenserver/usr_share_vswitch_scripts_dump-vif-details \
 +         $RPM_BUILD_ROOT/%{_datadir}/%{name}/scripts/dump-vif-details
@@ -144,6 +148,7 @@ diff -r 0d2b1ccfbd18 mk/openvswitch.spec.in
 +%config %{_sysconfdir}/init.d/vswitch
 +%config %{_sysconfdir}/sysconfig/vswitch
 +%config %{_sysconfdir}/logrotate.d/vswitch
++%{_sysconfdir}/xapi.d/plugins/vswitch-cfg-update
 +%dir /var/lib/openvswitch
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl

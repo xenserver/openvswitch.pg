@@ -1,0 +1,126 @@
+From dev-bounces@openvswitch.org Thu Sep 17 13:37:43 2009
+Received: from SMTP.EU.CITRIX.COM (10.30.244.21) by
+	LONPMAILMX01.citrite.net (10.30.224.162) with Microsoft SMTP Server id
+	8.1.393.1; Thu, 17 Sep 2009 13:37:43 +0100
+Received: from dime139.dizinc.com ([66.7.205.111])  by SMTP.EU.CITRIX.COM
+	with ESMTP; 17 Sep 2009 12:37:43 +0000
+Received: from localhost ([127.0.0.1]:32000 helo=dime139.dizinc.com)	by
+	dime139.dizinc.com with esmtp (Exim 4.69)	(envelope-from
+	<dev-bounces@openvswitch.org>)	id 1MoGEx-0001Gp-GG; Thu, 17 Sep 2009
+	08:37:35 -0400
+Received: from smtp.citrix.com ([66.165.176.89]:25906)	by
+	dime139.dizinc.com with esmtp (Exim 4.69)	(envelope-from
+	<Ian.Campbell@eu.citrix.com>) id 1MoGEv-0001GL-00	for dev@openvswitch.org;
+	Thu, 17 Sep 2009 08:37:33 -0400
+Received: from ftlpmailmx01.citrite.net ([10.9.154.223])	by
+	FTLPIPO01.CITRIX.COM with ESMTP; 17 Sep 2009 08:37:26 -0400
+Received: from [10.80.2.42] (10.9.154.239) by FTLPMAILMX01.citrite.net
+	(10.9.154.223) with Microsoft SMTP Server id 8.1.393.1; Thu, 17 Sep 2009
+	08:37:26 -0400
+From: Ian Campbell <Ian.Campbell@citrix.com>
+To: "dev@openvswitch.org" <dev@openvswitch.org>
+Sender: "dev-bounces@openvswitch.org" <dev-bounces@openvswitch.org>
+Date: Thu, 17 Sep 2009 13:37:25 +0100
+Subject: [ovs-dev] vswitchd: implement bond/hash unixctl
+Thread-Topic: [ovs-dev] vswitchd: implement bond/hash unixctl
+Thread-Index: Aco3k6c09omkjSxsTI2UlYs9eGZi5Q==
+Message-ID: <1253191045.16152.51.camel@zakaz.uk.xensource.com>
+List-Help: <mailto:dev-request@openvswitch.org?subject=help>
+List-Subscribe:
+	<http://openvswitch.org/mailman/listinfo/dev_openvswitch.org>,
+	<mailto:dev-request@openvswitch.org?subject=subscribe>
+List-Unsubscribe:
+	<http://openvswitch.org/mailman/options/dev_openvswitch.org>,
+	<mailto:dev-request@openvswitch.org?subject=unsubscribe>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Exchange-Organization-AuthSource: LONPMAILMX01.citrite.net
+X-MS-Has-Attach: 
+X-Auto-Response-Suppress: All
+X-MS-TNEF-Correlator: 
+x-sbrs: 2.9
+x-mesageid: 7128370
+x-ironport-server: lonpip01.citrite.net
+x-remote-ip: 66.7.205.111
+x-policy: $ACCEPTED
+x-ironport-anti-spam-filtered: true
+x-ironport-anti-spam-result: AgQEAMPKsUpCB81vgWdsb2JhbACbKAEBCwcECgcTwm2EGAU
+x-ironport-av: E=Sophos;i="4.44,403,1249272000";    d="scan'208";a="5616546"
+x-antiabuse: Sender Address Domain - openvswitch.org
+x-source: 
+x-source-args: 
+x-source-dir: 
+list-id: <dev_openvswitch.org.openvswitch.org>
+errors-to: dev-bounces@openvswitch.org
+list-post: <mailto:dev@openvswitch.org>
+list-archive: <http://openvswitch.org/pipermail/dev_openvswitch.org>
+x-beenthere: dev@openvswitch.org
+x-mailman-version: 2.1.11.cp3
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+X-Evolution-Source: imap://ianca@lonpmailmx01.citrite.net/
+Content-Transfer-Encoding: 8bit
+
+Our test case automation has a requirement to know which hash value a
+given MAC address hashes to, in order to validate that balancing is
+happening as expect etc.. Rather than attempt to reimplement the hash
+algorithm used by vswitchd in python instead expose an appctl which
+returns this information.
+
+diff -r 44438fc53b52 vswitchd/bridge.c
+--- a/vswitchd/bridge.c	Thu Sep 17 11:43:40 2009 +0100
++++ b/vswitchd/bridge.c	Thu Sep 17 13:33:23 2009 +0100
+@@ -2751,6 +2751,25 @@
+ }
+ 
+ static void
++bond_unixctl_hash(struct unixctl_conn *conn, const char *args)
++{
++	uint8_t mac[ETH_ADDR_LEN];
++	uint8_t hash;
++	char *hash_cstr;
++
++	if (sscanf(args, ETH_ADDR_SCAN_FMT, ETH_ADDR_SCAN_ARGS(mac))
++	    == ETH_ADDR_SCAN_COUNT) {
++		hash = bond_hash(mac);
++
++		hash_cstr = xasprintf("%u", hash);
++		unixctl_command_reply(conn, 200, hash_cstr);
++		free(hash_cstr);
++	} else {
++		unixctl_command_reply(conn, 501, "invalid mac");
++	}
++}
++
++static void
+ bond_init(void)
+ {
+     unixctl_command_register("bond/list", bond_unixctl_list);
+@@ -2760,6 +2779,7 @@
+                              bond_unixctl_set_active_slave);
+     unixctl_command_register("bond/enable-slave", bond_unixctl_enable_slave);
+     unixctl_command_register("bond/disable-slave", bond_unixctl_disable_slave);
++    unixctl_command_register("bond/hash", bond_unixctl_hash);
+ }
+ 
+ /* Port functions. */
+diff -r 44438fc53b52 vswitchd/ovs-vswitchd.8.in
+--- a/vswitchd/ovs-vswitchd.8.in	Thu Sep 17 11:43:40 2009 +0100
++++ b/vswitchd/ovs-vswitchd.8.in	Thu Sep 17 13:33:23 2009 +0100
+@@ -136,6 +136,8 @@
+ .IP
+ This setting is not permanent: it persists only until the carrier
+ status of \fIslave\fR changes.
++.IP "\fBbond/hash\fR \fImac\fR"
++Returns the hash value which would be used for \fImac\fR.
+ .
+ .so lib/vlog-unixctl.man
+ .SH "SEE ALSO"
+
+
+
+_______________________________________________
+dev mailing list
+dev@openvswitch.org
+http://openvswitch.org/mailman/listinfo/dev_openvswitch.org

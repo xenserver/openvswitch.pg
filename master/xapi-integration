@@ -1,0 +1,26 @@
+diff -r 4753220702b7 xenserver/etc_logrotate.d_vswitch
+--- a/xenserver/etc_logrotate.d_vswitch	Wed Sep 16 11:03:42 2009 -0700
++++ b/xenserver/etc_logrotate.d_vswitch	Thu Sep 17 17:36:41 2009 +0100
+@@ -12,3 +12,9 @@
+ 	/sbin/service vswitch reload
+ 	endscript
+ }
++
++/var/log/vswitch-cfg-update.log {
++        missinghook
++        rotate 5
++        size 4M
++}
+\ No newline at end of file
+diff -r 4753220702b7 xenserver/etc_xapi.d_plugins_vswitch-cfg-update
+--- a/xenserver/etc_xapi.d_plugins_vswitch-cfg-update	Wed Sep 16 11:03:42 2009 -0700
++++ b/xenserver/etc_xapi.d_plugins_vswitch-cfg-update	Thu Sep 17 17:36:41 2009 +0100
+@@ -53,7 +53,7 @@ def update(session, args):
+         raise XenAPIPlugin.Failure("MORE_THAN_ONE_POOL_FOR_HOST", [])
+     pool = session.xenapi.pool.get_record(pools[0])
+     try:
+-        controller = pool["other_config"]["vSwitchController"]
++        controller = pool["vswitch_controller"]
+     except KeyError, e:
+         controller = ""
+     currentController = vswitchCurrentController()

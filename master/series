@@ -1,4 +1,5 @@
 xapi-integration
 xapi-plugin-less-logging.patch
+disable-compat-layer.patch
 autoconf-2.59.patch
 build-integration.patch

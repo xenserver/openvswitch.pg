@@ -1,0 +1,57 @@
+Disable brcompatd.
+
+The compat layer is now unused in the vswitch branch of XenServer.
+
+diff -r bb206285e123 xenserver/etc_init.d_vswitch
+--- a/xenserver/etc_init.d_vswitch	Wed Sep 30 10:03:11 2009 +0100
++++ b/xenserver/etc_init.d_vswitch	Wed Sep 30 10:53:52 2009 +0100
+@@ -24,8 +24,8 @@
+ test -e /etc/sysconfig/vswitch && . /etc/sysconfig/vswitch
+ 
+ # General config variables in /etc/sysconfig/vswitch
+-: ${ENABLE_BRCOMPAT:=y}
+-: ${ENABLE_FAKE_PROC_NET:=y}
++: ${ENABLE_BRCOMPAT:=n}
++: ${ENABLE_FAKE_PROC_NET:=n}
+ : ${FORCE_COREFILES:=y}
+ 
+ # Config variables specific to ovs-vswitchd
+@@ -89,7 +89,7 @@
+         action "Inserting llc module" modprobe llc
+         action "Inserting openvswitch module" modprobe openvswitch_mod
+     fi
+-    if [ -n "$BRCOMPATD_PIDFILE" ] && ! lsmod | grep -q "brcompat_mod"; then
++    if [ "$ENABLE_BRCOMPATD" = "y" ] && [ -n "$BRCOMPATD_PIDFILE" ] && ! lsmod | grep -q "brcompat_mod"; then
+         action "Inserting brcompat module" modprobe brcompat_mod
+     fi
+ }
+@@ -267,7 +267,9 @@
+     fi
+ 
+     start_vswitchd
+-    start_brcompatd
++    if [ "${ENABLE_BRCOMPATD}" = "y" ] ; then
++	start_brcompatd
++    fi
+     reload_vswitchd  # ensures ovs-vswitchd has fully read config file.
+     touch /var/lock/subsys/vswitch
+ }
+diff -r bb206285e123 xenserver/usr_share_vswitch_scripts_sysconfig.template
+--- a/xenserver/usr_share_vswitch_scripts_sysconfig.template	Wed Sep 30 10:03:11 2009 +0100
++++ b/xenserver/usr_share_vswitch_scripts_sysconfig.template	Wed Sep 30 10:53:52 2009 +0100
+@@ -9,13 +9,13 @@
+ 
+ # ENABLE_BRCOMPAT: If 'y' than emulate linux bridging interfaces
+ #    using the brcompat kernel module and ovs-brcompatd daemon
+-# ENABLE_BRCOMPAT=y
++# ENABLE_BRCOMPAT=n
+ 
+ # ENABLE_FAKE_PROC_NET: If 'y' then emulate linux bonding and vlan
+ #    files in /proc as if the bonding and vlan demultiplexing done in
+ #    ovs-vswitchd were being implemented using existing Linux mechanisms.
+ #    This is useful in some cases when replacing existing solutions.
+-# ENABLE_FAKE_PROC_NET=y
++# ENABLE_FAKE_PROC_NET=n
+ 
+ # FORCE_COREFILES: If 'y' then core files will be enabled.
+ # FORCE_COREFILES=y

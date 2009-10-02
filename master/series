@@ -2,8 +2,10 @@ xapi-integration
 xapi-plugin-less-logging.patch
 disable-compat-layer.patch
 disable-compat-layer-fix.patch
+disable-compat-layer-fix2.patch
 reenabled-compat-layer.patch
 clear-config-on-boot.patch
+clear-config-on-boot-fix.patch
 xsconsole-plugin.patch
 autoconf-2.59.patch
 build-integration.patch

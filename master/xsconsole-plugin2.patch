@@ -4,10 +4,12 @@ Further updates to xsconsole plugin to use Pool.vswitch_controller
   do that manually.
 - Set controller to "" to unset.
 - No need to display ovs-brcompatd status since it is disabled.
+- Do not raise XenAPIPlugin.Failure, it is not an exception xsconsole
+  will handle.
 
-diff -r 6cd8d8d2f704 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
---- a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Fri Oct 02 14:43:55 2009 +0100
-+++ b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Fri Oct 02 14:45:37 2009 +0100
+diff -r 7943a21445c1 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
+--- a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Fri Oct 02 14:47:29 2009 +0100
++++ b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Fri Oct 02 15:20:54 2009 +0100
 @@ -111,8 +111,6 @@
                        lambda: self.getController()),
              ChoiceDef(Lang("Delete pool-wide controller"),
@@ -40,8 +42,17 @@ diff -r 6cd8d8d2f704 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.p
  
      def _modifyPoolConfig(self, session, value):
          """Modify pool configuration.
-@@ -239,23 +226,6 @@
-             raise XenAPIPlugin.Failure("MORE_THAN_ONE_POOL_FOR_HOST", [])
+@@ -234,28 +221,13 @@
+         pools = session.xenapi.pool.get_all()
+         # We assume there is only ever one pool...
+         if len(pools) == 0:
+-            raise XenAPIPlugin.Failure("NO_POOL_FOR_HOST", [])
++            XSLogFatal(Lang("No pool found for host."))
++            return
+         if len(pools) > 1:
+-            raise XenAPIPlugin.Failure("MORE_THAN_ONE_POOL_FOR_HOST", [])
++            XSLogFatal(Lang("More than one pool for host."))
++            return
          session.xenapi.pool.set_vswitch_controller(value)
          Data.Inst().Update()
 -
@@ -64,7 +75,7 @@ diff -r 6cd8d8d2f704 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.p
  
  class XSFeatureVSwitch:
  
-@@ -291,8 +261,8 @@
+@@ -291,8 +263,8 @@
          inPane.NewLine()
          inPane.AddStatusField(Lang("ovs-vswitchd status", 20),
                                VSwitchService.Inst("vswitch", "ovs-vswitchd").status())

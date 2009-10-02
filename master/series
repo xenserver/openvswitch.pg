@@ -7,5 +7,6 @@ reenabled-compat-layer.patch
 clear-config-on-boot.patch
 clear-config-on-boot-fix.patch
 xsconsole-plugin.patch
+xsconsole-plugin2.patch
 autoconf-2.59.patch
 build-integration.patch

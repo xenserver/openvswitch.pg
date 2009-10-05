@@ -1,0 +1,32 @@
+commit 7f929c5f1f876898f6b2343b7a512c56d5c0f342
+Author: Ian Campbell <Ian.Campbell@citrix.com>
+Date:   Thu Oct 1 09:26:22 2009 -0700
+
+    xenserver: Fix init script typos that prevented turning brcompatd back on.
+    
+    Commit 723a8c3ca "xenserver: Disable brcompatd" turned off brcompatd by
+    default but allowed it to be enabled using an option, but the option
+    didn't work.  This commit fixes that problem.
+
+diff --git a/xenserver/etc_init.d_vswitch b/xenserver/etc_init.d_vswitch
+index 0857f89..872383c 100755
+--- a/xenserver/etc_init.d_vswitch
++++ b/xenserver/etc_init.d_vswitch
+@@ -89,7 +89,7 @@ function insert_modules_if_required {
+         action "Inserting llc module" modprobe llc
+         action "Inserting openvswitch module" modprobe openvswitch_mod
+     fi
+-    if [ "$ENABLE_BRCOMPATD" = "y" ] && [ -n "$BRCOMPATD_PIDFILE" ] && ! lsmod | grep -q "brcompat_mod"; then
++    if [ "$ENABLE_BRCOMPAT" = "y" ] && [ -n "$BRCOMPATD_PIDFILE" ] && ! lsmod | grep -q "brcompat_mod"; then
+         action "Inserting brcompat module" modprobe brcompat_mod
+     fi
+ }
+@@ -267,7 +267,7 @@ function start {
+     fi
+ 
+     start_vswitchd
+-    if [ "${ENABLE_BRCOMPATD}" = "y" ] ; then
++    if [ "${ENABLE_BRCOMPAT}" = "y" ] ; then
+ 	start_brcompatd
+     fi
+     reload_vswitchd  # ensures ovs-vswitchd has fully read config file.

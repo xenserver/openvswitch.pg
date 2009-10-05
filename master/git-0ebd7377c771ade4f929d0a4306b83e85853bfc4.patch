@@ -1,58 +1,16 @@
-Update xsconsole plugin to use first class datamodel field.
+commit 0ebd7377c771ade4f929d0a4306b83e85853bfc4
+Author: Ben Pfaff <blp@nicira.com>
+Date:   Wed Sep 30 12:32:17 2009 -0700
 
-Log via XSConsoleLog module instead of via own log file.
+    xenserver: Update xsconsole plugin to use first class datamodel field.
+    
+    Part of a patch from Ian Campbell <ian.campbell@citrix.com>.
 
-diff -r aa941ec68c03 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
---- a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Wed Sep 30 11:38:22 2009 +0100
-+++ b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py	Wed Sep 30 11:44:51 2009 +0100
-@@ -7,9 +7,7 @@
- 
- # Copyright (c) 2009 Nicira Networks.
- 
--import logging
--log = logging.getLogger("vswitch-cfg-update")
--logging.basicConfig(filename="/var/log/vswitch-xsplugin.log", level=logging.DEBUG)
-+from XSConsoleLog import *
- 
- import os
- import socket
-@@ -36,7 +34,7 @@
-         try:
-             output = ShellPipe(["service", self.name, "version"]).Stdout()
-         except StandardError, e:
--            log.error("version retrieval error: " + str(e))
-+            XSLogError("vswitch version retrieval error: " + str(e))
-             return "<unknown>"
-         for line in output:
-             if self.processname in line:
-@@ -47,7 +45,7 @@
-         try:
-             output = ShellPipe(["service", self.name, "status"]).Stdout()
-         except StandardError, e:
--            log.error("status retrieval error: " + str(e))
-+            XSLogError("vswitch status retrieval error: " + str(e))
-             return "<unknown>"
-         if len(output) == 0:
-             return "<unknown>"
-@@ -66,7 +64,7 @@
-         try:
-             ShellPipe(["service", self.name, "restart"]).Call()
-         except StandardError, e:
--            log.error("restart error: " + str(e))
-+            XSLogError("vswitch restart error: " + str(e))
- 
-     @classmethod
-     def Inst(cls, name, processname=None):
-@@ -85,7 +83,7 @@
-             output = ShellPipe([cfg_mod, "-vANY:console:emer", "-F", 
-                     vswitchd_cfg_filename, "-q", key]).Stdout()
-         except StandardError, e:
--            log.error("config retrieval error: " + str(e))
-+            XSLogError("config retrieval error: " + str(e))
-             return "<unknown>"
- 
-         if len(output) == 0:
-@@ -104,7 +102,7 @@
+diff --git a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
+index 31a48c3..ed3e033 100644
+--- a/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
++++ b/xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py
+@@ -102,7 +102,7 @@ class VSwitchControllerDialogue(Dialogue):
          self.hostsUpdated = 0
          pool = data.GetPoolForThisHost()
          if pool is not None:
@@ -61,7 +19,7 @@ diff -r aa941ec68c03 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.p
          else:
              self.controller = ""
  
-@@ -225,25 +223,21 @@
+@@ -223,25 +223,21 @@ class VSwitchControllerDialogue(Dialogue):
      def SetController(self, ip):
          self.hostsInPool = 0
          self.hostsUpdated = 0
@@ -91,7 +49,7 @@ diff -r aa941ec68c03 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.p
          Data.Inst().Update()
  
      def _updateActiveServers(self, session):
-@@ -280,7 +274,7 @@
+@@ -278,7 +274,7 @@ class XSFeatureVSwitch:
  
          pool = data.GetPoolForThisHost()
          if pool is not None:
@@ -100,7 +58,7 @@ diff -r aa941ec68c03 xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.p
          else:
              dbController = ""
  
-@@ -322,5 +316,6 @@
+@@ -320,5 +316,6 @@ class XSFeatureVSwitch:
              }
          )
  

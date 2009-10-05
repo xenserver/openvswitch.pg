@@ -1,0 +1,486 @@
+commit 95f340cb191dd52a0be28176b009b5e5bca81cd9
+Author: Ben Pfaff <blp@nicira.com>
+Date:   Fri Oct 2 13:29:14 2009 -0700
+
+    xenserver: Improve vif hotplug script for XenServer 5.7.
+    
+    The vif hotplug script has the following changes:
+    
+          * Read extra vif details from xenstore instead of using XenAPI.
+            This reduces unnecessary traffic on the pool master and is good
+            for scalability. This change makes the dump-vif-details script
+            redundant.
+          * Manage network tap devices (emulated network devices created by
+            qemu) via the hotplug script. Replaces usage
+            of /etc/xen/qemu-ifup (which is removed in XenServer 5.7). This
+            is necessary in order to receive tap deletion a well as creation
+            events. Modified /etc/udev/rules/xen-backend.rules also
+            attached.
+    
+    These changes are not compatible with XenServer 5.0 since they require
+    changes to xapi which were made in the 5.7 branch. The first change
+    definitely requires xapi support while the second requires a kernel with
+    correctly working hotplug events on tap devices. I haven't confirmed but
+    I believe the 2.6.18 kernel used in XenServer 5.0 does not (old kernels
+    do not generate a hotplug even for a tap device until it is brought up).
+    The 2.6.27 kernel used in XenServer 5.7 does have usable hotplug events
+    on tap devices.
+    
+    (Ian Campbell made all the changes to the vif scripts and xen-backend.rules
+    files and wrote the above commit log.  Ben Pfaff updated the rest of the
+    file to integrate into the build.)
+
+diff --git a/xenserver/README b/xenserver/README
+index 276cd6c..c11f447 100644
+--- a/xenserver/README
++++ b/xenserver/README
+@@ -30,6 +30,10 @@ files are:
+         vswitch-related shell functions for the administrator's
+         convenience.
+ 
++    etc_udev_xen-backend.rules
++
++        udev rules for invoking the XenServer "vif" and "tap" scripts.
++
+     etc_xapi.d_plugins_vswitch-cfg-update
+ 
+         xapi plugin script to update the cache of configuration items
+@@ -44,12 +48,6 @@ files are:
+ 
+         vswitch-aware replacement for Citrix script of the same name.
+ 
+-    root_vswitch_scripts_dump-vif-details
+-
+-        Script to retrieve extended information about VIFs that are
+-        needed by the controller.  This is called by the "vif" script,
+-        which is run when virtual interfaces are added and removed.
+-
+     root_vswitch_scripts_sysconfig.template
+ 
+         Template for vswitch's /etc/sysconfig/vswitch configuration
+diff --git a/xenserver/automake.mk b/xenserver/automake.mk
+index 3275434..691d379 100644
+--- a/xenserver/automake.mk
++++ b/xenserver/automake.mk
+@@ -11,6 +11,7 @@ EXTRA_DIST += \
+ 	xenserver/etc_init.d_vswitch-xapi-update \
+ 	xenserver/etc_logrotate.d_vswitch \
+ 	xenserver/etc_profile.d_vswitch.sh \
++	xenserver/etc_udev_xen-backend.rules \
+ 	xenserver/etc_xapi.d_plugins_vswitch-cfg-update \
+ 	xenserver/etc_xensource_scripts_vif \
+ 	xenserver/opt_xensource_libexec_interface-reconfigure \
+@@ -18,5 +19,4 @@ EXTRA_DIST += \
+ 	xenserver/usr_sbin_brctl \
+ 	xenserver/usr_sbin_xen-bugtool \
+ 	xenserver/usr_share_vswitch_scripts_sysconfig.template \
+-	xenserver/usr_share_vswitch_scripts_dump-vif-details \
+ 	xenserver/vswitch-xen.spec
+diff --git a/xenserver/etc_udev_xen-backend.rules b/xenserver/etc_udev_xen-backend.rules
+new file mode 100644
+index 0000000..a67e868
+--- /dev/null
++++ b/xenserver/etc_udev_xen-backend.rules
+@@ -0,0 +1,10 @@
++SUBSYSTEM=="xen-backend", KERNEL=="tap*", RUN+="/etc/xensource/scripts/tap $env{ACTION}"
++SUBSYSTEM=="xen-backend", KERNEL=="vbd*", RUN+="/etc/xensource/scripts/block $env{ACTION}"
++
++SUBSYSTEM=="xen-backend", KERNEL=="vif*", RUN+="/etc/xensource/scripts/vif $env{ACTION} vif"
++SUBSYSTEM=="net",         KERNEL=="tap*", RUN+="/etc/xensource/scripts/vif $env{ACTION} tap"
++
++KERNEL=="evtchn", NAME="xen/%k"
++
++# blktap devices created by blktapctrl
++KERNEL=="blktap[0-9]*", OPTIONS="ignore_device"
+diff --git a/xenserver/etc_xensource_scripts_vif b/xenserver/etc_xensource_scripts_vif
+index 04aa2bb..1baaeec 100755
+--- a/xenserver/etc_xensource_scripts_vif
++++ b/xenserver/etc_xensource_scripts_vif
+@@ -12,26 +12,15 @@
+ # Keep other-config/ keys in sync with device.ml:vif_udev_keys
+ 
+ cfg_mod="/usr/bin/ovs-cfg-mod"
+-dump_vif_details="/usr/share/vswitch/scripts/dump-vif-details"
+ service="/sbin/service"
+-
+-TYPE=`echo ${XENBUS_PATH} | cut -f 2 -d '/'`
+-DOMID=`echo ${XENBUS_PATH} | cut -f 3 -d '/'`
+-DEVID=`echo ${XENBUS_PATH} | cut -f 4 -d '/'`
+-
+-XAPI=/xapi/${DOMID}/hotplug/${TYPE}/${DEVID}
+-HOTPLUG=/xapi/${DOMID}/hotplug/${TYPE}/${DEVID}
+-PRIVATE=/xapi/${DOMID}/private/${TYPE}/${DEVID}
+-BRCTL=/usr/sbin/brctl
+-IP=/sbin/ip
+-
++IP="/sbin/ip"
+ 
+ handle_promiscuous()
+ {
+-    local arg=$(xenstore-read "${PRIVATE}/other-config/promiscuous")
++    local arg=$(xenstore-read "${PRIVATE}/other-config/promiscuous" 2>/dev/null)
+     if [ $? -eq 0 -a -n "${arg}" ] ; then
+         case "${arg}" in 
+-            true|on) logger -t script-vif "${vif}: Promiscuous ports are not supported via vSwitch." ;;
++            true|on) logger -t script-vif "${dev}: Promiscuous ports are not supported via vSwitch." ;;
+             *) ;;
+         esac
+     fi
+@@ -40,96 +29,157 @@ handle_promiscuous()
+ handle_ethtool()
+ {
+     local opt=$1
+-    local arg=$(xenstore-read "${PRIVATE}/other-config/ethtool-${opt}")
++    local arg=$(xenstore-read "${PRIVATE}/other-config/ethtool-${opt}" 2>/dev/null)
+     if [ $? -eq 0 -a -n "${arg}" ] ; then
+         case "${arg}" in
+-            true|on)   /sbin/ethtool -K "${vif}" "${opt}" on ;;
+-            false|off) /sbin/ethtool -K "${vif}" "${opt}" off ;;
+-            *) logger -t scripts-vif "Unknown ethtool argument ${opt}=${arg} on ${vif}/${VIFUUID}" ;;
++            true|on)   /sbin/ethtool -K "${dev}" "${opt}" on ;;
++            false|off) /sbin/ethtool -K "${dev}" "${opt}" off ;;
++            *) logger -t scripts-vif "Unknown ethtool argument ${opt}=${arg} on ${dev}/${VIFUUID}" ;;
+         esac
+     fi
+ }
+ 
+ handle_mtu()
+ {
+-    local mtu=$(xenstore-read "${PRIVATE}/MTU")
++    local mtu=$(xenstore-read "${PRIVATE}/MTU" 2>/dev/null)
+     if [ $? -eq 0 -a -n "${mtu}" ]; then
+-	echo "${mtu}" > /sys/class/net/${vif}/mtu
++	echo "${mtu}" > /sys/class/net/${dev}/mtu
+     fi
+ }
+ 
++handle_vif_details()
++{
++    local vif_details=
++    local net_uuid=$(xenstore-read "${PRIVATE}/network-uuid" 2>/dev/null)
++    if [ -n "${net_uuid}" ] ; then
++	vif_details="$vif_details --add=port.${dev}.net-uuid=${net_uuid}"
++    fi
++
++    local address=$(xenstore-read "/local/domain/$DOMID/device/vif/$DEVID/mac" 2>/dev/null)
++    if [ -n "${address}" ] ; then
++	vif_details="$vif_details --add=port.${dev}.vif-mac=${address}"
++    fi
++
++    local vif_uuid=$(xenstore-read "${PRIVATE}/vif-uuid" 2>/dev/null)
++    if [ -n "${vif_uuid}" ] ; then
++	vif_details="$vif_details --add=port.${dev}.vif-uuid=${vif_uuid}"
++    fi
++
++    local vm=$(xenstore-read "/local/domain/$DOMID/vm" 2>/dev/null)
++    if [ $? -eq 0 -a -n "${vm}" ] ; then
++	local vm_uuid=$(xenstore-read "$vm/uuid" 2>/dev/null)
++    fi
++    if [ -n "${vm_uuid}" ] ; then
++	vif_details="$vif_details --add=port.${dev}.vm-uuid=${vm_uuid}"
++    fi
++    echo ${vif_details}
++}
++
+ add_to_bridge()
+ {
+     local address=$(xenstore-read "${PRIVATE}/bridge-MAC")
+     if [ $? -ne 0 -o -z "${address}" ]; then
+ 	logger -t scripts-vif "Failed to read ${PRIVATE}/bridge-MAC from xenstore"
++	exit 1
+     fi
+     local bridge=$(xenstore-read "${PRIVATE}/bridge")
+     if [ $? -ne 0 -o -z "${bridge}" ]; then
+ 	logger -t scripts-vif "Failed to read ${PRIVATE}/bridge from xenstore"
++	exit 1
+     fi
+-    logger -t scripts-vif "Adding ${vif} to ${bridge} with address ${address}"
++    logger -t scripts-vif "Adding ${dev} to ${bridge} with address ${address}"
+ 
+     vid=
+     if [ -e "/var/lib/openvswitch/br-$bridge" ]; then
+ 	. "/var/lib/openvswitch/br-$bridge"
+ 	if [ -n "$VLAN_SLAVE" -a -n "$VLAN_VID" ]; then
+ 	    bridge=$VLAN_SLAVE
+-	    vid="--add=vlan.$vif.tag=$VLAN_VID"
++	    vid="--add=vlan.${dev}.tag=$VLAN_VID"
+ 	fi
+     fi
+ 
+-    ${IP} link set "${vif}" down                        || logger -t scripts-vif "Failed to ip link set ${vif} down"
+-    ${IP} link set "${vif}" arp off                     || logger -t scripts-vif "Failed to ip link set ${vif} arp off"
+-    ${IP} link set "${vif}" multicast off               || logger -t scripts-vif "Failed to ip link set ${vif} multicast off"
+-    ${IP} link set "${vif}" address "${address}"        || logger -t scripts-vif "Failed to ip link set ${vif} address ${address}"
+-    ${IP} addr flush "${vif}"                           || logger -t scripts-vif "Failed to ip addr flush ${vif}"
+-
+-    local vif_details=$($dump_vif_details $DOMID $DEVID)
+-    if [ $? -ne 0 -o -z "${vif_details}" ]; then
+-	    logger -t scripts-vif "Failed to retrieve vif details for vswitch"
++    if [ "$type" = "vif" ] ; then
++	local vif_details=$(handle_vif_details)
+     fi
+ 
++    ${IP} link set "${dev}" down                        || logger -t scripts-vif "Failed to ip link set ${dev} down"
++    ${IP} link set "${dev}" arp off                     || logger -t scripts-vif "Failed to ip link set ${dev} arp off"
++    ${IP} link set "${dev}" multicast off               || logger -t scripts-vif "Failed to ip link set ${dev} multicast off"
++    ${IP} link set "${dev}" address "${address}"        || logger -t scripts-vif "Failed to ip link set ${dev} address ${address}"
++    ${IP} addr flush "${dev}"                           || logger -t scripts-vif "Failed to ip addr flush ${dev}"
++
+     $cfg_mod -F /etc/ovs-vswitchd.conf \
+-        --del-match="bridge.*.port=$vif" \
+-        --del-match="vlan.$vif.[!0-9]*" \
+-        --del-match="port.$vif.[!0-9]*" \
+-        --add="bridge.$bridge.port=$vif" \
++        --del-match="bridge.*.port=${dev}" \
++        --del-match="vlan.${dev}.[!0-9]*" \
++        --del-match="port.${dev}.[!0-9]*" \
++        --add="bridge.$bridge.port=${dev}" \
+         $vid $vif_details -c 
+     $service vswitch reload
+ 
+-    ${IP} link set "${vif}" up                          || logger -t scripts-vif "Failed to ip link set ${vif} up"
++    ${IP} link set "${dev}" up                          || logger -t scripts-vif "Failed to ip link set ${dev} up"
+ }
+ 
+-echo Called as "$@" "$TYPE" "$DOMID" "$DEVID" | logger -t scripts-vif
+-case "$1" in
+-online)
+-	handle_ethtool rx
+-	handle_ethtool tx
+-	handle_ethtool sg
+-	handle_ethtool tso
+-	handle_ethtool ufo
+-	handle_ethtool gso
++type=$2
+ 
+-	handle_mtu
+-	add_to_bridge
+-	handle_promiscuous
++case ${type} in
++    vif)
++	DOMID=`echo ${XENBUS_PATH} | cut -f 3 -d '/'`
++	DEVID=`echo ${XENBUS_PATH} | cut -f 4 -d '/'`
++	dev=vif${DOMID}.${DEVID}
++	;;
++    tap)
++	dev=$INTERFACE
++	DOMID=`echo ${dev#tap} | cut -f 1 -d '.'`
++	DEVID=`echo ${dev#tap} | cut -f 2 -d '.'`
++	;;
++    *)  
++	logger -t scripts-vif "unknown interface type ${type}"
++	exit 1
++	;;
++esac
+ 
+-	xenstore-write "${HOTPLUG}/vif" "${vif}"
+-	xenstore-write "${HOTPLUG}/hotplug" "online"
++XAPI=/xapi/${DOMID}/hotplug/vif/${DEVID}
++HOTPLUG=/xapi/${DOMID}/hotplug/vif/${DEVID}
++PRIVATE=/xapi/${DOMID}/private/vif/${DEVID}
+ 
+-	# xs-xen.pq.hq:91e986b8e49f netback-wait-for-hotplug
+-	xenstore-write "/local/domain/0/backend/vif/${DOMID}/${DEVID}/hotplug-status" "connected"
++echo Called as "$@" "$DOMID" "$DEVID" | logger -t scripts-vif
++case "$1" in
++online)
++	if [ "${type}" = "vif" ] ; then
++	    handle_ethtool rx
++	    handle_ethtool tx
++	    handle_ethtool sg
++	    handle_ethtool tso
++	    handle_ethtool ufo
++	    handle_ethtool gso
++
++	    handle_mtu
++	    add_to_bridge
++	    handle_promiscuous
++
++	    xenstore-write "${HOTPLUG}/vif" "${dev}"
++	    xenstore-write "${HOTPLUG}/hotplug" "online"
++
++	    # xs-xen.pq.hq:91e986b8e49f netback-wait-for-hotplug
++	    xenstore-write "/local/domain/0/backend/vif/${DOMID}/${DEVID}/hotplug-status" "connected"
++	fi
++	;;
+ 
++add)
++	if [ "${type}" = "tap" ] ; then
++	    add_to_bridge
++	fi
+ 	;;
++
+ remove)
+-	xenstore-rm "${HOTPLUG}/hotplug"
+-	vif=vif${DOMID}.${DEVID}
+-	logger -t scripts-vif "${vif} has been removed"
++	if [ "${type}" = "vif" ] ;then
++	    xenstore-rm "${HOTPLUG}/hotplug"
++	fi
++	logger -t scripts-vif "${dev} has been removed"
+ 	$cfg_mod -vANY:console:emer -F /etc/ovs-vswitchd.conf \
+-	    --del-match="bridge.*.port=${vif}" \
+-	    --del-match="vlan.${vif}.[!0-9]*" \
+-	    --del-match="port.${vif}.[!0-9]*" -c
++	    --del-match="bridge.*.port=${dev}" \
++	    --del-match="vlan.${dev}.[!0-9]*" \
++	    --del-match="port.${dev}.[!0-9]*" -c
+ 	$service vswitch reload
+ 	;;
+ esac
+diff --git a/xenserver/usr_share_vswitch_scripts_dump-vif-details b/xenserver/usr_share_vswitch_scripts_dump-vif-details
+deleted file mode 100755
+index b0ceb40..0000000
+--- a/xenserver/usr_share_vswitch_scripts_dump-vif-details
++++ /dev/null
+@@ -1,78 +0,0 @@
+-#!/usr/bin/python
+-#
+-# Script to retrieve extended information about VIFs that are
+-# needed by the controller.  This is called by the "vif" script,
+-# which is run when virtual interfaces are added and removed.
+-
+-# Copyright (C) 2009 Nicira Networks, Inc.
+-#
+-# Copying and distribution of this file, with or without modification,
+-# are permitted in any medium without royalty provided the copyright
+-# notice and this notice are preserved.  This file is offered as-is,
+-# without warranty of any kind.
+-
+-import sys
+-import XenAPI
+-import xen.lowlevel.xs
+-
+-# Query XenStore for the opaque reference of this vif
+-def get_vif_ref(domid, devid):
+-	xenstore = xen.lowlevel.xs.xs()
+-	t = xenstore.transaction_start()
+-	vif_ref = xenstore.read(t, '/xapi/%s/private/vif/%s/ref' % (domid, devid))
+-	xenstore.transaction_end(t)
+-	return vif_ref
+-
+-# Query XAPI for the information we need using the vif's opaque reference
+-def dump_vif_info(domid, devid, vif_ref):
+-	try: 
+-		session = XenAPI.xapi_local()
+-		session.xenapi.login_with_password("root", "")
+-		vif_rec = session.xenapi.VIF.get_record(vif_ref)
+-		net_rec = session.xenapi.network.get_record(vif_rec["network"])
+-		vm_rec = session.xenapi.VM.get_record(vif_rec["VM"])
+-
+-		# Data to allow vNetManager to associate VIFs with xapi data
+-		sys.stdout.write('--add=port.vif%s.%s.net-uuid=%s ' 
+-				% (domid, devid, net_rec["uuid"]))
+-		sys.stdout.write('--add=port.vif%s.%s.vif-mac=%s ' 
+-				% (domid, devid, vif_rec["MAC"]))
+-		sys.stdout.write('--add=port.vif%s.%s.vif-uuid=%s ' 
+-				% (domid, devid, vif_rec["uuid"]))
+-		sys.stdout.write('--add=port.vif%s.%s.vm-uuid=%s ' 
+-				% (domid, devid, vm_rec["uuid"]))
+-
+-		# vNetManager needs to know the network UUID(s) associated with
+-		# each datapath.  Normally interface-reconfigure adds them, but
+-		# interface-reconfigure never gets called for internal networks
+-		# (xapi does the addbr ioctl internally), so we have to do it
+-		# here instead for internal networks.  This is only acceptable
+-		# because xapi is lazy about creating internal networks: it
+-		# only creates one just before it adds the first vif to it.
+-		# There may still be a brief delay between the initial
+-		# ovs-vswitchd connection to vNetManager and setting this
+-		# configuration variable, but vNetManager can tolerate that.
+-		if len(net_rec['PIFs']) == 0:
+-			key = 'bridge.%s.xs-network-uuids' % net_rec['bridge']
+-			value = net_rec['uuid']
+-			sys.stdout.write('--del-match=%s=* ' % key)
+-			sys.stdout.write('--add=%s=%s ' % (key, value))
+-	finally:
+-		session.xenapi.session.logout()
+-	
+-if __name__ == '__main__':
+-	if (len(sys.argv) != 3):
+-		sys.stderr.write("ERROR: %s <domid> <devid>\n")
+-		sys.exit(1)
+-
+-	domid = sys.argv[1]
+-	devid = sys.argv[2]
+-
+-	vif_ref = get_vif_ref(domid, devid)
+-	if not vif_ref:
+-		sys.stderr.write("ERROR: Could not find interface vif%s.%s\n" 
+-				% (domid, devid))
+-		sys.exit(1)
+-
+-	dump_vif_info(domid, devid, vif_ref)
+-	sys.exit(0)
+diff --git a/xenserver/vswitch-xen.spec b/xenserver/vswitch-xen.spec
+index bc9271d..70c1984 100644
+--- a/xenserver/vswitch-xen.spec
++++ b/xenserver/vswitch-xen.spec
+@@ -71,14 +71,14 @@ install -m 755 xenserver/opt_xensource_libexec_interface-reconfigure \
+              $RPM_BUILD_ROOT/usr/share/vswitch/scripts/interface-reconfigure
+ install -m 755 xenserver/etc_xensource_scripts_vif \
+              $RPM_BUILD_ROOT/usr/share/vswitch/scripts/vif
+-install -m 755 xenserver/usr_share_vswitch_scripts_dump-vif-details \
+-               $RPM_BUILD_ROOT/usr/share/vswitch/scripts/dump-vif-details
+ install -m 755 xenserver/usr_sbin_xen-bugtool \
+              $RPM_BUILD_ROOT/usr/share/vswitch/scripts/xen-bugtool
+ install -m 755 xenserver/usr_sbin_brctl \
+              $RPM_BUILD_ROOT/usr/share/vswitch/scripts/brctl
+ install -m 755 xenserver/usr_share_vswitch_scripts_sysconfig.template \
+          $RPM_BUILD_ROOT/usr/share/vswitch/scripts/sysconfig.template
++install -m 644 xenserver/etc_udev_xen-backend.rules \
++        $RPM_BUILD_ROOT/usr/share/vswitch/scripts/xen-backend.rules
+ install -m 644 \
+         xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py \
+                $RPM_BUILD_ROOT/usr/share/vswitch/scripts/XSFeatureVSwitch.py
+@@ -121,6 +121,7 @@ ca141d60061dcfdade73e75abc6529b5  /usr/sbin/brctl
+ b8e9835862ef1a9cec2a3f477d26c989  /etc/xensource/scripts/vif
+ 51970ad613a3996d5997e18e44db47da  /opt/xensource/libexec/interface-reconfigure
+ 5654c8c36699fcc8744ca9cd5b855414  /usr/sbin/xen-bugtool
++883820a78723ee21340f31099b18f18e  /etc/udev/xen-backend.rules
+ EOF
+     then
+         printf "\nVerified host scripts from XenServer 5.5.0.\n\n"
+@@ -129,6 +130,7 @@ ca141d60061dcfdade73e75abc6529b5  /usr/sbin/brctl
+ b8e9835862ef1a9cec2a3f477d26c989  /etc/xensource/scripts/vif
+ ce451d3c985fd1db6497a363f0d9dedb  /opt/xensource/libexec/interface-reconfigure
+ 2b53f500431fcba5276c896e9e4281b9  /usr/sbin/xen-bugtool
++883820a78723ee21340f31099b18f18e  /etc/udev/xen-backend.rules
+ EOF
+     then
+         printf "\nVerified host scripts from XenServer 5.5.900.\n\n"
+@@ -209,7 +211,8 @@ for f in \
+     /opt/xensource/libexec/interface-reconfigure \
+     /etc/xensource/scripts/vif \
+     /usr/sbin/xen-bugtool \
+-    /usr/sbin/brctl
++    /usr/sbin/brctl \
++    /etc/udev/xen-backend.rules
+ do
+     s=$(basename "$f")
+     t=$(readlink "$f")
+@@ -268,7 +271,8 @@ if [ "$1" = "0" ]; then     # $1 = 1 for upgrade
+         /opt/xensource/libexec/interface-reconfigure \
+         /etc/xensource/scripts/vif \
+         /usr/sbin/xen-bugtool \
+-        /usr/sbin/brctl
++        /usr/sbin/brctl \
++        /etc/udev/xen-backend.rules
+     do
+         s=$(basename "$f")
+         if [ ! -f "/usr/lib/vswitch/xs-original/$s" ]; then
+@@ -303,13 +307,13 @@ fi
+ /etc/profile.d/vswitch.sh
+ /lib/modules/%{xen_version}/kernel/net/vswitch/openvswitch_mod.ko
+ /lib/modules/%{xen_version}/kernel/net/vswitch/brcompat_mod.ko
+-/usr/share/vswitch/scripts/dump-vif-details
+ /usr/share/vswitch/scripts/interface-reconfigure
+ /usr/share/vswitch/scripts/vif
+ /usr/share/vswitch/scripts/xen-bugtool
+ /usr/share/vswitch/scripts/XSFeatureVSwitch.py
+ /usr/share/vswitch/scripts/brctl
+ /usr/share/vswitch/scripts/sysconfig.template
++/usr/share/vswitch/scripts/xen-backend.rules
+ # Following two files are generated automatically by rpm.  We don't
+ # really need them and they won't be used on the XenServer, but there
+ # isn't an obvious place to get rid of them since they are generated

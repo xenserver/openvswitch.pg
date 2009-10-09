@@ -12,7 +12,7 @@ vswitch__Factor_out_detection_of_internal_interfaces_into_a_new_function.patch
 vswitch__Allow_user_to_set_Ethernet_address_of_any_internal_interface.patch
 
 # Local patches
-reenabled-compat-layer.patch
+#reenabled-compat-layer.patch
 clear-config-on-boot-fix.patch
 logrotate-missing-ok.patch
 autoconf-2.59.patch

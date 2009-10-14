@@ -6,6 +6,7 @@ git-7f929c5f1f876898f6b2343b7a512c56d5c0f342.patch # xenserver: Fix init script 
 git-fc72ccd85b962c243ea7cf5c674be91f4243dca9.patch # xenserver: Correct "service vswitch status" when brcompatd is disabled
 git-fcc4950b0aad972069475da4bcc39cdaee2bfd49.patch # xenserver: Improve xsconsole plugin in various ways.
 #git-95f340cb191dd52a0be28176b009b5e5bca81cd9.patch # xenserver: Improve vif hotplug script for XenServer 5.7.
+correct-initscript-status.patch
 
 # Local patches
 logrotate-missing-ok.patch

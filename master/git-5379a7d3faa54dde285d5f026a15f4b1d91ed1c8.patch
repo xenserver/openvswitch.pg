@@ -1,0 +1,22 @@
+commit 5379a7d3faa54dde285d5f026a15f4b1d91ed1c8
+Author: Ian Campbell <Ian.Campbell@citrix.com>
+Date:   Wed Oct 14 11:38:40 2009 +0100
+
+    logrotate: Allow logs to be missing
+    
+    In particular ovs-brcompatd.log is not present if compatibility mode is
+    disabled. Without this logrotate attempts to send email to the
+    administrator.
+
+diff --git a/xenserver/etc_logrotate.d_vswitch b/xenserver/etc_logrotate.d_vswitch
+index 6366c67..3186e10 100644
+--- a/xenserver/etc_logrotate.d_vswitch
++++ b/xenserver/etc_logrotate.d_vswitch
+@@ -7,6 +7,7 @@
+ 
+ /var/log/ovs-vswitchd.log /var/log/ovs-brcompatd.log {
+ 	sharedscripts
++	missingok
+ 	postrotate
+ 	# Tell ovs-vswitchd and ovs-brcompatd to reopen their log files
+ 	/sbin/service vswitch reload

@@ -9,6 +9,10 @@ git-fcc4950b0aad972069475da4bcc39cdaee2bfd49.patch # xenserver: Improve xsconsol
 git-dde98f40a3ec6f1482383bd1d6bb3e439872806b.patch # Ensure "service vswitch status" returns appropriate error code
 git-5379a7d3faa54dde285d5f026a15f4b1d91ed1c8.patch # logrotate: Allow logs to be missing
 
+# Upstream patches from citrix branch
+git-3a55ef14838f9552fa824b90599aa2a6493bb04a.patch # bonding: Drop unicast packets which have a different learned port.
+git-5422a9e189c627202a0eaa568a52d17e088d82fb.patch # bonding: Balance bond slaves based on ratio.
+
 # Local patches
 autoconf-2.59.patch
 build-integration.patch

@@ -8,6 +8,7 @@ git-fcc4950b0aad972069475da4bcc39cdaee2bfd49.patch # xenserver: Improve xsconsol
 #git-95f340cb191dd52a0be28176b009b5e5bca81cd9.patch # xenserver: Improve vif hotplug script for XenServer 5.7.
 git-dde98f40a3ec6f1482383bd1d6bb3e439872806b.patch # Ensure "service vswitch status" returns appropriate error code
 git-5379a7d3faa54dde285d5f026a15f4b1d91ed1c8.patch # logrotate: Allow logs to be missing
+service-vswitch-status.patch
 
 # Local patches
 autoconf-2.59.patch

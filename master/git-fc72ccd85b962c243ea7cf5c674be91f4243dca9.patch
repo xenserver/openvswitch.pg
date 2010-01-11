@@ -3,18 +3,17 @@ Author: Ian Campbell <Ian.Campbell@citrix.com>
 Date:   Fri Oct 2 11:32:10 2009 +0100
 
     xenserver: Correct "service vswitch status" when brcompatd is disabled
-    
+
     I don't think it makes sense to report brcompatd's status when it is
     explicitly disabled. Doing so causes service status to return an error
     when brcompatd is deliberately disabled.
-    
+
     Also fix up a tab vs. spaces whitespace snafu.
 
 diff --git a/xenserver/etc_init.d_vswitch b/xenserver/etc_init.d_vswitch
-index 872383c..e79a536 100755
 --- a/xenserver/etc_init.d_vswitch
 +++ b/xenserver/etc_init.d_vswitch
-@@ -268,7 +268,7 @@ function start {
+@@ -274,7 +274,7 @@
  
      start_vswitchd
      if [ "${ENABLE_BRCOMPAT}" = "y" ] ; then
@@ -23,14 +22,14 @@ index 872383c..e79a536 100755
      fi
      reload_vswitchd  # ensures ovs-vswitchd has fully read config file.
      touch /var/lock/subsys/vswitch
-@@ -311,7 +311,9 @@ case "$1" in
+@@ -317,7 +317,9 @@
          ;;
      status)
-         status -p ovs-vswitchd.pid ovs-vswitchd
--        status -p ovs-brcompatd.pid ovs-brcompatd
+         status -p "$VSWITCHD_PIDFILE" ovs-vswitchd
+-        status -p "$BRCOMPATD_PIDFILE" ovs-brcompatd
 +        if [ "$ENABLE_BRCOMPAT" = "y" ] ; then
-+            status -p ovs-brcompatd.pid ovs-brcompatd
-+        fi
++            status -p "$BRCOMPATD_PIDFILE" ovs-brcompatd
++	fi
          ;;
      version)
          /usr/sbin/ovs-vswitchd -V

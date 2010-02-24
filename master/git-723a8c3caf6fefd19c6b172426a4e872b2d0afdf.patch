@@ -10,7 +10,7 @@ diff --git a/xenserver/etc_init.d_vswitch b/xenserver/etc_init.d_vswitch
 index e63a001..0857f89 100755
 --- a/xenserver/etc_init.d_vswitch
 +++ b/xenserver/etc_init.d_vswitch
-@@ -24,8 +24,8 @@
+@@ -24,9 +24,9 @@
  test -e /etc/sysconfig/vswitch && . /etc/sysconfig/vswitch
  
  # General config variables in /etc/sysconfig/vswitch
@@ -18,6 +18,7 @@ index e63a001..0857f89 100755
 -: ${ENABLE_FAKE_PROC_NET:=y}
 +: ${ENABLE_BRCOMPAT:=n}
 +: ${ENABLE_FAKE_PROC_NET:=n}
+ : ${ENABLE_MONITOR:=y}
  : ${FORCE_COREFILES:=y}
  
  # Config variables specific to ovs-vswitchd
@@ -30,7 +31,7 @@ index e63a001..0857f89 100755
          action "Inserting brcompat module" modprobe brcompat_mod
      fi
  }
-@@ -267,7 +267,9 @@ function start {
+@@ -267,6 +267,8 @@ function start {
      fi
  
      start_vswitchd
@@ -38,7 +39,6 @@ index e63a001..0857f89 100755
 +    if [ "${ENABLE_BRCOMPATD}" = "y" ] ; then
 +	start_brcompatd
 +    fi
-     reload_vswitchd  # ensures ovs-vswitchd has fully read config file.
      touch /var/lock/subsys/vswitch
  }
 diff --git a/xenserver/usr_share_vswitch_scripts_sysconfig.template b/xenserver/usr_share_vswitch_scripts_sysconfig.template

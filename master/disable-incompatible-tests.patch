@@ -1,0 +1,477 @@
+Disable tests which are incompatible with our version of autoconf/autotest
+
+diff -r 70497f430d31 tests/check-structs.at
+--- a/tests/check-structs.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/check-structs.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -1,11 +1,11 @@
+ AT_BANNER([struct alignment checker unit tests])
+ 
+-m4_define([check_structs], [$top_srcdir/build-aux/check-structs])
+-m4_define([RUN_STRUCT_CHECKER], 
+-  [AT_SKIP_IF([test $HAVE_PYTHON = no])
+-   AT_DATA([test.h], [$1
+-])
+-   AT_CHECK_UNQUOTED([$PYTHON check_structs test.h], [$2], [$3], [$4])])
++dnl m4_define([check_structs], [$top_srcdir/build-aux/check-structs])
++dnl m4_define([RUN_STRUCT_CHECKER], 
++dnl   [dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
++dnl    AT_DATA([test.h], [$1
++dnl ])
++dnl    AT_CHECK_UNQUOTED([$PYTHON check_structs test.h], [$2], [$3], [$4])])
+ 
+ AT_SETUP([check struct tail padding])
+ RUN_STRUCT_CHECKER(
+diff -r 70497f430d31 tests/daemon.at
+--- a/tests/daemon.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/daemon.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -1,10 +1,12 @@
+ AT_BANNER([daemon unit tests])
+ 
+ AT_SETUP([daemon])
+-AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
++dnl AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
+ OVSDB_INIT([db])
+-AT_CAPTURE_FILE([pid])
+-AT_CAPTURE_FILE([expected])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([expected]))
+ # Start the daemon and wait for the pidfile to get created
+ # and that its contents are the correct pid.
+ AT_CHECK([ovsdb-server --pidfile=$PWD/pid --remote=punix:socket --unixctl=$PWD/unixctl db& echo $! > expected], [0], [ignore], [ignore])
+@@ -20,12 +22,16 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --monitor])
+-AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
++dnl AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
+ OVSDB_INIT([db])
+-AT_CAPTURE_FILE([pid])
+-AT_CAPTURE_FILE([parent])
+-AT_CAPTURE_FILE([parentpid])
+-AT_CAPTURE_FILE([newpid])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([parent]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([parentpid]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([newpid]))
+ # Start the daemon and wait for the pidfile to get created.
+ AT_CHECK([ovsdb-server --monitor --pidfile=$PWD/pid --remote=punix:socket --unixctl=$PWD/unixctl db& echo $! > parent], [0], [ignore], [ignore])
+ OVS_WAIT_UNTIL([test -s pid], [kill `cat parent`])
+@@ -64,8 +70,9 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --detach])
+-AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
+-AT_CAPTURE_FILE([pid])
++dnl AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
+ OVSDB_INIT([db])
+ # Start the daemon and make sure that the pidfile exists immediately.
+ # We don't wait for the pidfile to get created because the daemon is
+@@ -81,16 +88,22 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --detach --monitor])
+-AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
++dnl AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov wrapper make pids differ
+ m4_define([CHECK], 
+   [AT_CHECK([$1], [$2], [$3], [$4], [kill `cat daemon monitor`])])
+ OVSDB_INIT([db])
+-AT_CAPTURE_FILE([daemon])
+-AT_CAPTURE_FILE([olddaemon])
+-AT_CAPTURE_FILE([newdaemon])
+-AT_CAPTURE_FILE([monitor])
+-AT_CAPTURE_FILE([newmonitor])
+-AT_CAPTURE_FILE([init])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([daemon]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([olddaemon]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([newdaemon]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([monitor]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([newmonitor]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([init]))
+ # Start the daemon and make sure that the pidfile exists immediately.
+ # We don't wait for the pidfile to get created because the daemon is
+ # supposed to do so before the parent exits.
+@@ -131,7 +144,8 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --detach startup errors])
+-AT_CAPTURE_FILE([pid])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
+ OVSDB_INIT([db])
+ AT_CHECK([ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/nonexistent/unixctl db], [1], [], [stderr])
+ AT_CHECK([grep 'ovsdb-server: could not initialize control socket' stderr],
+@@ -140,7 +154,8 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --detach --monitor startup errors])
+-AT_CAPTURE_FILE([pid])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
+ OVSDB_INIT([db])
+ AT_CHECK([ovsdb-server --detach --pidfile=$PWD/pid --monitor --unixctl=$PWD/nonexistent/unixctl db], [1], [], [stderr])
+ AT_CHECK([grep 'ovsdb-server: could not initialize control socket' stderr],
+@@ -149,7 +164,8 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --detach closes standard fds])
+-AT_CAPTURE_FILE([pid])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
+ OVSDB_INIT([db])
+ AT_CHECK([(yes; echo $? > status) | ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [stderr])
+ AT_CHECK([kill `cat pid`])
+@@ -159,7 +175,8 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([daemon --detach --monitor closes standard fds])
+-AT_CAPTURE_FILE([pid])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([pid]))
+ OVSDB_INIT([db])
+ AT_CHECK([(yes; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [stderr])
+ AT_CHECK([kill `cat pid`])
+diff -r 70497f430d31 tests/json.at
+--- a/tests/json.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/json.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -2,7 +2,8 @@
+   [AT_SETUP([$1])
+    AT_KEYWORDS([json positive])
+    AT_CHECK([printf %s "AS_ESCAPE([$2])" > input])
+-   AT_CAPTURE_FILE([input])
++   m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([input]))
+    AT_CHECK([test-json $4 input], [0], [stdout], [])
+    AT_CHECK([cat stdout], [0], [$3
+ ])
+@@ -12,7 +13,8 @@
+   [AT_SETUP([$1])
+    AT_KEYWORDS([json negative])
+    AT_CHECK([printf %s "AS_ESCAPE([$2])" > input])
+-   AT_CAPTURE_FILE([input])
++   m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([input]))
+    AT_CHECK([test-json $4 input], [1], [stdout], [])
+    AT_CHECK([[sed 's/^error: [^:]*:/error:/' < stdout]], [0], [$3
+ ])
+diff -r 70497f430d31 tests/lockfile.at
+--- a/tests/lockfile.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/lockfile.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -1,12 +1,12 @@
+ AT_BANNER([lockfile unit tests])
+ 
+-m4_define([CHECK_LOCKFILE],
+-  [AT_SETUP([m4_translit([$1], [_], [ ])])
+-   AT_KEYWORDS([lockfile])
+-   AT_CHECK([test-lockfile $1], [0], [$1: success (m4_if(
+-     [$2], [1], [$2 child], [$2 children]))
+-])
+-   AT_CLEANUP])
++dnl m4_define([CHECK_LOCKFILE],
++dnl   [AT_SETUP([m4_translit([$1], [_], [ ])])
++dnl    AT_KEYWORDS([lockfile])
++dnl    AT_CHECK([test-lockfile $1], [0], [$1: success (m4_if(
++dnl      [$2], [1], [$2 child], [$2 children]))
++dnl ])
++dnl    AT_CLEANUP])
+ 
+ CHECK_LOCKFILE([lock_and_unlock], [0])
+ CHECK_LOCKFILE([lock_and_unlock_twice], [0])
+diff -r 70497f430d31 tests/ovsdb-data.at
+--- a/tests/ovsdb-data.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/ovsdb-data.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -290,36 +290,36 @@
+ constraint violation: 11 is not in the valid range -10 to 10 (inclusive)
+ constraint violation: 123576 is not in the valid range -10 to 10 (inclusive)])
+ 
+-AT_SETUP([strings matching /(a(b)?)c?/])
+-AT_KEYWORDS([ovsdb positive])
+-if test "$HAVE_PCRE" = yes; then
+-   b_out='constraint violation: "b" does not match regular expression /(a(b)?)?c?/'
+-   bc_out='constraint violation: "bc" does not match regular expression /(a(b)?)?c?/'
+-else
+-   b_out='"b"'
+-   bc_out='"bc"'
+-fi
+-AT_CHECK_UNQUOTED(
+-  [[test-ovsdb parse-atoms '{"type": "string", "reMatch": "(a(b)?)?c?"}' \
+-    '[""]' \
+-    '["a"]' \
+-    '["ab"]' \
+-    '["abc"]' \
+-    '["ac"]' \
+-    '["b"]' \
+-    '["bc"]' \
+-    '["c"]']],
+-  [0],
+-  [[""
+-"a"
+-"ab"
+-"abc"
+-"ac"
+-$b_out
+-$bc_out
+-"c"
+-]])
+-AT_CLEANUP
++dnl AT_SETUP([strings matching /(a(b)?)c?/])
++dnl AT_KEYWORDS([ovsdb positive])
++dnl if test "$HAVE_PCRE" = yes; then
++dnl    b_out='constraint violation: "b" does not match regular expression /(a(b)?)?c?/'
++dnl    bc_out='constraint violation: "bc" does not match regular expression /(a(b)?)?c?/'
++dnl else
++dnl    b_out='"b"'
++dnl    bc_out='"bc"'
++dnl fi
++dnl AT_CHECK_UNQUOTED(
++dnl   [[test-ovsdb parse-atoms '{"type": "string", "reMatch": "(a(b)?)?c?"}' \
++dnl     '[""]' \
++dnl     '["a"]' \
++dnl     '["ab"]' \
++dnl     '["abc"]' \
++dnl     '["ac"]' \
++dnl     '["b"]' \
++dnl     '["bc"]' \
++dnl     '["c"]']],
++dnl   [0],
++dnl   [[""
++dnl "a"
++dnl "ab"
++dnl "abc"
++dnl "ac"
++dnl $b_out
++dnl $bc_out
++dnl "c"
++dnl ]])
++dnl AT_CLEANUP
+ 
+ OVSDB_CHECK_POSITIVE([strings at least 2 characters long],
+   [[parse-atoms '{"type": "string", "minLength": 2}' \
+diff -r 70497f430d31 tests/ovsdb-log.at
+--- a/tests/ovsdb-log.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/ovsdb-log.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -2,7 +2,8 @@
+ 
+ AT_SETUP([create empty, reread])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([log])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([log]))
+ AT_CHECK(
+   [test-ovsdb log-io file create], [0], 
+   [file: open successful
+@@ -17,7 +18,8 @@
+ 
+ AT_SETUP([write one, reread])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]']], [0], 
+   [[file: open successful
+@@ -34,7 +36,8 @@
+ 
+ AT_SETUP([check that create fails if file exists])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[1]']], [0], 
+   [[file: open successful
+@@ -54,7 +57,8 @@
+ 
+ AT_SETUP([write one, reread])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -75,7 +79,8 @@
+ 
+ AT_SETUP([write one, reread, append])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -105,7 +110,8 @@
+ 
+ AT_SETUP([write, reread one, overwrite])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -131,7 +137,8 @@
+ 
+ AT_SETUP([write, add corrupted data, read])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -153,7 +160,8 @@
+ 
+ AT_SETUP([write, add corrupted data, read, overwrite])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -185,7 +193,8 @@
+ 
+ AT_SETUP([write, corrupt some data, read, overwrite])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -218,7 +227,8 @@
+ 
+ AT_SETUP([write, truncate file, read, overwrite])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+@@ -251,7 +261,8 @@
+ 
+ AT_SETUP([write bad JSON, read, overwrite])
+ AT_KEYWORDS([ovsdb log])
+-AT_CAPTURE_FILE([file])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([file]))
+ AT_CHECK(
+   [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
+   [[file: open successful
+diff -r 70497f430d31 tests/ovsdb-server.at
+--- a/tests/ovsdb-server.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/ovsdb-server.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -109,8 +109,8 @@
+ m4_define([OVSDB_CHECK_EXECUTION], 
+   [AT_SETUP([$1])
+    AT_KEYWORDS([ovsdb server positive ssl $5])
+-   AT_SKIP_IF([test "$HAVE_OPENSSL" = no])
+-   AT_SKIP_IF([test "x$RANDOM" = x])
++   dnl AT_SKIP_IF([test "$HAVE_OPENSSL" = no])
++   dnl AT_SKIP_IF([test "x$RANDOM" = x])
+    AT_DATA([schema], [$2
+ ])
+    SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
+diff -r 70497f430d31 tests/ovsdb-tool.at
+--- a/tests/ovsdb-tool.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/ovsdb-tool.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -122,7 +122,8 @@
+ dnl We can't fully re-check the contents of the database log, because the
+ dnl order of the records is not predictable, but there should only be 4 lines
+ dnl in it now.
+-AT_CAPTURE_FILE([db])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([db]))
+ AT_CHECK([wc -l < db], [0], [4
+ ])
+ dnl And check that the dumped data is the same too:
+@@ -185,7 +186,8 @@
+ dnl We can't fully re-check the contents of the database log, because the
+ dnl order of the records is not predictable, but there should only be 4 lines
+ dnl in it now.
+-AT_CAPTURE_FILE([db])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([db]))
+ AT_CHECK([wc -l < db], [0], [4
+ ])
+ dnl And check that the dumped data is the same except for the removed column:
+@@ -247,7 +249,8 @@
+ dnl We can't fully re-check the contents of the database log, because the
+ dnl order of the records is not predictable, but there should only be 4 lines
+ dnl in it now.
+-AT_CAPTURE_FILE([db])
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([db]))
+ AT_CHECK([wc -l < db], [0], [4
+ ])
+ dnl And check that the dumped data is the same except for the added column:
+diff -r 70497f430d31 tests/uuid.at
+--- a/tests/uuid.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/uuid.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -32,7 +32,7 @@
+ AT_CLEANUP
+ 
+ AT_SETUP([UUID generation, parsing, serialization])
+-AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov makes this test absurdly slow
++dnl AT_SKIP_IF([test "$CHECK_LCOV" = true]) # lcov makes this test absurdly slow
+ AT_KEYWORDS([UUID])
+ AT_CHECK([
+   uuids=
+diff -r 70497f430d31 tests/vconn.at
+--- a/tests/vconn.at	Wed Feb 24 11:09:48 2010 +0000
++++ b/tests/vconn.at	Wed Feb 24 11:57:36 2010 +0000
+@@ -1,21 +1,21 @@
+-m4_define([TEST_VCONN_CLASS],
+-  [AT_BANNER([vconn library -- $1 class])
+-   m4_foreach(
+-     [testname], 
+-     [[refuse-connection], 
+-      [accept-then-close],
+-      [read-hello],
+-      [send-plain-hello],
+-      [send-long-hello],
+-      [send-echo-hello],
+-      [send-short-hello],
+-      [send-invalid-version-hello]],
+-     [AT_SETUP([$1 vconn - m4_bpatsubst(testname, [-], [ ])])
+-      m4_if([$1], [ssl], [
+-        AT_SKIP_IF([test "$HAVE_OPENSSL" = no])
+-        AT_CHECK([cp $abs_top_srcdir/tests/testpki*.pem .])])
+-      AT_CHECK([test-vconn testname $1], [0], [], [ignore])
+-      AT_CLEANUP])])
++dnl m4_define([TEST_VCONN_CLASS],
++dnl   [AT_BANNER([vconn library -- $1 class])
++dnl    m4_foreach(
++dnl      [testname], 
++dnl      [[refuse-connection], 
++dnl       [accept-then-close],
++dnl       [read-hello],
++dnl       [send-plain-hello],
++dnl       [send-long-hello],
++dnl       [send-echo-hello],
++dnl       [send-short-hello],
++dnl       [send-invalid-version-hello]],
++dnl      [AT_SETUP([$1 vconn - m4_bpatsubst(testname, [-], [ ])])
++dnl       m4_if([$1], [ssl], [
++dnl         dnl AT_SKIP_IF([test "$HAVE_OPENSSL" = no])
++dnl         AT_CHECK([cp $abs_top_srcdir/tests/testpki*.pem .])])
++dnl       AT_CHECK([test-vconn testname $1], [0], [], [ignore])
++dnl       AT_CLEANUP])])
+ 
+ TEST_VCONN_CLASS([unix])
+ TEST_VCONN_CLASS([tcp])

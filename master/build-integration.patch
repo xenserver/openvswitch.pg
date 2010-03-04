@@ -1,6 +1,6 @@
-diff -r b329a8de5f66 mk/Makefile
+diff -r dbfd988eff69 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Thu Oct 01 17:26:46 2009 +0100
++++ b/mk/Makefile	Thu Mar 04 11:56:16 2010 +0000
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r b329a8de5f66 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r b329a8de5f66 mk/openvswitch.spec.in
+diff -r dbfd988eff69 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Thu Oct 01 17:26:46 2009 +0100
-@@ -0,0 +1,107 @@
++++ b/mk/openvswitch.spec.in	Thu Mar 04 11:56:16 2010 +0000
+@@ -0,0 +1,115 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -139,6 +139,10 @@ diff -r b329a8de5f66 mk/openvswitch.spec.in
 +        xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py \
 +               $RPM_BUILD_ROOT/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
 +
++install -d -m 755 $RPM_BUILD_ROOT/usr/share/vswitch
++install -m 644 vswitchd/vswitch.ovsschema \
++         $RPM_BUILD_ROOT/usr/share/vswitch/vswitch.ovsschema
++
 +%clean
 +rm -rf %{buildroot}
 +
@@ -155,16 +159,20 @@ diff -r b329a8de5f66 mk/openvswitch.spec.in
 +%{_bindir}/ovs-dpctl
 +%{_bindir}/ovs-ofctl
 +%{_bindir}/ovs-vsctl
-+%{_bindir}/ovs-cfg-mod
++%{_bindir}/ovsdb-client
++%{_bindir}/ovsdb-tool
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
++%{_sbindir}/ovsdb-server
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyc
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyo
-+%{_mandir}/man5/ovs-vswitchd.conf.5.gz
++/usr/share/vswitch/vswitch.ovsschema
++%{_mandir}/man1/ovsdb-client.1.gz
++%{_mandir}/man1/ovsdb-tool.1.gz
++%{_mandir}/man1/ovsdb-server.1.gz
 +%{_mandir}/man8/ovs-appctl.8.gz
 +%{_mandir}/man8/ovs-brcompatd.8.gz
-+%{_mandir}/man8/ovs-cfg-mod.8.gz
 +%{_mandir}/man8/ovs-dpctl.8.gz
 +%{_mandir}/man8/ovs-ofctl.8.gz
 +%{_mandir}/man8/ovs-vsctl.8.gz

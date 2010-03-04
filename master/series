@@ -11,5 +11,5 @@ git-5379a7d3faa54dde285d5f026a15f4b1d91ed1c8.patch # logrotate: Allow logs to be
 
 # Local patches
 autoconf-2.59.patch
-build-integration.patch
 disable-incompatible-tests.patch
+build-integration.patch

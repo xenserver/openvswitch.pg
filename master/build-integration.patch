@@ -1,6 +1,6 @@
-diff -r dbfd988eff69 mk/Makefile
+diff -r 263448afccaa mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Thu Mar 04 11:56:16 2010 +0000
++++ b/mk/Makefile	Mon Mar 29 13:52:22 2010 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r dbfd988eff69 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r dbfd988eff69 mk/openvswitch.spec.in
+diff -r 263448afccaa mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Thu Mar 04 11:56:16 2010 +0000
-@@ -0,0 +1,115 @@
++++ b/mk/openvswitch.spec.in	Mon Mar 29 13:52:22 2010 +0100
+@@ -0,0 +1,117 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -113,35 +113,35 @@ diff -r dbfd988eff69 mk/openvswitch.spec.in
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/secchan.8 \
 +    $RPM_BUILD_ROOT/usr/share/openvswitch
 +
-+install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}
-+
-+touch $RPM_BUILD_ROOT/%{_sysconfdir}/ovs-vswitchd.conf
 +install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
++install -d -m 755 $RPM_BUILD_ROOT/var/xen/openvswitch
++
++install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/init.d
-+install -m 755 xenserver/etc_init.d_vswitch \
-+         $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/vswitch
++install -m 755 xenserver/etc_init.d_openvswitch \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig
-+install -m 755 xenserver/usr_share_vswitch_scripts_sysconfig.template \
-+         $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/vswitch
++install -m 755 xenserver/usr_share_openvswitch_scripts_sysconfig.template \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/sysconfig/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d
-+install -m 755 xenserver/etc_logrotate.d_vswitch \
-+         $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/vswitch
++install -m 755 xenserver/etc_logrotate.d_openvswitch \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/logrotate.d/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/xapi.d/plugins
-+install -m 755 xenserver/etc_xapi.d_plugins_vswitch-cfg-update \
-+         $RPM_BUILD_ROOT/%{_sysconfdir}/xapi.d/plugins/vswitch-cfg-update
++install -m 755 xenserver/etc_xapi.d_plugins_openvswitch-cfg-update \
++         $RPM_BUILD_ROOT/%{_sysconfdir}/xapi.d/plugins/openvswitch-cfg-update
 +
 +install -d -m 755 $RPM_BUILD_ROOT/usr/lib/xsconsole/plugins-base
 +install -m 644 \
 +        xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py \
 +               $RPM_BUILD_ROOT/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
 +
-+install -d -m 755 $RPM_BUILD_ROOT/usr/share/vswitch
++install -d -m 755 $RPM_BUILD_ROOT/usr/share/openvswitch
 +install -m 644 vswitchd/vswitch.ovsschema \
-+         $RPM_BUILD_ROOT/usr/share/vswitch/vswitch.ovsschema
++         $RPM_BUILD_ROOT/usr/share/openvswitch/vswitch.ovsschema
 +
 +%clean
 +rm -rf %{buildroot}
@@ -149,11 +149,12 @@ diff -r dbfd988eff69 mk/openvswitch.spec.in
 +%files
 +%defattr(-,root,root)
 +%doc COPYING README
-+%config %{_sysconfdir}/ovs-vswitchd.conf
-+%config %{_sysconfdir}/init.d/vswitch
-+%config %{_sysconfdir}/sysconfig/vswitch
-+%config %{_sysconfdir}/logrotate.d/vswitch
-+%{_sysconfdir}/xapi.d/plugins/vswitch-cfg-update
++%config %{_sysconfdir}/init.d/openvswitch
++%config %{_sysconfdir}/sysconfig/openvswitch
++%config %{_sysconfdir}/logrotate.d/openvswitch
++%{_sysconfdir}/xapi.d/plugins/openvswitch-cfg-update
++%dir /etc/openvswitch
++%dir /var/xen/openvswitch
 +%dir /var/lib/openvswitch
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl
@@ -167,10 +168,11 @@ diff -r dbfd988eff69 mk/openvswitch.spec.in
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyc
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyo
-+/usr/share/vswitch/vswitch.ovsschema
++/usr/share/openvswitch/vswitch.ovsschema
 +%{_mandir}/man1/ovsdb-client.1.gz
 +%{_mandir}/man1/ovsdb-tool.1.gz
 +%{_mandir}/man1/ovsdb-server.1.gz
++%{_mandir}/man5/ovs-vswitchd.conf.db.5.gz
 +%{_mandir}/man8/ovs-appctl.8.gz
 +%{_mandir}/man8/ovs-brcompatd.8.gz
 +%{_mandir}/man8/ovs-dpctl.8.gz

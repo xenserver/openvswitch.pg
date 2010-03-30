@@ -69,26 +69,28 @@ index ed3e033..fb3e6b0 100644
 -        for host in hosts:
 -            Layout.Inst().TransientBanner("Updating host %d out of %d" 
 -                    % (self.hostsUpdated + 1, self.hostsInPool))
--            session.xenapi.host.call_plugin(host, "vswitch-cfg-update", "update", {})
+-            session.xenapi.host.call_plugin(host, "openvswitch-cfg-update", "update", {})
 -            self.hostsUpdated = self.hostsUpdated + 1
 -
 -    def _updateThisServer(self, session):
 -        data = Data.Inst()
 -        host = data.host.opaqueref()
--        session.xenapi.host.call_plugin(host, "vswitch-cfg-update", "update", {})
+-        session.xenapi.host.call_plugin(host, "openvswitch-cfg-update", "update", {})
 -
 -
  class XSFeatureVSwitch:
  
      @classmethod
-@@ -291,8 +263,8 @@ class XSFeatureVSwitch:
+@@ -291,10 +263,10 @@ class XSFeatureVSwitch:
          inPane.NewLine()
          inPane.AddStatusField(Lang("ovs-vswitchd status", 20),
-                               VSwitchService.Inst("vswitch", "ovs-vswitchd").status())
+                               VSwitchService.Inst("openvswitch", "ovs-vswitchd").status())
+         inPane.AddStatusField(Lang("ovsdb-server status", 20),
+                               VSwitchService.Inst("openvswitch", "ovsdb-server").status())
 -        inPane.AddStatusField(Lang("ovs-brcompatd status", 20),
--                              VSwitchService.Inst("vswitch", "ovs-brcompatd").status())
+-                              VSwitchService.Inst("openvswitch", "ovs-brcompatd").status())
 +        #inPane.AddStatusField(Lang("ovs-brcompatd status", 20),
-+        #                      VSwitchService.Inst("vswitch", "ovs-brcompatd").status())
++        #                      VSwitchService.Inst("openvswitch", "ovs-brcompatd").status())
  
          inPane.AddKeyHelpField( {
              Lang("<Enter>") : Lang("Reconfigure"),

@@ -1,0 +1,50 @@
+diff -r 687764f7ba4f .hgignore
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/.hgignore	Mon Mar 29 10:09:27 2010 +0100
+@@ -0,0 +1,46 @@
++syntax: glob
++
++#*#
++*.a
++*.d
++*.ko
++*.la
++*.lo
++*.loT
++*.mod.c
++*.o
++*.o
++*.pyc
++*.so
++*~
++.#*
++.*.cmd
++.*.swp
++.deps
++.dirstamp
++.libs
++.tmp_versions
++/Makefile
++/Makefile.in
++/aclocal.m4
++/autom4te.cache
++/build-arch-stamp
++/build-indep-stamp
++/compile
++/config.guess
++/config.h
++/config.h.in
++/config.log
++/config.status
++/config.sub
++/configure
++/configure-stamp
++/depcomp
++/install-sh
++/missing
++/package.m4
++/stamp-h1
++Module.symvers
++TAGS
++cscope.*
++tags

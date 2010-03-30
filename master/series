@@ -1,15 +1,12 @@
 # Upstream patches from xs5.7 branch
 git-37fee735b8c14ba6e97763a726ada1b4ff699776.patch # xenserver: Use first-class pool vswitch controller configuration field
 git-0ebd7377c771ade4f929d0a4306b83e85853bfc4.patch # xenserver: Update xsconsole plugin to use first class datamodel field.
-git-723a8c3caf6fefd19c6b172426a4e872b2d0afdf.patch # xenserver: Disable brcompatd
-git-7f929c5f1f876898f6b2343b7a512c56d5c0f342.patch # xenserver: Fix init script typos that prevented turning brcompatd back on.
-git-fc72ccd85b962c243ea7cf5c674be91f4243dca9.patch # xenserver: Correct "service vswitch status" when brcompatd is disabled
 git-fcc4950b0aad972069475da4bcc39cdaee2bfd49.patch # xenserver: Improve xsconsole plugin in various ways.
 #git-95f340cb191dd52a0be28176b009b5e5bca81cd9.patch # xenserver: Improve vif hotplug script for XenServer 5.7.
-git-dde98f40a3ec6f1482383bd1d6bb3e439872806b.patch # Ensure "service vswitch status" returns appropriate error code
-git-5379a7d3faa54dde285d5f026a15f4b1d91ed1c8.patch # logrotate: Allow logs to be missing
 
 # Local patches
 autoconf-2.59.patch
 disable-incompatible-tests.patch
+hgingore
+logrotate-restart-running-only.patch
 build-integration.patch

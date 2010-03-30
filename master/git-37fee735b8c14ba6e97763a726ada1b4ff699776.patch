@@ -7,10 +7,10 @@ Date:   Wed Sep 30 11:57:20 2009 +0100
     This has been implemented in our vswitch branch to trunk so use it
     instead of the other-config key.
 
-diff --git a/xenserver/etc_xapi.d_plugins_vswitch-cfg-update b/xenserver/etc_xapi.d_plugins_vswitch-cfg-update
+diff --git a/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update b/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
 index 7472d1b..4db8cc3 100755
---- a/xenserver/etc_xapi.d_plugins_vswitch-cfg-update
-+++ b/xenserver/etc_xapi.d_plugins_vswitch-cfg-update
+--- a/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
++++ b/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
 @@ -47,7 +47,7 @@ def update(session, args):
          raise XenAPIPlugin.Failure("MORE_THAN_ONE_POOL_FOR_HOST", [])
      pool = session.xenapi.pool.get_record(pools[0])

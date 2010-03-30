@@ -1,8 +1,8 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r e242c961fd5c tests/check-structs.at
---- a/tests/check-structs.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/check-structs.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/check-structs.at
+--- a/tests/check-structs.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/check-structs.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -1,11 +1,11 @@
  AT_BANNER([struct alignment checker unit tests])
  
@@ -21,9 +21,9 @@ diff -r e242c961fd5c tests/check-structs.at
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r e242c961fd5c tests/daemon.at
---- a/tests/daemon.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/daemon.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/daemon.at
+--- a/tests/daemon.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/daemon.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -1,10 +1,12 @@
  AT_BANNER([daemon unit tests])
  
@@ -144,9 +144,9 @@ diff -r e242c961fd5c tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([(yes; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [stderr])
  AT_CHECK([kill `cat pid`])
-diff -r e242c961fd5c tests/json.at
---- a/tests/json.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/json.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/json.at
+--- a/tests/json.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/json.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -2,7 +2,8 @@
    [AT_SETUP([$1])
     AT_KEYWORDS([json positive])
@@ -167,9 +167,9 @@ diff -r e242c961fd5c tests/json.at
     AT_CHECK([test-json $4 input], [1], [stdout], [])
     AT_CHECK([[sed 's/^error: [^:]*:/error:/' < stdout]], [0], [$3
  ])
-diff -r e242c961fd5c tests/lockfile.at
---- a/tests/lockfile.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/lockfile.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/lockfile.at
+--- a/tests/lockfile.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/lockfile.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -1,12 +1,12 @@
  AT_BANNER([lockfile unit tests])
  
@@ -190,9 +190,9 @@ diff -r e242c961fd5c tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r e242c961fd5c tests/ovsdb-log.at
---- a/tests/ovsdb-log.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/ovsdb-log.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/ovsdb-log.at
+--- a/tests/ovsdb-log.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/ovsdb-log.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -2,7 +2,8 @@
  
  AT_SETUP([create empty, reread])
@@ -303,10 +303,58 @@ diff -r e242c961fd5c tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r e242c961fd5c tests/ovsdb-server.at
---- a/tests/ovsdb-server.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/ovsdb-server.at	Thu Mar 04 11:42:36 2010 +0000
-@@ -109,8 +109,8 @@
+diff -r a0f76bba50d6 tests/ovsdb-server.at
+--- a/tests/ovsdb-server.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/ovsdb-server.at	Mon Mar 29 10:20:14 2010 +0100
+@@ -92,11 +92,11 @@
+ 
+ AT_SETUP([SSL db: implementation])
+ AT_KEYWORDS([ovsdb server positive ssl $5])
+-AT_SKIP_IF([test "$HAVE_OPENSSL" = no])
+-AT_SKIP_IF([test "x$RANDOM" = x])
++dnl AT_SKIP_IF([test "$HAVE_OPENSSL" = no])
++dnl AT_SKIP_IF([test "x$RANDOM" = x])
+ SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
+ PKIDIR=$abs_top_srcdir/tests
+-AT_SKIP_IF([expr "$PKIDIR" : ".*[ 	'\"
++dnl AT_SKIP_IF([expr "$PKIDIR" : ".*[ 	'\"
+ \\]"])
+ AT_DATA([schema],
+   [[{"name": "mydb",
+@@ -137,10 +137,10 @@
+            "columns": ["private_key"]}]']], 
+   [0], [stdout], [ignore], [test ! -e pid || kill `cat pid`])
+ cat stdout >> output
+-AT_CHECK_UNQUOTED(
+-  [perl $srcdir/uuidfilt.pl output], [0], 
+-  [[[{"rows":[{"private_key":"$PKIDIR/testpki-privkey2.pem"}]}]
+-]], [ignore], [test ! -e pid || kill `cat pid`])
++dnl AT_CHECK_UNQUOTED(
++dnl   [perl $srcdir/uuidfilt.pl output], [0], 
++dnl   [[[{"rows":[{"private_key":"$PKIDIR/testpki-privkey2.pem"}]}]
++dnl ]], [ignore], [test ! -e pid || kill `cat pid`])
+ OVSDB_SERVER_SHUTDOWN
+ AT_CLEANUP
+ 
+@@ -151,7 +151,7 @@
+ touch .db.~lock~
+ AT_CHECK([ovsdb-tool create db schema], [0], [ignore], [ignore])
+ AT_CHECK([ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/unixctl --remote=punix:socket --log-file=$PWD/ovsdb-server.log db], [0], [ignore], [ignore])
+-AT_CAPTURE_FILE([ovsdb-server.log])
++dnl AT_CAPTURE_FILE([ovsdb-server.log])
+ dnl Do a bunch of random transactions that put crap in the database log.
+ AT_CHECK(
+   [[for pair in 'zero 0' 'one 1' 'two 2' 'three 3' 'four 4' 'five 5'; do
+@@ -220,7 +220,7 @@
+ dnl We can't fully re-check the contents of the database log, because the
+ dnl order of the records is not predictable, but there should only be 4 lines
+ dnl in it now.
+-AT_CAPTURE_FILE([db])
++dnl AT_CAPTURE_FILE([db])
+ AT_CHECK([wc -l < db], [0], [4
+ ], [], [test ! -e pid || kill `cat pid`])
+ dnl And check that the dumped data is the same too:
+@@ -280,8 +280,8 @@
  m4_define([OVSDB_CHECK_EXECUTION], 
    [AT_SETUP([$1])
     AT_KEYWORDS([ovsdb server positive ssl $5])
@@ -317,9 +365,9 @@ diff -r e242c961fd5c tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r e242c961fd5c tests/ovsdb-tool.at
---- a/tests/ovsdb-tool.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/ovsdb-tool.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/ovsdb-tool.at
+--- a/tests/ovsdb-tool.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/ovsdb-tool.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -122,7 +122,8 @@
  dnl We can't fully re-check the contents of the database log, because the
  dnl order of the records is not predictable, but there should only be 4 lines
@@ -350,9 +398,9 @@ diff -r e242c961fd5c tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r e242c961fd5c tests/uuid.at
---- a/tests/uuid.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/uuid.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/uuid.at
+--- a/tests/uuid.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/uuid.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -32,7 +32,7 @@
  AT_CLEANUP
  
@@ -362,9 +410,9 @@ diff -r e242c961fd5c tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r e242c961fd5c tests/vconn.at
---- a/tests/vconn.at	Thu Mar 04 11:41:45 2010 +0000
-+++ b/tests/vconn.at	Thu Mar 04 11:42:36 2010 +0000
+diff -r a0f76bba50d6 tests/vconn.at
+--- a/tests/vconn.at	Mon Mar 29 10:03:07 2010 +0100
++++ b/tests/vconn.at	Mon Mar 29 10:20:14 2010 +0100
 @@ -1,21 +1,21 @@
 -m4_define([TEST_VCONN_CLASS],
 -  [AT_BANNER([vconn library -- $1 class])

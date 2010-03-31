@@ -1,6 +1,6 @@
-diff -r 263448afccaa mk/Makefile
+diff -r 2d8c9443ea93 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Mon Mar 29 13:52:22 2010 +0100
++++ b/mk/Makefile	Wed Mar 31 09:17:36 2010 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 263448afccaa mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 263448afccaa mk/openvswitch.spec.in
+diff -r 2d8c9443ea93 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Mon Mar 29 13:52:22 2010 +0100
-@@ -0,0 +1,117 @@
++++ b/mk/openvswitch.spec.in	Wed Mar 31 09:17:36 2010 +0100
+@@ -0,0 +1,119 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -114,6 +114,7 @@ diff -r 263448afccaa mk/openvswitch.spec.in
 +    $RPM_BUILD_ROOT/usr/share/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
++install -d -m 755 $RPM_BUILD_ROOT/var/log/openvswitch
 +install -d -m 755 $RPM_BUILD_ROOT/var/xen/openvswitch
 +
 +install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/openvswitch
@@ -156,6 +157,7 @@ diff -r 263448afccaa mk/openvswitch.spec.in
 +%dir /etc/openvswitch
 +%dir /var/xen/openvswitch
 +%dir /var/lib/openvswitch
++%dir /var/log/openvswitch
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl
 +%{_bindir}/ovs-ofctl

@@ -1,6 +1,6 @@
-diff -r 2d8c9443ea93 mk/Makefile
+diff -r d40baa22bfd8 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Wed Mar 31 09:17:36 2010 +0100
++++ b/mk/Makefile	Sat May 01 23:12:35 2010 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 2d8c9443ea93 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 2d8c9443ea93 mk/openvswitch.spec.in
+diff -r d40baa22bfd8 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Wed Mar 31 09:17:36 2010 +0100
-@@ -0,0 +1,119 @@
++++ b/mk/openvswitch.spec.in	Sat May 01 23:12:35 2010 +0100
+@@ -0,0 +1,124 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -112,6 +112,9 @@ diff -r 2d8c9443ea93 mk/openvswitch.spec.in
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-pki.8 \
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/secchan.8 \
 +    $RPM_BUILD_ROOT/usr/share/openvswitch
++
++install -d -m 755 $RPM_BUILD_ROOT/%{_sbindir}
++install -m 755 xenserver/ovs-xenserverd $RPM_BUILD_ROOT/%{_sbindir}
 +
 +install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
 +install -d -m 755 $RPM_BUILD_ROOT/var/log/openvswitch
@@ -166,6 +169,7 @@ diff -r 2d8c9443ea93 mk/openvswitch.spec.in
 +%{_bindir}/ovsdb-tool
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
++%{_sbindir}/ovs-xenserverd
 +%{_sbindir}/ovsdb-server
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
 +/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyc
@@ -181,5 +185,6 @@ diff -r 2d8c9443ea93 mk/openvswitch.spec.in
 +%{_mandir}/man8/ovs-ofctl.8.gz
 +%{_mandir}/man8/ovs-vsctl.8.gz
 +%{_mandir}/man8/ovs-vswitchd.8.gz
++%{_mandir}/man8/ovs-xenserverd.8.gz
 +
 +%changelog

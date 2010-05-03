@@ -1,12 +1,5 @@
-# Upstream patches from xs5.7 branch
-git-37fee735b8c14ba6e97763a726ada1b4ff699776.patch # xenserver: Use first-class pool vswitch controller configuration field
-git-0ebd7377c771ade4f929d0a4306b83e85853bfc4.patch # xenserver: Update xsconsole plugin to use first class datamodel field.
-git-fcc4950b0aad972069475da4bcc39cdaee2bfd49.patch # xenserver: Improve xsconsole plugin in various ways.
-#git-95f340cb191dd52a0be28176b009b5e5bca81cd9.patch # xenserver: Improve vif hotplug script for XenServer 5.7.
-
 # Local patches
 autoconf-2.59.patch
 disable-incompatible-tests.patch
-hgingore
-logrotate-restart-running-only.patch
+hgignore
 build-integration.patch

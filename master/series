@@ -1,4 +1,6 @@
 bridge-Avoid-calling-iface_is_internal-before-iface-.patch
+git-7dab724e7d49b3fbaeed67b9d3d22378996a604e.patch # Fix issue with "strict" deletion of flows
+git-7b99db051b2560290a6e1bc123f1b4e760226faa.patch # bridge: Fix double-free in sFlow configuration.
 
 # Local patches
 autoconf-2.59.patch

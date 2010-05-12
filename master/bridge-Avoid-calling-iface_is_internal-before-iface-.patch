@@ -1,0 +1,40 @@
+From 494da8de6b311d7aac13463063676891f2ef61e2 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 11 May 2010 10:20:20 -0700
+Subject: [PATCH] bridge: Avoid calling iface_is_internal() before iface is fully created.
+
+When creating an interface we need to check whether it is internal.
+However, the function iface_is_internal() does a lookup on the
+interface name but we haven't added it to the set of ports yet.  This
+instead uses an explicit test that avoids that problem.
+
+This problem has already been fixed in a different way on "master" by
+commit 2457b2 "bridge: Add iface to hash table before calling
+iface_is_internal()" but that fix does not apply to the DVS phase 2 code
+used by Citrix.
+
+Diagnosed-by: Ian Campbell <ian.campbell@citrix.com>.
+NIC-78
+---
+ vswitchd/bridge.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/vswitchd/bridge.c b/vswitchd/bridge.c
+index 35267a6..1b6a037 100644
+--- a/vswitchd/bridge.c
++++ b/vswitchd/bridge.c
+@@ -3611,7 +3611,10 @@ iface_create(struct port *port, const struct ovsrec_interface *if_cfg)
+     iface->cfg = if_cfg;
+ 
+     /* Attempt to create the network interface in case it doesn't exist yet. */
+-    if (!iface_is_internal(port->bridge, iface->name)) {
++    if (!strcmp(iface->name, port->bridge->name)
++        || !strcmp(if_cfg->type, "internal")) {
++        /* It's an internal interface that will be created later. */
++    } else {
+         error = set_up_iface(if_cfg, iface, true);
+         if (error) {
+             VLOG_WARN("could not create iface %s: %s", iface->name,
+-- 
+1.7.1
+

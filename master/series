@@ -1,3 +1,5 @@
+bridge-Avoid-calling-iface_is_internal-before-iface-.patch
+
 # Local patches
 autoconf-2.59.patch
 disable-incompatible-tests.patch

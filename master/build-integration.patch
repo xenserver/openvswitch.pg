@@ -1,6 +1,6 @@
-diff -r d40baa22bfd8 mk/Makefile
+diff -r 506821649973 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Sat May 01 23:12:35 2010 +0100
++++ b/mk/Makefile	Thu May 20 09:26:21 2010 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r d40baa22bfd8 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r d40baa22bfd8 mk/openvswitch.spec.in
+diff -r 506821649973 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Sat May 01 23:12:35 2010 +0100
-@@ -0,0 +1,124 @@
++++ b/mk/openvswitch.spec.in	Thu May 20 09:26:21 2010 +0100
+@@ -0,0 +1,116 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -138,11 +138,6 @@ diff -r d40baa22bfd8 mk/openvswitch.spec.in
 +install -m 755 xenserver/etc_xapi.d_plugins_openvswitch-cfg-update \
 +         $RPM_BUILD_ROOT/%{_sysconfdir}/xapi.d/plugins/openvswitch-cfg-update
 +
-+install -d -m 755 $RPM_BUILD_ROOT/usr/lib/xsconsole/plugins-base
-+install -m 644 \
-+        xenserver/usr_lib_xsconsole_plugins-base_XSFeatureVSwitch.py \
-+               $RPM_BUILD_ROOT/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
-+
 +install -d -m 755 $RPM_BUILD_ROOT/usr/share/openvswitch
 +install -m 644 vswitchd/vswitch.ovsschema \
 +         $RPM_BUILD_ROOT/usr/share/openvswitch/vswitch.ovsschema
@@ -171,9 +166,6 @@ diff -r d40baa22bfd8 mk/openvswitch.spec.in
 +%{_sbindir}/ovs-vswitchd
 +%{_sbindir}/ovs-xenserverd
 +%{_sbindir}/ovsdb-server
-+/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
-+/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyc
-+/usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyo
 +/usr/share/openvswitch/vswitch.ovsschema
 +%{_mandir}/man1/ovsdb-client.1.gz
 +%{_mandir}/man1/ovsdb-tool.1.gz

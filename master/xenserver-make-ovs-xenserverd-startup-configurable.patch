@@ -1,0 +1,80 @@
+From c5cbd87f87d924933f0fd3eb6b1885e4bf7352be Mon Sep 17 00:00:00 2001
+From: Ian Campbell <ian.campbell@citrix.com>
+Date: Thu, 3 Jun 2010 15:28:56 +0100
+Subject: [PATCH] xenserver: make ovs-xenserverd startup configurable and disable it for 5.6.0 onwards.
+
+In my testing with XenServer 5.6.810 without ovs-xenserverd the
+vswitch bridge external-id network-uuid field was always kept up to
+date over both pool join and pool eject. I believe this is because
+xapi is restarted on both pool join and pool eject and on restart all
+PIFs are plugged again. This causes the vswitch field to be updated,
+either via a call to interface reconfigure or via an explicit
+ovs-vsctl call in the case of internal networks.
+
+I think the only reason this daemon would still be required with
+XenServer 5.5 is that the explicit call to ovs-vsctl for internl
+networks is not present there.
+
+Signed-off-by: Ian Campbell <ian.campbell@citrix.com>
+---
+ xenserver/etc_init.d_openvswitch                   |    9 +++++++--
+ ...sr_share_openvswitch_scripts_sysconfig.template |    5 +++++
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/xenserver/etc_init.d_openvswitch b/xenserver/etc_init.d_openvswitch
+index c6cc66b..ce75480 100755
+--- a/xenserver/etc_init.d_openvswitch
++++ b/xenserver/etc_init.d_openvswitch
+@@ -35,10 +35,12 @@ if test "$PRODUCT_VERSION" = "5.5.0"; then
+     # XenServer 5.5.0 needs ovs-brcompatd and /proc/net simulation.
+     : ${ENABLE_BRCOMPAT:=y}
+     : ${ENABLE_FAKE_PROC_NET:=y}
++    : ${ENABLE_XENSERVERD:=y}
+ else
+     # Later versions don't need them.
+     : ${ENABLE_BRCOMPAT:=n}
+     : ${ENABLE_FAKE_PROC_NET:=n}
++    : ${ENABLE_XENSERVERD:=n}
+ fi
+ : ${ENABLE_MONITOR:=y}
+ : ${FORCE_COREFILES:=y}
+@@ -343,7 +345,9 @@ function start {
+     if [ "${ENABLE_BRCOMPAT}" = "y" ] ; then
+         start_brcompatd
+     fi
+-    start_xenserverd
++    if [ "${ENABLE_XENSERVERD}" = "y" ] ; then
++        start_xenserverd
++    fi
+     touch /var/lock/subsys/openvswitch
+ }
+ 
+@@ -385,7 +389,8 @@ case "$1" in
+         status -p "$VSWITCHD_PIDFILE" ovs-vswitchd &&
+         (test "$ENABLE_BRCOMPAT" != "y" || 
+             status -p "$BRCOMPATD_PIDFILE" ovs-brcompatd) &&
+-        status -p "$XENSERVERD_PIDFILE" ovs-xenserverd
++        (test "$ENABLE_XENSERVERD" != "y" ||
++            status -p "$XENSERVERD_PIDFILE" ovs-xenserverd)
+         ;;
+     version)
+         /usr/sbin/ovsdb-server -V
+diff --git a/xenserver/usr_share_openvswitch_scripts_sysconfig.template b/xenserver/usr_share_openvswitch_scripts_sysconfig.template
+index 6492931..e58dfce 100644
+--- a/xenserver/usr_share_openvswitch_scripts_sysconfig.template
++++ b/xenserver/usr_share_openvswitch_scripts_sysconfig.template
+@@ -21,6 +21,11 @@
+ #    and not required and not enabled by default for later versions.
+ # ENABLE_FAKE_PROC_NET=?
+ 
++# ENABLE_XENSERVERD: If 'y' then monitor system for changes in pool membership
++#    This is required and enabled by default for XenServer 5.5.0,
++#    and not required and not enabled by default for later versions.
++# ENABLE_XENSERVERD=?
++
+ # ENABLE_MONITOR: If 'y' then monitor daemon processes and restart them
+ #    if they die due to an error signal.
+ # ENABLE_MONITOR=y
+-- 
+1.5.6.5
+

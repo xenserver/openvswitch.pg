@@ -453,3 +453,38 @@ diff -r a0f76bba50d6 tests/vconn.at
  
  TEST_VCONN_CLASS([unix])
  TEST_VCONN_CLASS([tcp])
+diff -r d3f8caa60ba2 tests/classifier.at
+--- a/tests/classifier.at	Fri Jun 04 09:59:46 2010 +0100
++++ b/tests/classifier.at	Fri Jun 04 10:06:11 2010 +0100
+@@ -1,16 +1,16 @@
+ AT_BANNER([flow classifier unit tests])
+-m4_foreach(
+-  [testname],
+-  [[empty],
+-   [destroy-null],
+-   [single-rule],
+-   [rule-replacement],
+-   [two-rules-in-one-bucket],
+-   [two-rules-in-one-table],
+-   [two-rules-in-different-tables],
+-   [many-rules-in-one-bucket],
+-   [many-rules-in-one-table],
+-   [many-rules-in-different-tables]],
+-  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
+-   AT_CHECK([test-classifier testname], [0], [], [])
+-   AT_CLEANUP])])
++dnl m4_foreach(
++dnl   [testname],
++dnl   [[empty],
++dnl    [destroy-null],
++dnl    [single-rule],
++dnl    [rule-replacement],
++dnl    [two-rules-in-one-bucket],
++dnl    [two-rules-in-one-table],
++dnl    [two-rules-in-different-tables],
++dnl    [many-rules-in-one-bucket],
++dnl    [many-rules-in-one-table],
++dnl    [many-rules-in-different-tables]],
++dnl   [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
++dnl    AT_CHECK([test-classifier testname], [0], [], [])
++dnl    AT_CLEANUP])])

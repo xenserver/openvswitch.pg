@@ -1,0 +1,41 @@
+From 8b75073b0c677f66a1621a67a0df9e6f55309ea9 Mon Sep 17 00:00:00 2001
+From: Jesse Gross <jesse@nicira.com>
+Date: Thu, 27 May 2010 16:35:45 -0700
+Subject: [PATCH] debian: Fix version number check for changelog.
+
+The test to see if the current version is present in the Debian
+changelog wasn't properly quoted so we would add a new entry every
+time configure was run.
+---
+ build-aux/update-debian-changelog |    2 +-
+ debian/changelog                  |    4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/build-aux/update-debian-changelog b/build-aux/update-debian-changelog
+index 2007d4f..dfb84fc 100755
+--- a/build-aux/update-debian-changelog
++++ b/build-aux/update-debian-changelog
+@@ -18,7 +18,7 @@ if test ! -e "$CHANGELOG"; then
+     exit 1
+ fi
+ 
+-if grep '($(VERSION))' debian/changelog >/dev/null 2>&1; then
++if grep '('$VERSION')' debian/changelog >/dev/null 2>&1; then
+     :
+ else
+     echo "Adding change log record for $VERSION to $CHANGELOG"
+diff --git a/debian/changelog b/debian/changelog
+index 9608830..945f65d 100644
+--- a/debian/changelog
++++ b/debian/changelog
+@@ -1,5 +1,5 @@
+ openvswitch (1.0.0) unstable; urgency=low
+ 
+-  * Development version.
++  * New upstream version.
+ 
+- -- Ben Pfaff <blp@nicira.com>  Tue, 15 Dec 2009 11:00:11 -0800
++ -- Open vSwitch team <dev@openvswitch.org>  Mon, 17 May 2010 10:36:00 +0000
+-- 
+1.5.6.5
+

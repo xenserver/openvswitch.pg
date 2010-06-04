@@ -1,6 +1,6 @@
-From c5cbd87f87d924933f0fd3eb6b1885e4bf7352be Mon Sep 17 00:00:00 2001
+From b33c0ddb28655b5cc0dd851d3e26829a961c0e3d Mon Sep 17 00:00:00 2001
 From: Ian Campbell <ian.campbell@citrix.com>
-Date: Thu, 3 Jun 2010 15:28:56 +0100
+Date: Thu, 3 Jun 2010 15:35:51 +0100
 Subject: [PATCH] xenserver: make ovs-xenserverd startup configurable and disable it for 5.6.0 onwards.
 
 In my testing with XenServer 5.6.810 without ovs-xenserverd the

@@ -1,6 +1,6 @@
-diff -r 506821649973 mk/Makefile
+diff -r fbe90b25a55d mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Thu May 20 09:26:21 2010 +0100
++++ b/mk/Makefile	Fri Jun 04 11:18:36 2010 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 506821649973 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 506821649973 mk/openvswitch.spec.in
+diff -r fbe90b25a55d mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Thu May 20 09:26:21 2010 +0100
-@@ -0,0 +1,116 @@
++++ b/mk/openvswitch.spec.in	Fri Jun 04 11:18:36 2010 +0100
+@@ -0,0 +1,119 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -141,6 +141,8 @@ diff -r 506821649973 mk/openvswitch.spec.in
 +install -d -m 755 $RPM_BUILD_ROOT/usr/share/openvswitch
 +install -m 644 vswitchd/vswitch.ovsschema \
 +         $RPM_BUILD_ROOT/usr/share/openvswitch/vswitch.ovsschema
++install -m 755 xenserver/usr_share_openvswitch_scripts_refresh-network-uuids \
++               $RPM_BUILD_ROOT/usr/share/openvswitch/scripts/refresh-network-uuids
 +
 +%clean
 +rm -rf %{buildroot}
@@ -167,6 +169,7 @@ diff -r 506821649973 mk/openvswitch.spec.in
 +%{_sbindir}/ovs-xenserverd
 +%{_sbindir}/ovsdb-server
 +/usr/share/openvswitch/vswitch.ovsschema
++/usr/share/openvswitch/scripts/refresh-network-uuids
 +%{_mandir}/man1/ovsdb-client.1.gz
 +%{_mandir}/man1/ovsdb-tool.1.gz
 +%{_mandir}/man1/ovsdb-server.1.gz

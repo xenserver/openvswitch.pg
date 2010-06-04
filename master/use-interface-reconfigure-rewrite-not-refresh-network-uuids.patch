@@ -1,0 +1,19 @@
+xenserver: call "interface-reconfigure rewrite" instead of refresh-network-uuids
+
+Signed-off-by: Ian Campbell <ian.campbell@citrix.com>
+
+diff -r bfe32b419178 xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
+--- a/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update	Fri Jun 04 13:26:27 2010 +0100
++++ b/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update	Fri Jun 04 16:43:21 2010 +0100
+@@ -40,9 +40,9 @@
+ 
+ def update(session, args):
+     # Refresh bridge network UUIDs in case this host joined or left a pool.
+-    script = "/usr/share/openvswitch/scripts/refresh-network-uuids"
++    script = "/opt/xensource/libexec/interface-reconfigure"
+     try:
+-        retval = subprocess.call(script)
++        retval = subprocess.call([script, "rewrite"])
+         if retval != 0:
+             syslog.syslog("%s exited with status %d" % (script, retval))
+     except OSError, e:

@@ -4,6 +4,7 @@ xenserver-make-ovs-xenserverd-startup-configurable.patch
 
 # patches proposed upstream
 call-refresh-network-uuids-from-openvswitch-cfg-update-plugin.patch
+use-interface-reconfigure-rewrite-not-refresh-network-uuids.patch
 
 # Local patches
 autoconf-2.59.patch

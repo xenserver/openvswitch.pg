@@ -6,6 +6,8 @@ xenserver-make-ovs-xenserverd-startup-configurable.patch
 call-refresh-network-uuids-from-openvswitch-cfg-update-plugin.patch
 use-interface-reconfigure-rewrite-not-refresh-network-uuids.patch
 
+xenserver-correct-status-when-not-in-vswitch-mode.patch
+
 # Local patches
 autoconf-2.59.patch
 disable-incompatible-tests.patch

@@ -1,0 +1,16 @@
+diff -r a779af6fe2db xenserver/etc_init.d_openvswitch
+--- a/xenserver/etc_init.d_openvswitch	Mon Jun 14 11:36:53 2010 +0100
++++ b/xenserver/etc_init.d_openvswitch	Mon Jun 14 11:41:16 2010 +0100
+@@ -27,7 +27,11 @@
+ NETWORK_MODE=$(cat /etc/xensource/network.conf)
+ if test "$NETWORK_MODE" = bridge; then
+     echo "Open vSwitch disabled (/etc/xensource/network.conf is 'bridge')" >&2
+-    exit 0
++    if [ "$1" = "status" ] ; then
++	exit 1
++    else
++	exit 0
++    fi
+ fi
+ 
+ # General config variables in /etc/sysconfig/openvswitch

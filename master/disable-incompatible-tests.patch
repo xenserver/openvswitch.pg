@@ -1,8 +1,8 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r a0f76bba50d6 tests/check-structs.at
---- a/tests/check-structs.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/check-structs.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/check-structs.at
+--- a/tests/check-structs.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/check-structs.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -1,11 +1,11 @@
  AT_BANNER([struct alignment checker unit tests])
  
@@ -21,9 +21,44 @@ diff -r a0f76bba50d6 tests/check-structs.at
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r a0f76bba50d6 tests/daemon.at
---- a/tests/daemon.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/daemon.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/classifier.at
+--- a/tests/classifier.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/classifier.at	Wed Jun 30 12:14:34 2010 +0100
+@@ -1,16 +1,16 @@
+ AT_BANNER([flow classifier unit tests])
+-m4_foreach(
+-  [testname],
+-  [[empty],
+-   [destroy-null],
+-   [single-rule],
+-   [rule-replacement],
+-   [two-rules-in-one-bucket],
+-   [two-rules-in-one-table],
+-   [two-rules-in-different-tables],
+-   [many-rules-in-one-bucket],
+-   [many-rules-in-one-table],
+-   [many-rules-in-different-tables]],
+-  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
+-   AT_CHECK([test-classifier testname], [0], [], [])
+-   AT_CLEANUP])])
++dnl m4_foreach(
++dnl   [testname],
++dnl   [[empty],
++dnl    [destroy-null],
++dnl    [single-rule],
++dnl    [rule-replacement],
++dnl    [two-rules-in-one-bucket],
++dnl    [two-rules-in-one-table],
++dnl    [two-rules-in-different-tables],
++dnl    [many-rules-in-one-bucket],
++dnl    [many-rules-in-one-table],
++dnl    [many-rules-in-different-tables]],
++dnl   [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
++dnl    AT_CHECK([test-classifier testname], [0], [], [])
++dnl    AT_CLEANUP])])
+diff -r 685e3433eb2a tests/daemon.at
+--- a/tests/daemon.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/daemon.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -1,10 +1,12 @@
  AT_BANNER([daemon unit tests])
  
@@ -124,29 +159,41 @@ diff -r a0f76bba50d6 tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([ovsdb-server --detach --pidfile=$PWD/pid --monitor --unixctl=$PWD/nonexistent/unixctl db], [1], [], [stderr])
  AT_CHECK([grep 'ovsdb-server: could not initialize control socket' stderr],
-@@ -149,7 +164,8 @@
+@@ -149,9 +164,12 @@
  AT_CLEANUP
  
  AT_SETUP([daemon --detach closes standard fds])
 -AT_CAPTURE_FILE([pid])
+-AT_CAPTURE_FILE([status])
+-AT_CAPTURE_FILE([stderr])
 +m4_ifdef([AT_CAPTURE_FILE],
 +AT_CAPTURE_FILE([pid]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([status]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([stderr]))
  OVSDB_INIT([db])
- AT_CHECK([(yes; echo $? > status) | ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [stderr])
+ AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-@@ -159,7 +175,8 @@
+@@ -169,9 +187,12 @@
  AT_CLEANUP
  
  AT_SETUP([daemon --detach --monitor closes standard fds])
 -AT_CAPTURE_FILE([pid])
+-AT_CAPTURE_FILE([status])
+-AT_CAPTURE_FILE([stderr])
 +m4_ifdef([AT_CAPTURE_FILE],
 +AT_CAPTURE_FILE([pid]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([status]))
++m4_ifdef([AT_CAPTURE_FILE],
++AT_CAPTURE_FILE([stderr]))
  OVSDB_INIT([db])
- AT_CHECK([(yes; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [stderr])
+ AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r a0f76bba50d6 tests/json.at
---- a/tests/json.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/json.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/json.at
+--- a/tests/json.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/json.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -2,7 +2,8 @@
    [AT_SETUP([$1])
     AT_KEYWORDS([json positive])
@@ -167,9 +214,9 @@ diff -r a0f76bba50d6 tests/json.at
     AT_CHECK([test-json $4 input], [1], [stdout], [])
     AT_CHECK([[sed 's/^error: [^:]*:/error:/' < stdout]], [0], [$3
  ])
-diff -r a0f76bba50d6 tests/lockfile.at
---- a/tests/lockfile.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/lockfile.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/lockfile.at
+--- a/tests/lockfile.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/lockfile.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -1,12 +1,12 @@
  AT_BANNER([lockfile unit tests])
  
@@ -190,9 +237,9 @@ diff -r a0f76bba50d6 tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r a0f76bba50d6 tests/ovsdb-log.at
---- a/tests/ovsdb-log.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/ovsdb-log.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/ovsdb-log.at
+--- a/tests/ovsdb-log.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/ovsdb-log.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -2,7 +2,8 @@
  
  AT_SETUP([create empty, reread])
@@ -303,9 +350,9 @@ diff -r a0f76bba50d6 tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r a0f76bba50d6 tests/ovsdb-server.at
---- a/tests/ovsdb-server.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/ovsdb-server.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/ovsdb-server.at
+--- a/tests/ovsdb-server.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/ovsdb-server.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -92,11 +92,11 @@
  
  AT_SETUP([SSL db: implementation])
@@ -365,9 +412,9 @@ diff -r a0f76bba50d6 tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r a0f76bba50d6 tests/ovsdb-tool.at
---- a/tests/ovsdb-tool.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/ovsdb-tool.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/ovsdb-tool.at
+--- a/tests/ovsdb-tool.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/ovsdb-tool.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -122,7 +122,8 @@
  dnl We can't fully re-check the contents of the database log, because the
  dnl order of the records is not predictable, but there should only be 4 lines
@@ -398,9 +445,9 @@ diff -r a0f76bba50d6 tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r a0f76bba50d6 tests/uuid.at
---- a/tests/uuid.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/uuid.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/uuid.at
+--- a/tests/uuid.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/uuid.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -32,7 +32,7 @@
  AT_CLEANUP
  
@@ -410,9 +457,9 @@ diff -r a0f76bba50d6 tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r a0f76bba50d6 tests/vconn.at
---- a/tests/vconn.at	Mon Mar 29 10:03:07 2010 +0100
-+++ b/tests/vconn.at	Mon Mar 29 10:20:14 2010 +0100
+diff -r 685e3433eb2a tests/vconn.at
+--- a/tests/vconn.at	Wed Jun 30 12:12:06 2010 +0100
++++ b/tests/vconn.at	Wed Jun 30 12:14:34 2010 +0100
 @@ -1,21 +1,21 @@
 -m4_define([TEST_VCONN_CLASS],
 -  [AT_BANNER([vconn library -- $1 class])
@@ -453,38 +500,3 @@ diff -r a0f76bba50d6 tests/vconn.at
  
  TEST_VCONN_CLASS([unix])
  TEST_VCONN_CLASS([tcp])
-diff -r d3f8caa60ba2 tests/classifier.at
---- a/tests/classifier.at	Fri Jun 04 09:59:46 2010 +0100
-+++ b/tests/classifier.at	Fri Jun 04 10:06:11 2010 +0100
-@@ -1,16 +1,16 @@
- AT_BANNER([flow classifier unit tests])
--m4_foreach(
--  [testname],
--  [[empty],
--   [destroy-null],
--   [single-rule],
--   [rule-replacement],
--   [two-rules-in-one-bucket],
--   [two-rules-in-one-table],
--   [two-rules-in-different-tables],
--   [many-rules-in-one-bucket],
--   [many-rules-in-one-table],
--   [many-rules-in-different-tables]],
--  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
--   AT_CHECK([test-classifier testname], [0], [], [])
--   AT_CLEANUP])])
-+dnl m4_foreach(
-+dnl   [testname],
-+dnl   [[empty],
-+dnl    [destroy-null],
-+dnl    [single-rule],
-+dnl    [rule-replacement],
-+dnl    [two-rules-in-one-bucket],
-+dnl    [two-rules-in-one-table],
-+dnl    [two-rules-in-different-tables],
-+dnl    [many-rules-in-one-bucket],
-+dnl    [many-rules-in-one-table],
-+dnl    [many-rules-in-different-tables]],
-+dnl   [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
-+dnl    AT_CHECK([test-classifier testname], [0], [], [])
-+dnl    AT_CLEANUP])])

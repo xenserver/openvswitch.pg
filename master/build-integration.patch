@@ -1,6 +1,6 @@
-diff -r fbe90b25a55d mk/Makefile
+diff -r db6873bb7383 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Fri Jun 04 13:26:27 2010 +0100
++++ b/mk/Makefile	Wed Jun 30 12:16:41 2010 +0100
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r fbe90b25a55d mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r fbe90b25a55d mk/openvswitch.spec.in
+diff -r db6873bb7383 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Fri Jun 04 13:26:27 2010 +0100
-@@ -0,0 +1,121 @@
++++ b/mk/openvswitch.spec.in	Wed Jun 30 12:16:41 2010 +0100
+@@ -0,0 +1,117 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -112,9 +112,6 @@ diff -r fbe90b25a55d mk/openvswitch.spec.in
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-pki.8 \
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/secchan.8 \
 +    $RPM_BUILD_ROOT/usr/share/openvswitch
-+
-+install -d -m 755 $RPM_BUILD_ROOT/%{_sbindir}
-+install -m 755 xenserver/ovs-xenserverd $RPM_BUILD_ROOT/%{_sbindir}
 +
 +install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
 +install -d -m 755 $RPM_BUILD_ROOT/var/log/openvswitch
@@ -168,7 +165,6 @@ diff -r fbe90b25a55d mk/openvswitch.spec.in
 +%{_bindir}/ovsdb-tool
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
-+%{_sbindir}/ovs-xenserverd
 +%{_sbindir}/ovsdb-server
 +/usr/share/openvswitch/vswitch.ovsschema
 +/usr/share/openvswitch/scripts/refresh-network-uuids

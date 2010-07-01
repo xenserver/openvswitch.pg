@@ -1,12 +1,8 @@
 # additional patches from upstream
-debian-Fix-version-number-check-for-changelog.patch
-xenserver-make-ovs-xenserverd-startup-configurable.patch
 
 # patches proposed upstream
-call-refresh-network-uuids-from-openvswitch-cfg-update-plugin.patch
-use-interface-reconfigure-rewrite-not-refresh-network-uuids.patch
-
 xenserver-correct-status-when-not-in-vswitch-mode.patch
+debian-changelog
 
 # Local patches
 autoconf-2.59.patch

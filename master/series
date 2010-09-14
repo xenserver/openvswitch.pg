@@ -1,13 +1,9 @@
-REVERT-bridge-Implement-basic-periodic-update-of-interface-statistics.patch
-# additional patches from upstream
-kill-bond-slaves-dhclients-when-bringing-up-bond-master.patch
-
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch
-debian-changelog
 
 # Local patches
 autoconf-2.59.patch
 disable-incompatible-tests.patch
+python-uuid.patch
 hgignore
 build-integration.patch

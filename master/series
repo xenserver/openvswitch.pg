@@ -12,3 +12,8 @@ build-integration.patch
 0003-datapath-Increase-maximum-number-of-actions-per-flow.patch
 0004-datapath-Check-IS_ERR-in-do_execute.patch
 0006-ovs-vsctl-Remove-default-timeout.patch
+
+# NIC-263
+0010-xenserver-Change-license-of-xsconsole-plugin-to-GPLv.patch
+0011-xenserver-Add-explicit-license-to-refresh-xs-network.patch
+0012-xenserver-Add-license-to-uuid.py.patch

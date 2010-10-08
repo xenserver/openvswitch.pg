@@ -7,3 +7,8 @@ disable-incompatible-tests.patch
 python-uuid.patch
 hgignore
 build-integration.patch
+
+# NIC-265
+0003-datapath-Increase-maximum-number-of-actions-per-flow.patch
+0004-datapath-Check-IS_ERR-in-do_execute.patch
+0006-ovs-vsctl-Remove-default-timeout.patch

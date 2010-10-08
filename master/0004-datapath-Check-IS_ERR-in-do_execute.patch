@@ -1,0 +1,39 @@
+From a842e7b093786019292998fa192d4ed7d228d686 Mon Sep 17 00:00:00 2001
+From: Jesse Gross <jesse@nicira.com>
+Date: Wed, 15 Sep 2010 16:52:48 -0700
+Subject: [PATCH 04/30] datapath: Check IS_ERR() in do_execute().
+
+flow_actions_alloc() returns an error code in the form of a pointer
+but we checked that the pointer was not NULL, which is always true.
+This caused oopses on allocation errors when we would write into
+an invalid pointer.
+
+NIC-234
+
+Signed-off-by: Jesse Gross <jesse@nicira.com>
+Acked-by: Ben Pfaff <blp@nicira.com>
+---
+ datapath/datapath.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/datapath/datapath.c b/datapath/datapath.c
+index 5ee9157..fe37ec1 100644
+--- a/datapath/datapath.c
++++ b/datapath/datapath.c
+@@ -1326,10 +1326,11 @@ static int do_execute(struct datapath *dp, const struct odp_execute *execute)
+ 	if (execute->length < ETH_HLEN || execute->length > 65535)
+ 		goto error;
+ 
+-	err = -ENOMEM;
+ 	actions = flow_actions_alloc(execute->n_actions);
+-	if (!actions)
++	if (IS_ERR(actions)) {
++		err = PTR_ERR(actions);
+ 		goto error;
++	}
+ 
+ 	err = -EFAULT;
+ 	if (copy_from_user(actions->actions, execute->actions,
+-- 
+1.6.3.3
+

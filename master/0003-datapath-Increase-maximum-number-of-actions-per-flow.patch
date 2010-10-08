@@ -1,0 +1,42 @@
+From 51a66e1bc935c50afe955da947cf253adf115751 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 14 Sep 2010 13:32:36 -0700
+Subject: [PATCH 03/30] datapath: Increase maximum number of actions per flow.
+
+Until now the number of actions in a flow has been limited to what fits in
+a page.  Each action is 8 bytes, and on 32-bit architectures there is a
+12-byte header, so with 4-kB pages that limits flows to 510 actions.  We
+and Citrix have noticed that OVS stops working properly after about 509
+VIFs are added to a bridge.  According to log messages this is the reason:
+at this point it is no longer possible to flood a packet to all ports.
+
+This commit should help, by increasing the maximum number of actions in a
+flow.  In the long term, though, we should adopt use of port groups or
+otherwise reduce the number of actions needed to flood a packet.
+
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+Bug #3573.
+NIC-234.
+---
+ datapath/flow.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/datapath/flow.c b/datapath/flow.c
+index dbfe5dd..7684c06 100644
+--- a/datapath/flow.c
++++ b/datapath/flow.c
+@@ -108,7 +108,10 @@ struct sw_flow_actions *flow_actions_alloc(size_t n_actions)
+ {
+ 	struct sw_flow_actions *sfa;
+ 
+-	if (n_actions > (PAGE_SIZE - sizeof *sfa) / sizeof(union odp_action))
++	/* At least DP_MAX_PORTS actions are required to be able to flood a
++	 * packet to every port.  Factor of 2 allows for setting VLAN tags,
++	 * etc. */
++	if (n_actions > 2 * DP_MAX_PORTS)
+ 		return ERR_PTR(-EINVAL);
+ 
+ 	sfa = kmalloc(sizeof *sfa + n_actions * sizeof(union odp_action),
+-- 
+1.6.3.3
+

@@ -17,3 +17,10 @@ build-integration.patch
 0010-xenserver-Change-license-of-xsconsole-plugin-to-GPLv.patch
 0011-xenserver-Add-explicit-license-to-refresh-xs-network.patch
 0012-xenserver-Add-license-to-uuid.py.patch
+
+# NIC-264
+0005-brcompat_mod-Check-if-user-has-CAP_NET_ADMIN-in-ioct.patch
+0008-ovsdb-Fix-bug-in-wait-command-implementation.patch
+0016-netdev-linux-Fix-off-by-one-error-dumping-queue-stat.patch
+0017-netflow-Do-64-bit-division-less-often.patch
+0018-netflow-Avoid-theoretically-looping-2-32-times.patch

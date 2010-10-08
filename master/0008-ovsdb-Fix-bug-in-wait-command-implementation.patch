@@ -1,0 +1,29 @@
+From 083d5565bb3dc5471affa1b490311c8980be7857 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Thu, 2 Sep 2010 10:06:42 -0700
+Subject: [PATCH 08/30] ovsdb: Fix bug in "wait" command implementation.
+
+The declaration of "error" that this commit removes shadowed an outer local
+declaration of "error", which caused errors detected by this code not to be
+propagated up to the outer level.
+
+Found with GCC -Wshadow.
+---
+ ovsdb/execution.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/ovsdb/execution.c b/ovsdb/execution.c
+index 5b6762f..7ce9a3f 100644
+--- a/ovsdb/execution.c
++++ b/ovsdb/execution.c
+@@ -629,7 +629,6 @@ ovsdb_execute_wait(struct ovsdb_execution *x, struct ovsdb_parser *parser,
+         /* Parse "rows" into 'expected'. */
+         ovsdb_row_hash_init(&expected, &columns);
+         for (i = 0; i < rows->u.array.n; i++) {
+-            struct ovsdb_error *error;
+             struct ovsdb_row *row;
+ 
+             row = ovsdb_row_create(table);
+-- 
+1.6.3.3
+

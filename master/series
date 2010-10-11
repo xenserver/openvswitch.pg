@@ -26,6 +26,7 @@
 0019-xenserver-ovs-external-ids-log-to-file-instead-of-sy.patch
 0020-netdev-Don-t-divide-by-zero-when-linux-htb-zero-min-.patch
 0021-netdev-Enforce-a-floor-linux-htb-min-rate.patch
+0022-Release-Open-vSwitch-1.0.2.patch
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch

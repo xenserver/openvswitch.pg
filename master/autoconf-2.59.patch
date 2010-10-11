@@ -1,28 +1,28 @@
-diff -r b5febf902977 Makefile.am
---- a/Makefile.am	Mon Sep 13 11:10:19 2010 +0100
-+++ b/Makefile.am	Mon Sep 13 14:58:37 2010 +0100
-@@ -4,6 +4,8 @@
- # are permitted in any medium without royalty provided the copyright
+diff -r a842d22bb9f7 Makefile.am
+--- a/Makefile.am	Mon Oct 11 16:01:03 2010 +0100
++++ b/Makefile.am	Mon Oct 11 16:02:26 2010 +0100
+@@ -5,6 +5,8 @@
  # notice and this notice are preserved.  This file is offered as-is,
  # without warranty of any kind.
-+
-+MKDIR_P = mkdir -p --
  
++MKDIR_P = mkdir -p --
++
  AUTOMAKE_OPTIONS = foreign subdir-objects
  ACLOCAL_AMFLAGS = -I m4
-diff -r b5febf902977 configure.ac
---- a/configure.ac	Mon Sep 13 11:10:19 2010 +0100
-+++ b/configure.ac	Mon Sep 13 14:58:37 2010 +0100
+ SUBDIRS = datapath
+diff -r a842d22bb9f7 configure.ac
+--- a/configure.ac	Mon Oct 11 16:01:03 2010 +0100
++++ b/configure.ac	Mon Oct 11 16:02:26 2010 +0100
 @@ -12,7 +12,7 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
  
 -AC_PREREQ(2.64)
 +AC_PREREQ(2.59)
- AC_INIT(openvswitch, 1.1.0pre1, ovs-bugs@openvswitch.org)
+ AC_INIT(openvswitch, 1.0.2, ovs-bugs@openvswitch.org)
  NX_BUILDNR
  AC_CONFIG_SRCDIR([datapath/datapath.c])
-@@ -26,7 +26,6 @@ AM_PROG_CC_C_O
+@@ -26,7 +26,6 @@
  AM_PROG_CC_C_O
  AC_PROG_CPP
  AC_PROG_RANLIB
@@ -30,7 +30,7 @@ diff -r b5febf902977 configure.ac
  AC_PROG_FGREP
  
  AC_ARG_VAR([PERL], [path to Perl interpreter])
-@@ -35,7 +34,10 @@ if test "$PERL" = no; then
+@@ -35,7 +34,10 @@
     AC_MSG_ERROR([Perl interpreter not found in $PATH or $PERL.])
  fi
  
@@ -42,10 +42,10 @@ diff -r b5febf902977 configure.ac
  AC_C_BIGENDIAN
  AC_SYS_LARGEFILE
  
-diff -r b5febf902977 m4/openvswitch.m4
---- a/m4/openvswitch.m4	Mon Sep 13 11:10:19 2010 +0100
-+++ b/m4/openvswitch.m4	Mon Sep 13 14:58:37 2010 +0100
-@@ -241,9 +241,9 @@ AC_DEFUN([OVS_CHECK_PYTHON_MODULE],
+diff -r a842d22bb9f7 m4/openvswitch.m4
+--- a/m4/openvswitch.m4	Mon Oct 11 16:01:03 2010 +0100
++++ b/m4/openvswitch.m4	Mon Oct 11 16:02:26 2010 +0100
+@@ -241,9 +241,9 @@
       [ovs_cv_py_[]AS_TR_SH([$1])],
       [ovs_cv_py_[]AS_TR_SH([$1])=no
        if test $HAVE_PYTHON = yes; then
@@ -58,7 +58,7 @@ diff -r b5febf902977 m4/openvswitch.m4
          if $PYTHON -c 'import $1
  import sys
  sys.exit(0)' >&AS_MESSAGE_LOG_FD 2>&1; then
-@@ -295,12 +295,12 @@ mv conftest.$ac_ext conftest2.$ac_ext
+@@ -295,12 +295,12 @@
  mv conftest.$ac_ext conftest2.$ac_ext
  rm -f conftest1.$ac_objext conftest2.$ac_objext conftest$ac_exeext
  ovs_link2='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest1.$ac_ext conftest2.$ac_ext $LIBS >&5'

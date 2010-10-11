@@ -1,0 +1,38 @@
+From fa0d5349c39593656e75bdc82330bf04e9f612f7 Mon Sep 17 00:00:00 2001
+From: Ethan Jackson <ethan@nicira.com>
+Date: Fri, 1 Oct 2010 02:29:27 +0000
+Subject: [PATCH 19/22] xenserver: ovs-external-ids log to file instead of syslog
+
+ovs-external-ids was crashing on startup because it was brought up
+before /dev/log exists.  The simplest solution to this problem is
+to have it log to /var/log/openvswitch/ovs-external-ids.log .  This
+is consistent with vswitchd and ovsdb-server.
+
+Signed-off-by: Ethan Jackson <ethan@nicira.com>
+---
+ .../usr_share_openvswitch_scripts_ovs-external-ids |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/xenserver/usr_share_openvswitch_scripts_ovs-external-ids b/xenserver/usr_share_openvswitch_scripts_ovs-external-ids
+index ef95bcc..1ca88c3 100755
+--- a/xenserver/usr_share_openvswitch_scripts_ovs-external-ids
++++ b/xenserver/usr_share_openvswitch_scripts_ovs-external-ids
+@@ -36,12 +36,12 @@ import ovs.daemon
+ import ovs.db.idl
+ 
+ s_log     = logging.getLogger("ovs-external-ids")
+-l_handler = logging.handlers.SysLogHandler(
+-        "/dev/log",
+-        facility=logging.handlers.SysLogHandler.LOG_DAEMON)
++l_handler = logging.handlers.RotatingFileHandler(
++        "/var/log/openvswitch/ovs-external-ids.log")
+ l_formatter = logging.Formatter('%(filename)s: %(levelname)s: %(message)s')
+ l_handler.setFormatter(l_formatter)
+ s_log.addHandler(l_handler)
++s_log.setLevel(logging.INFO)
+ 
+ vsctl="/usr/bin/ovs-vsctl"
+ session = None
+-- 
+1.6.3.3
+

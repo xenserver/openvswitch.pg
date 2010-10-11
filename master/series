@@ -24,3 +24,13 @@ build-integration.patch
 0016-netdev-linux-Fix-off-by-one-error-dumping-queue-stat.patch
 0017-netflow-Do-64-bit-division-less-often.patch
 0018-netflow-Avoid-theoretically-looping-2-32-times.patch
+
+# NIC-261
+0001-xenserver-Don-t-monitor-external-ids-until-XAPI-is-u.patch
+0002-xenserver-Don-t-delete-pidfile-when-stopping-monitor.patch
+0007-xenserver-monitor-external-ids-remove-redundant-ovs-.patch
+0013-xenserver-Rename-monitor-external-ids-ovs-external-i.patch
+0014-xenserver-Added-additional-logging-to-ovs-external-i.patch
+0015-xenserver-monitor-external-ids-should-run-with-monit.patch
+0019-xenserver-ovs-external-ids-log-to-file-instead-of-sy.patch
+

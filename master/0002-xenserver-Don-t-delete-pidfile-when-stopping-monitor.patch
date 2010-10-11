@@ -1,0 +1,27 @@
+From aa536b6e43828e23c48c54612d4047024f209eeb Mon Sep 17 00:00:00 2001
+From: Justin Pettit <jpettit@nicira.com>
+Date: Fri, 10 Sep 2010 14:32:41 -0700
+Subject: [PATCH 02/22] xenserver: Don't delete pidfile when stopping monitor-external-ids
+
+It's not necessary to explicitly delete the pidfile when stopping
+monitor-external-ids through the init script, since the daemon will take
+care of that.
+---
+ xenserver/etc_init.d_openvswitch |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/xenserver/etc_init.d_openvswitch b/xenserver/etc_init.d_openvswitch
+index 7b86d4c..0508445 100755
+--- a/xenserver/etc_init.d_openvswitch
++++ b/xenserver/etc_init.d_openvswitch
+@@ -358,7 +358,6 @@ function stop {
+     stop_daemon OVSDB_SERVER "$ovsdb_server"
+     if [ -e /var/run/openvswitch/monitor-external-ids.pid ]; then
+         kill `cat /var/run/openvswitch/monitor-external-ids.pid`
+-        rm /var/run/openvswitch/monitor-external-ids.pid
+     fi
+     rm -f /var/lock/subsys/openvswitch
+ }
+-- 
+1.6.3.3
+

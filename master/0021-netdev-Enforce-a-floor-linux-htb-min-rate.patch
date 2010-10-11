@@ -1,0 +1,47 @@
+From ff9a6b34ed9fa087df43ca6aabca5e3b3e532146 Mon Sep 17 00:00:00 2001
+From: Justin Pettit <jpettit@nicira.com>
+Date: Fri, 8 Oct 2010 14:18:28 -0700
+Subject: [PATCH 21/22] netdev: Enforce a floor "linux-htb" min-rate
+
+---
+ lib/netdev-linux.c   |    4 ++--
+ vswitchd/vswitch.xml |    3 ++-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/lib/netdev-linux.c b/lib/netdev-linux.c
+index 7668eff..c468a03 100644
+--- a/lib/netdev-linux.c
++++ b/lib/netdev-linux.c
+@@ -2384,13 +2384,13 @@ htb_parse_class_details__(struct netdev *netdev,
+     const char *priority_s = shash_find_data(details, "priority");
+     int mtu;
+ 
+-    /* min-rate */
++    /* min-rate.  Don't allow a min-rate below 1500 bytes/s. */
+     if (!min_rate_s) {
+         /* min-rate is required. */
+         return EINVAL;
+     }
+     hc->min_rate = strtoull(min_rate_s, NULL, 10) / 8;
+-    hc->min_rate = MAX(hc->min_rate, 0);
++    hc->min_rate = MAX(hc->min_rate, 1500);
+     hc->min_rate = MIN(hc->min_rate, htb->max_rate);
+ 
+     /* max-rate */
+diff --git a/vswitchd/vswitch.xml b/vswitchd/vswitch.xml
+index 979fd5d..c1f2c98 100644
+--- a/vswitchd/vswitch.xml
++++ b/vswitchd/vswitch.xml
+@@ -825,7 +825,8 @@
+         column="type"/> of <code>min-rate</code> are:</p>
+       <dl>
+         <dt><code>min-rate</code></dt>
+-        <dd>Minimum guaranteed bandwidth, in bit/s.  Required.</dd>
++        <dd>Minimum guaranteed bandwidth, in bit/s.  Required.  The
++          floor value is 1500 bytes/s (12,000 bit/s).</dd>
+       </dl>
+       <p>The key-value pairs defined for <ref table="QoS"/> <ref table="QoS"
+         column="type"/> of <code>linux-htb</code> are:</p>
+-- 
+1.6.3.3
+

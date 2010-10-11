@@ -33,4 +33,5 @@ build-integration.patch
 0014-xenserver-Added-additional-logging-to-ovs-external-i.patch
 0015-xenserver-monitor-external-ids-should-run-with-monit.patch
 0019-xenserver-ovs-external-ids-log-to-file-instead-of-sy.patch
+0020-netdev-Don-t-divide-by-zero-when-linux-htb-zero-min-.patch
 

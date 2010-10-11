@@ -1,12 +1,3 @@
-# patches proposed upstream
-xenserver-correct-status-when-not-in-vswitch-mode.patch
-
-# Local patches
-autoconf-2.59.patch
-disable-incompatible-tests.patch
-python-uuid.patch
-hgignore
-build-integration.patch
 
 # NIC-265
 0003-datapath-Increase-maximum-number-of-actions-per-flow.patch
@@ -35,4 +26,15 @@ build-integration.patch
 0019-xenserver-ovs-external-ids-log-to-file-instead-of-sy.patch
 0020-netdev-Don-t-divide-by-zero-when-linux-htb-zero-min-.patch
 0021-netdev-Enforce-a-floor-linux-htb-min-rate.patch
+
+# patches proposed upstream
+xenserver-correct-status-when-not-in-vswitch-mode.patch
+
+# Local patches
+autoconf-2.59.patch
+disable-incompatible-tests.patch
+python-uuid.patch
+hgignore
+build-integration.patch
+
 

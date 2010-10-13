@@ -1,0 +1,46 @@
+---
+ xenserver/etc_init.d_openvswitch                           |    9 ++++++---
+ xenserver/usr_share_openvswitch_scripts_sysconfig.template |    3 +++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+Index: openvswitch.hg/xenserver/etc_init.d_openvswitch
+===================================================================
+--- openvswitch.hg.orig/xenserver/etc_init.d_openvswitch	2010-10-13 13:35:00.471297812 +0100
++++ openvswitch.hg/xenserver/etc_init.d_openvswitch	2010-10-13 13:52:25.827523190 +0100
+@@ -52,6 +52,7 @@ else
+     : ${ENABLE_FAKE_PROC_NET:=n}
+ fi
+ : ${ENABLE_MONITOR:=y}
++: ${ENABLE_MONITOR_DAEMON:=n}
+ : ${FORCE_COREFILES:=y}
+ 
+ # Config variables specific to ovsdb-server
+@@ -349,9 +350,11 @@ function start {
+     fi
+ 
+     # Start daemon to monitor external ids
+-    PYTHONPATH=/usr/share/openvswitch/python \
+-               /usr/share/openvswitch/scripts/ovs-external-ids \
+-               --pidfile --detach $monitor_opt "$VSWITCHD_OVSDB_SERVER"
++	if [ "${ENABLE_MONITOR_DAEMON}" = "y" ] ; then
++	    PYTHONPATH=/usr/share/openvswitch/python \
++	               /usr/share/openvswitch/scripts/ovs-external-ids \
++	               --pidfile --detach $monitor_opt "$VSWITCHD_OVSDB_SERVER"
++	fi
+ 
+     touch /var/lock/subsys/openvswitch
+ }
+Index: openvswitch.hg/xenserver/usr_share_openvswitch_scripts_sysconfig.template
+===================================================================
+--- openvswitch.hg.orig/xenserver/usr_share_openvswitch_scripts_sysconfig.template	2010-10-13 13:53:21.238799014 +0100
++++ openvswitch.hg/xenserver/usr_share_openvswitch_scripts_sysconfig.template	2010-10-13 14:29:15.171090279 +0100
+@@ -21,6 +21,9 @@
+ #    and not required and not enabled by default for later versions.
+ # ENABLE_FAKE_PROC_NET=?
+ 
++# ENABLE_MONITOR_DAEMON: If 'y' then monitor daemon will be started.
++# ENABLE_MONITOR_DAEMON=n
++
+ # ENABLE_MONITOR: If 'y' then monitor daemon processes and restart them
+ #    if they die due to an error signal.
+ # ENABLE_MONITOR=y

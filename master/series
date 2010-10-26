@@ -24,9 +24,17 @@
 0014-xenserver-Added-additional-logging-to-ovs-external-i.patch
 0015-xenserver-monitor-external-ids-should-run-with-monit.patch
 0019-xenserver-ovs-external-ids-log-to-file-instead-of-sy.patch
+
+# NIC-266
 0020-netdev-Don-t-divide-by-zero-when-linux-htb-zero-min-.patch
+
+# NIC-267
 0021-netdev-Enforce-a-floor-linux-htb-min-rate.patch
+
+# NIC-268
 0022-Release-Open-vSwitch-1.0.2.patch
+
+# NIC-283
 0031-netflow-Back-out-optimization-that-could-lead-to-inf.patch
 
 # NIC-282

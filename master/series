@@ -44,6 +44,9 @@
 0035-ovs-vsctl-Check-for-dirty-reads-within-transactions.patch
 0037-ovs-vsctl-Prevent-double-free-when-retrying-a-transa.patch
 
+# NIC-285
+0036-netdev-linux-Always-check-tc_make_request-for-NULL-r.patch
+
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch
 

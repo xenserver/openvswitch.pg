@@ -1,0 +1,34 @@
+From c5ef4d5f755873bb6ec9ff4880a1284e6fcd8829 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Fri, 22 Oct 2010 09:58:12 -0700
+Subject: [PATCH 32/37] ovsdb: Document the "mutable" feature for columns.
+
+This feature has been implemented in OVSDB since the beginning, but until
+now it was undocumented.
+---
+ ovsdb/SPECS |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/ovsdb/SPECS b/ovsdb/SPECS
+index d9c92de..260786e 100644
+--- a/ovsdb/SPECS
++++ b/ovsdb/SPECS
+@@ -149,11 +149,14 @@ is represented by <database-schema>, as described below.
+ 
+         "type": <type>                            required
+         "ephemeral": <boolean>                    optional
++        "mutable": <boolean>                      optional
+ 
+     The "type" specifies the type of data stored in this column.  If
+     "ephemeral" is specified as true, then this column's values are
+     not guaranteed to be durable; they may be lost when the database
+-    restarts.
++    restarts.  If "mutable" is specified as false, then this column's
++    values may not be modified after they are initially set with the
++    "insert" operation.
+ 
+ <type>
+ 
+-- 
+1.6.3.3
+

@@ -29,6 +29,13 @@
 0022-Release-Open-vSwitch-1.0.2.patch
 0031-netflow-Back-out-optimization-that-could-lead-to-inf.patch
 
+# NIC-282
+0032-ovsdb-Document-the-mutable-feature-for-columns.patch
+0033-vswitch-Make-unique-name-columns-immutable-to-simpli.patch
+0034-ovs-vsctl-Add-context-pointer-to-struct-vsctl_info.patch
+0035-ovs-vsctl-Check-for-dirty-reads-within-transactions.patch
+0037-ovs-vsctl-Prevent-double-free-when-retrying-a-transa.patch
+
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch
 

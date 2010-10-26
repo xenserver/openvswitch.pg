@@ -1,0 +1,38 @@
+From 58453fde168c5938afe445f8e22f8aa96d02083f Mon Sep 17 00:00:00 2001
+From: Justin Pettit <jpettit@nicira.com>
+Date: Fri, 22 Oct 2010 17:25:02 -0700
+Subject: [PATCH 37/37] ovs-vsctl: Prevent double-free when retrying a transaction
+
+---
+ utilities/ovs-vsctl.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/utilities/ovs-vsctl.c b/utilities/ovs-vsctl.c
+index 916ac65..9b4d9f7 100644
+--- a/utilities/ovs-vsctl.c
++++ b/utilities/ovs-vsctl.c
+@@ -2791,7 +2791,7 @@ do_vsctl(const char *args, struct vsctl_command *commands, size_t n_commands,
+     }
+     error = xstrdup(ovsdb_idl_txn_get_error(txn));
+     ovsdb_idl_txn_destroy(txn);
+-    the_idl_txn = NULL;
++    txn = the_idl_txn = NULL;
+ 
+     unused = ovsdb_symbol_table_find_unused(symtab);
+     if (unused) {
+@@ -2882,8 +2882,10 @@ do_vsctl(const char *args, struct vsctl_command *commands, size_t n_commands,
+ try_again:
+     /* Our transaction needs to be rerun, or a prerequisite was not met.  Free
+      * resources and return so that the caller can try again. */
+-    ovsdb_idl_txn_abort(txn);
+-    ovsdb_idl_txn_destroy(txn);
++    if (txn) {
++        ovsdb_idl_txn_abort(txn);
++        ovsdb_idl_txn_destroy(txn);
++    }
+     ovsdb_symbol_table_destroy(symtab);
+     for (c = commands; c < &commands[n_commands]; c++) {
+         ds_destroy(&c->output);
+-- 
+1.6.3.3
+

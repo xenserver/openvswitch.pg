@@ -1,6 +1,6 @@
-diff -r 17fc7432ceb7 mk/Makefile
+diff -r 72ec30ec4158 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Tue Sep 14 10:43:43 2010 +0100
++++ b/mk/Makefile	Wed Jan 26 12:04:29 2011 +0000
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 17fc7432ceb7 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 17fc7432ceb7 mk/openvswitch.spec.in
+diff -r 72ec30ec4158 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Tue Sep 14 10:43:43 2010 +0100
-@@ -0,0 +1,112 @@
++++ b/mk/openvswitch.spec.in	Wed Jan 26 12:04:29 2011 +0000
+@@ -0,0 +1,118 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -156,6 +156,9 @@ diff -r 17fc7432ceb7 mk/openvswitch.spec.in
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl
 +%{_bindir}/ovs-ofctl
++%{_bindir}/ovs-pcap
++%{_bindir}/ovs-tcpundump
++%{_bindir}/ovs-vlan-test
 +%{_bindir}/ovs-vsctl
 +%{_bindir}/ovsdb-client
 +%{_bindir}/ovsdb-tool
@@ -172,6 +175,9 @@ diff -r 17fc7432ceb7 mk/openvswitch.spec.in
 +%{_mandir}/man8/ovs-dpctl.8.gz
 +%{_mandir}/man8/ovs-ofctl.8.gz
 +%{_mandir}/man8/ovs-parse-leaks.8.gz
++%{_mandir}/man1/ovs-pcap.1.gz
++%{_mandir}/man1/ovs-tcpundump.1.gz
++%{_mandir}/man8/ovs-vlan-test.8.gz
 +%{_mandir}/man8/ovs-vsctl.8.gz
 +%{_mandir}/man8/ovs-vswitchd.8.gz
 +

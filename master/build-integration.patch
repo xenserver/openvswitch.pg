@@ -1,6 +1,6 @@
-diff -r 72ec30ec4158 mk/Makefile
+diff -r 577d5c307c14 mk/Makefile
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Wed Jan 26 12:04:29 2011 +0000
++++ b/mk/Makefile	Mon Feb 07 17:06:09 2011 +0000
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,16 +60,16 @@ diff -r 72ec30ec4158 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 72ec30ec4158 mk/openvswitch.spec.in
+diff -r 577d5c307c14 mk/openvswitch.spec.in
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Wed Jan 26 12:04:29 2011 +0000
++++ b/mk/openvswitch.spec.in	Mon Feb 07 17:06:09 2011 +0000
 @@ -0,0 +1,118 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
 +URL: http://www.openvswitch.org/
 +Version: @OPENVSWITCH_VERSION@
-+License: GPL3
++License: ASL 2.0 and GPLv2
 +Release: @OPENVSWITCH_RELEASE@
 +Source: openvswitch-%{version}.tar.gz
 +Group: Applications/System

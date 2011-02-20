@@ -1,8 +1,8 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r 86ce4db325f2 tests/check-structs.at
---- a/tests/check-structs.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/check-structs.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/check-structs.at
+--- a/tests/check-structs.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/check-structs.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,11 +1,11 @@
  AT_BANNER([struct alignment checker unit tests])
  
@@ -21,9 +21,9 @@ diff -r 86ce4db325f2 tests/check-structs.at
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r 86ce4db325f2 tests/classifier.at
---- a/tests/classifier.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/classifier.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/classifier.at
+--- a/tests/classifier.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/classifier.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,14 +1,14 @@
  AT_BANNER([flow classifier unit tests])
 -m4_foreach(
@@ -52,9 +52,9 @@ diff -r 86ce4db325f2 tests/classifier.at
 +dnl  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
 +dnl   AT_CHECK([test-classifier testname], [0], [], [])
 +dnl   AT_CLEANUP])])
-diff -r 86ce4db325f2 tests/daemon-py.at
---- a/tests/daemon-py.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/daemon-py.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/daemon-py.at
+--- a/tests/daemon-py.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/daemon-py.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,9 +1,9 @@
  AT_BANNER([daemon unit tests - Python])
  
@@ -186,9 +186,9 @@ diff -r 86ce4db325f2 tests/daemon-py.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --detach], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r 86ce4db325f2 tests/daemon.at
---- a/tests/daemon.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/daemon.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/daemon.at
+--- a/tests/daemon.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/daemon.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,10 +1,10 @@
  AT_BANNER([daemon unit tests - C])
  
@@ -274,35 +274,39 @@ diff -r 86ce4db325f2 tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([ovsdb-server --detach --pidfile=$PWD/pid --monitor --unixctl=$PWD/nonexistent/unixctl db], [1], [], [stderr])
  AT_CHECK([grep 'ovsdb-server: could not initialize control socket' stderr],
-@@ -149,9 +149,9 @@
- AT_CLEANUP
- 
+@@ -151,10 +151,10 @@
+ # xxx This test hangs frequently, which often prevents builds from
+ # xxx completing.   Skip this test until we have time to debug it.
  AT_SETUP([daemon --detach closes standard fds])
+-AT_SKIP_IF([:])
 -AT_CAPTURE_FILE([pid])
 -AT_CAPTURE_FILE([status])
 -AT_CAPTURE_FILE([stderr])
++dnl AT_SKIP_IF([:])
 +dnl AT_CAPTURE_FILE([pid])
 +dnl AT_CAPTURE_FILE([status])
 +dnl AT_CAPTURE_FILE([stderr])
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-@@ -169,9 +169,9 @@
- AT_CLEANUP
- 
+@@ -174,10 +174,10 @@
+ # xxx This test hangs frequently, which often prevents builds from
+ # xxx completing.   Skip this test until we have time to debug it.
  AT_SETUP([daemon --detach --monitor closes standard fds])
+-AT_SKIP_IF([:])
 -AT_CAPTURE_FILE([pid])
 -AT_CAPTURE_FILE([status])
 -AT_CAPTURE_FILE([stderr])
++dnl AT_SKIP_IF([:])
 +dnl AT_CAPTURE_FILE([pid])
 +dnl AT_CAPTURE_FILE([status])
 +dnl AT_CAPTURE_FILE([stderr])
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r 86ce4db325f2 tests/json.at
---- a/tests/json.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/json.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/json.at
+--- a/tests/json.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/json.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -2,7 +2,7 @@
    [AT_SETUP([$1])
     AT_KEYWORDS([json positive])
@@ -324,7 +328,20 @@ diff -r 86ce4db325f2 tests/json.at
     AT_CHECK([$PYTHON $srcdir/test-json.py $4 input], [0], [stdout], [])
     AT_CHECK([cat stdout], [0], [$3
  ])
-@@ -27,7 +27,7 @@
+@@ -22,10 +22,10 @@
+ m4_define([JSON_CHECK_POSITIVE_UCS4PY],
+   [AT_SETUP([$1])
+    AT_KEYWORDS([json positive Python])
+-   AT_SKIP_IF([test $HAVE_PYTHON = no])
++   dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
+    AT_XFAIL_IF([$PYTHON -c "exit(len(u'\U00010800'))"; test $? -ne 1])
+    AT_CHECK([printf %s "AS_ESCAPE([$2])" > input])
+-   AT_CAPTURE_FILE([input])
++   dnl AT_CAPTURE_FILE([input])
+    AT_CHECK([$PYTHON $srcdir/test-json.py $4 input], [0], [stdout], [])
+    AT_CHECK([cat stdout], [0], [$3
+ ])
+@@ -39,7 +39,7 @@
    [AT_SETUP([$1])
     AT_KEYWORDS([json negative])
     AT_CHECK([printf %s "AS_ESCAPE([$2])" > input])
@@ -333,7 +350,7 @@ diff -r 86ce4db325f2 tests/json.at
     AT_CHECK([test-json $4 input], [1], [stdout], [])
     AT_CHECK([[sed 's/^error: [^:]*:/error:/' < stdout]], [0], [$3
  ])
-@@ -36,9 +36,9 @@
+@@ -48,9 +48,9 @@
  m4_define([JSON_CHECK_NEGATIVE_PY], 
    [AT_SETUP([$1])
     AT_KEYWORDS([json negative Python])
@@ -345,7 +362,7 @@ diff -r 86ce4db325f2 tests/json.at
     AT_CHECK([$PYTHON $srcdir/test-json.py $4 input], [1], [stdout], [])
     AT_CHECK([[sed 's/^error: [^:]*:/error:/' < stdout]], [0], [$3
  ])
-@@ -115,7 +115,7 @@
+@@ -130,7 +130,7 @@
  
  AT_SETUP([end of input in quoted string - Python])
  AT_KEYWORDS([json negative Python])
@@ -354,9 +371,9 @@ diff -r 86ce4db325f2 tests/json.at
  AT_CHECK([printf '"xxx' > input
  $PYTHON $srcdir/test-json.py input], [1],
    [error: line 0, column 4, byte 4: unexpected end of input in quoted string
-diff -r 86ce4db325f2 tests/jsonrpc-py.at
---- a/tests/jsonrpc-py.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/jsonrpc-py.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/jsonrpc-py.at
+--- a/tests/jsonrpc-py.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/jsonrpc-py.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,7 +1,7 @@
  AT_BANNER([JSON-RPC - Python])
  
@@ -384,9 +401,9 @@ diff -r 86ce4db325f2 tests/jsonrpc-py.at
  AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile-name=$PWD/pid listen punix:socket])
  AT_CHECK([test -s pid])
  # When a daemon dies it deletes its pidfile, so make a copy.
-diff -r 86ce4db325f2 tests/lockfile.at
---- a/tests/lockfile.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/lockfile.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/lockfile.at
+--- a/tests/lockfile.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/lockfile.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,12 +1,12 @@
  AT_BANNER([lockfile unit tests])
  
@@ -407,9 +424,9 @@ diff -r 86ce4db325f2 tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r 86ce4db325f2 tests/ofp-print.at
---- a/tests/ofp-print.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ofp-print.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ofp-print.at
+--- a/tests/ofp-print.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ofp-print.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -217,7 +217,7 @@
  
  AT_SETUP([OFPT_PACKET_IN])
@@ -419,9 +436,9 @@ diff -r 86ce4db325f2 tests/ofp-print.at
  AT_CHECK([ovs-ofctl ofp-print "\
  01 0a 00 4e 00 00 00 00 00 00 01 11 00 3c 00 03 \
  00 00 50 54 00 00 00 06 50 54 00 00 00 05 08 00 \
-diff -r 86ce4db325f2 tests/ofproto.at
---- a/tests/ofproto.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ofproto.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ofproto.at
+--- a/tests/ofproto.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ofproto.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -7,7 +7,7 @@
    [OVS_RUNDIR=$PWD; export OVS_RUNDIR
     OVS_LOGDIR=$PWD; export OVS_LOGDIR
@@ -440,9 +457,9 @@ diff -r 86ce4db325f2 tests/ofproto.at
  OFPT_FEATURES_REPLY: ver:0x1, dpid:fedcba9876543210
  n_tables:2, n_buffers:256
  features: capabilities:0x87, actions:0xfff
-diff -r 86ce4db325f2 tests/ovsdb-idl-py.at
---- a/tests/ovsdb-idl-py.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ovsdb-idl-py.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ovsdb-idl-py.at
+--- a/tests/ovsdb-idl-py.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ovsdb-idl-py.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -18,7 +18,7 @@
  # TITLE is provided to AT_SETUP and KEYWORDS to AT_KEYWORDS.
  m4_define([OVSDB_CHECK_IDL_PY], 
@@ -452,9 +469,9 @@ diff -r 86ce4db325f2 tests/ovsdb-idl-py.at
     AT_KEYWORDS([ovsdb server idl positive Python $5])
     AT_CHECK([ovsdb-tool create db $abs_srcdir/idltest.ovsschema],
                    [0], [stdout], [ignore])
-diff -r 86ce4db325f2 tests/ovsdb-log.at
---- a/tests/ovsdb-log.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ovsdb-log.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ovsdb-log.at
+--- a/tests/ovsdb-log.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ovsdb-log.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -2,7 +2,7 @@
  
  AT_SETUP([create empty, reread])
@@ -554,9 +571,9 @@ diff -r 86ce4db325f2 tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r 86ce4db325f2 tests/ovsdb-monitor.at
---- a/tests/ovsdb-monitor.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ovsdb-monitor.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ovsdb-monitor.at
+--- a/tests/ovsdb-monitor.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ovsdb-monitor.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -24,7 +24,7 @@
     AT_CHECK([ovsdb-tool create db schema], [0], [stdout], [ignore])
     m4_foreach([txn], [$3],
@@ -566,9 +583,9 @@ diff -r 86ce4db325f2 tests/ovsdb-monitor.at
     AT_CHECK([ovsdb-server --detach --pidfile=$PWD/server-pid --remote=punix:socket --unixctl=$PWD/unixctl --log-file=$PWD/ovsdb-server-log db >/dev/null 2>&1],
              [0], [], [])
     AT_CHECK([ovsdb-client -vjsonrpc --detach --pidfile=$PWD/client-pid -d json monitor --format=csv unix:socket $4 $5 $8 > output], 
-diff -r 86ce4db325f2 tests/ovsdb-server.at
---- a/tests/ovsdb-server.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ovsdb-server.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ovsdb-server.at
+--- a/tests/ovsdb-server.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ovsdb-server.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -103,11 +103,11 @@
  
  AT_SETUP([SSL db: implementation])
@@ -628,9 +645,9 @@ diff -r 86ce4db325f2 tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r 86ce4db325f2 tests/ovsdb-tool.at
---- a/tests/ovsdb-tool.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ovsdb-tool.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ovsdb-tool.at
+--- a/tests/ovsdb-tool.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ovsdb-tool.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -123,7 +123,7 @@
  dnl We can't fully re-check the contents of the database log, because the
  dnl order of the records is not predictable, but there should only be 4 lines
@@ -658,9 +675,9 @@ diff -r 86ce4db325f2 tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r 86ce4db325f2 tests/ovsdb.at
---- a/tests/ovsdb.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/ovsdb.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/ovsdb.at
+--- a/tests/ovsdb.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/ovsdb.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -23,7 +23,7 @@
  # TITLE is provided to AT_SETUP and KEYWORDS to AT_KEYWORDS.
  m4_define([OVSDB_CHECK_POSITIVE_PY], 
@@ -679,9 +696,9 @@ diff -r 86ce4db325f2 tests/ovsdb.at
     AT_KEYWORDS([ovsdb negative $4])
     AT_CHECK([$PYTHON $srcdir/test-ovsdb.py $2], [1], [], [stderr])
     m4_assert(m4_len([$3]))
-diff -r 86ce4db325f2 tests/reconnect.at
---- a/tests/reconnect.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/reconnect.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/reconnect.at
+--- a/tests/reconnect.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/reconnect.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -17,7 +17,7 @@
       [$3])
     __RECONNECT_CHECK(
@@ -691,9 +708,9 @@ diff -r 86ce4db325f2 tests/reconnect.at
       [$2],
       [$PYTHON $srcdir/test-reconnect.py < input],
       [$3])])
-diff -r 86ce4db325f2 tests/uuid.at
---- a/tests/uuid.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/uuid.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/uuid.at
+--- a/tests/uuid.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/uuid.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -32,7 +32,7 @@
  AT_CLEANUP
  
@@ -703,9 +720,9 @@ diff -r 86ce4db325f2 tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r 86ce4db325f2 tests/vconn.at
---- a/tests/vconn.at	Tue Jan 25 16:43:47 2011 +0000
-+++ b/tests/vconn.at	Tue Jan 25 17:02:59 2011 +0000
+diff -r 4a8a376a0af3 tests/vconn.at
+--- a/tests/vconn.at	Thu Feb 17 12:25:25 2011 +0000
++++ b/tests/vconn.at	Thu Feb 17 12:33:17 2011 +0000
 @@ -1,21 +1,21 @@
 -m4_define([TEST_VCONN_CLASS],
 -  [AT_BANNER([vconn library -- $1 class])

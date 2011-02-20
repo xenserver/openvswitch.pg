@@ -3,44 +3,44 @@
  xenserver/usr_share_openvswitch_scripts_sysconfig.template |    3 +++
  2 files changed, 9 insertions(+), 3 deletions(-)
 
-diff -r d913711ec5dd xenserver/etc_init.d_openvswitch
---- a/xenserver/etc_init.d_openvswitch	Tue Jan 25 13:02:31 2011 +0000
-+++ b/xenserver/etc_init.d_openvswitch	Tue Jan 25 13:08:31 2011 +0000
-@@ -95,6 +95,7 @@
-     : ${ENABLE_FAKE_PROC_NET:=y}
- fi
+diff -r 94801242ce6a xenserver/etc_init.d_openvswitch
+--- a/xenserver/etc_init.d_openvswitch	Thu Feb 17 12:15:49 2011 +0000
++++ b/xenserver/etc_init.d_openvswitch	Thu Feb 17 12:25:04 2011 +0000
+@@ -80,6 +80,7 @@
+ esac
+ 
  : ${ENABLE_MONITOR:=y}
 +: ${ENABLE_MONITOR_DAEMON:=n}
  : ${FORCE_COREFILES:=y}
  
  # Config variables specific to ovsdb-server
-@@ -427,10 +428,12 @@
-     fi
+@@ -365,11 +366,13 @@
  
-     if [ -f /etc/xensource-inventory ]; then
+     start_vswitchd
+ 
+-    if [ -f /etc/xensource-inventory ]; then
 -        # Start daemon to monitor external ids
 -        PYTHONPATH=/usr/share/openvswitch/python \
--                   /usr/share/openvswitch/scripts/ovs-external-ids \
--                   --pidfile --detach $monitor_opt "$VSWITCHD_OVSDB_SERVER"
-+        if [ "${ENABLE_MONITOR_DAEMON}" = "y" ] ; then
++    if [ "${ENABLE_MONITOR_DAEMON}" = "y" ] ; then
++        if [ -f /etc/xensource-inventory ]; then
 +            # Start daemon to monitor external ids
 +            PYTHONPATH=/usr/share/openvswitch/python \
-+                       /usr/share/openvswitch/scripts/ovs-external-ids \
-+                       --pidfile --detach $monitor_opt "$VSWITCHD_OVSDB_SERVER"
+                    /usr/share/openvswitch/scripts/ovs-xapi-sync \
+                    --pidfile --detach $monitor_opt "$VSWITCHD_OVSDB_SERVER"
 +        fi
      fi
  
      touch /var/lock/subsys/openvswitch
-diff -r d913711ec5dd xenserver/usr_share_openvswitch_scripts_sysconfig.template
---- a/xenserver/usr_share_openvswitch_scripts_sysconfig.template	Tue Jan 25 13:02:31 2011 +0000
-+++ b/xenserver/usr_share_openvswitch_scripts_sysconfig.template	Tue Jan 25 13:08:31 2011 +0000
-@@ -20,6 +20,9 @@
- #    This is required and enabled by default for XenServer 5.5.0,
- #    and not required and not enabled by default for later versions.
- # ENABLE_FAKE_PROC_NET=?
+diff -r 94801242ce6a xenserver/usr_share_openvswitch_scripts_sysconfig.template
+--- a/xenserver/usr_share_openvswitch_scripts_sysconfig.template	Thu Feb 17 12:15:49 2011 +0000
++++ b/xenserver/usr_share_openvswitch_scripts_sysconfig.template	Thu Feb 17 12:25:04 2011 +0000
+@@ -10,6 +10,9 @@
+ # ENABLE_MONITOR: If 'y' then monitor daemon processes and restart them
+ #    if they die due to an error signal.
+ # ENABLE_MONITOR=y
 +
 +# ENABLE_MONITOR_DAEMON: If 'y' then monitor daemon will be started.
 +# ENABLE_MONITOR_DAEMON=n
  
- # ENABLE_MONITOR: If 'y' then monitor daemon processes and restart them
- #    if they die due to an error signal.
+ # FORCE_COREFILES: If 'y' then core files will be enabled.
+ # FORCE_COREFILES=y

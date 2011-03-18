@@ -1,6 +1,6 @@
-diff -r 577d5c307c14 mk/Makefile
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/Makefile	Mon Feb 07 17:06:09 2011 +0000
+diff -r 1f259679d73b mk/Makefile
+--- /dev/null
++++ b/mk/Makefile
 @@ -0,0 +1,58 @@
 +include $(B_BASE)/common.mk
 +include $(B_BASE)/rpmbuild.mk
@@ -60,10 +60,10 @@ diff -r 577d5c307c14 mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 577d5c307c14 mk/openvswitch.spec.in
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/mk/openvswitch.spec.in	Mon Feb 07 17:06:09 2011 +0000
-@@ -0,0 +1,118 @@
+diff -r 1f259679d73b mk/openvswitch.spec.in
+--- /dev/null
++++ b/mk/openvswitch.spec.in
+@@ -0,0 +1,120 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -165,6 +165,7 @@ diff -r 577d5c307c14 mk/openvswitch.spec.in
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
 +%{_sbindir}/ovsdb-server
++%{_sbindir}/ovs-vlan-bug-workaround
 +/usr/share/openvswitch/vswitch.ovsschema
 +%{_mandir}/man1/ovsdb-client.1.gz
 +%{_mandir}/man1/ovsdb-tool.1.gz
@@ -180,5 +181,6 @@ diff -r 577d5c307c14 mk/openvswitch.spec.in
 +%{_mandir}/man8/ovs-vlan-test.8.gz
 +%{_mandir}/man8/ovs-vsctl.8.gz
 +%{_mandir}/man8/ovs-vswitchd.8.gz
++%{_mandir}/man8/ovs-vlan-bug-workaround.8.gz
 +
 +%changelog

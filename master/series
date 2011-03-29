@@ -9,5 +9,6 @@ python-uuid.patch
 hgignore
 build-integration.patch
 make-ovs-external-ids-daemon-optional.patch
+log-all-mac-learning-msg-for-debug.patch
 
 

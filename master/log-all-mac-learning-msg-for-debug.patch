@@ -1,0 +1,41 @@
+NIC-359
+Nicira has told us that the return code form mac_learning_learn() is
+incorrect, and thus debug message is not geting logged.
+For short term debug purposes always log this message.
+Nicira should fix this in the mean time.
+---
+
+diff -r eb99a91a08a1 vswitchd/bridge.c
+--- a/vswitchd/bridge.c
++++ b/vswitchd/bridge.c
+@@ -2867,6 +2867,10 @@
+     enum grat_arp_lock_type lock_type;
+     tag_type rev_tag;
+ 
++    /* The log messages here could actually be useful in debugging,
++     * so keep the rate limit relatively high. */
++    static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(30, 300);
++
+     /* We don't want to learn from gratuitous ARP packets that are reflected
+      * back over bond slaves so we lock the learning table. */
+     lock_type = !is_gratuitous_arp(flow) ? GRAT_ARP_LOCK_NONE :
+@@ -2875,15 +2879,13 @@
+ 
+     rev_tag = mac_learning_learn(br->ml, flow->dl_src, vlan, in_port->port_idx,
+                                  lock_type);
+-    if (rev_tag) {
+-        /* The log messages here could actually be useful in debugging,
+-         * so keep the rate limit relatively high. */
+-        static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(30,
+-                                                                300);
+-        VLOG_DBG_RL(&rl, "bridge %s: learned that "ETH_ADDR_FMT" is "
++
++    VLOG_DBG_RL(&rl, "bridge %s: learned that "ETH_ADDR_FMT" is "
+                     "on port %s in VLAN %d",
+                     br->name, ETH_ADDR_ARGS(flow->dl_src),
+                     in_port->name, vlan);
++
++    if (rev_tag) {
+         ofproto_revalidate(br->ofproto, rev_tag);
+     }
+ }

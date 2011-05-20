@@ -1,0 +1,34 @@
+From f49cc5d2ee29ee90a5a08babfee55479c579bf27 Mon Sep 17 00:00:00 2001
+From: Sajjad Lateef <slateef@nicira.com>
+Date: Mon, 16 May 2011 19:18:48 -0700
+Subject: [PATCH 05/13] xenserver: remove unneeded macro definitions
+
+The macro binsuffix is no longer needed. It has been replaced with
+kernel_flavor that is passed on the command line.
+
+The macro kernel_version is passed on the command line. Redefining
+the macro inside the spec file leads to build failures.
+
+Signed-off-by: Sajjad Lateef <slateef@nicira.com>
+---
+ xenserver/openvswitch-xen.spec |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
+
+diff --git a/xenserver/openvswitch-xen.spec b/xenserver/openvswitch-xen.spec
+index 47d07f5..7b6ad84 100644
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -24,10 +24,6 @@
+ # bump this when breaking compatibility with userspace
+ %define module_abi_version 0
+ 
+-# extract kernel type (xen or kdump)
+-%define binsuffix -%(echo '%{xen_version}' | sed -r 's/^.*[0-9]+//')
+-# kernel version string w/o kernel type
+-%define kernel_version %(echo '%{xen_version}' | sed -r 's/[a-z]+$//')
+ # build-supplemental-pack.sh requires this naming for kernel module packages
+ %define module_package modules-%{kernel_flavor}-%{kernel_version}
+ 
+-- 
+1.6.3.3
+

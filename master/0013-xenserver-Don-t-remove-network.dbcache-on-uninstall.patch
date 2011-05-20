@@ -1,0 +1,31 @@
+From 7685755461f2907ac5bc52a89061edf4dade6051 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 3 May 2011 11:03:08 -0700
+Subject: [PATCH 13/13] xenserver: Don't remove network.dbcache on uninstall.
+
+network.dbcache was introduced by Open vSwitch for its own purposes, but
+it has now migrated into the base install of XenServer, which uses it
+whether Open vSwitch is installed or not, so we should no longer remove it
+on package uninstall.
+
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+Reported-by: Bob Ball <bob.ball@citrix.com>
+---
+ xenserver/openvswitch-xen.spec |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/xenserver/openvswitch-xen.spec b/xenserver/openvswitch-xen.spec
+index 3ac9d0f..e1291bd 100644
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -295,7 +295,6 @@ if [ "$1" = "0" ]; then     # $1 = 1 for upgrade
+     rm -f /etc/openvswitch/conf.db
+     rm -f /etc/sysconfig/openvswitch
+     rm -f /etc/openvswitch/vswitchd.cacert
+-    rm -f /var/xapi/network.dbcache
+ 
+     # Remove saved XenServer scripts directory, but only if it's empty
+     rmdir -p /usr/lib/openvswitch/xs-saved 2>/dev/null
+-- 
+1.6.3.3
+

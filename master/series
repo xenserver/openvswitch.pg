@@ -35,6 +35,7 @@
 
 # NIC-391
 0013-xenserver-Don-t-remove-network.dbcache-on-uninstall.patch
+0014-xenserver-Pull-slave-MTU-from-bond-record.patch
 
 
 

@@ -1,18 +1,18 @@
-diff -r 8a89107c7620 Makefile.am
---- a/Makefile.am	Tue Jan 25 11:22:27 2011 +0000
-+++ b/Makefile.am	Tue Jan 25 16:19:38 2011 +0000
-@@ -4,6 +4,8 @@
- # are permitted in any medium without royalty provided the copyright
+diff -r 6eceee6cd9e0 Makefile.am
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -5,6 +5,8 @@
  # notice and this notice are preserved.  This file is offered as-is,
  # without warranty of any kind.
-+
-+MKDIR_P = mkdir -p --
  
++MKDIR_P = mkdir -p --
++
  AUTOMAKE_OPTIONS = foreign subdir-objects
  ACLOCAL_AMFLAGS = -I m4
-diff -r 8a89107c7620 configure.ac
---- a/configure.ac	Tue Jan 25 11:22:27 2011 +0000
-+++ b/configure.ac	Tue Jan 25 16:19:38 2011 +0000
+ SUBDIRS = datapath
+diff -r 6eceee6cd9e0 configure.ac
+--- a/configure.ac
++++ b/configure.ac
 @@ -12,8 +12,8 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
@@ -20,7 +20,7 @@ diff -r 8a89107c7620 configure.ac
 -AC_PREREQ(2.64)
 -AC_INIT(openvswitch, 1.1.0pre2, ovs-bugs@openvswitch.org)
 +AC_PREREQ(2.59)
-+AC_INIT(openvswitch, 1.0.2, ovs-bugs@openvswitch.org)
++AC_INIT(openvswitch, 1.0.99, ovs-bugs@openvswitch.org)
  NX_BUILDNR
  AC_CONFIG_SRCDIR([datapath/datapath.c])
  AC_CONFIG_MACRO_DIR([m4])
@@ -44,10 +44,10 @@ diff -r 8a89107c7620 configure.ac
  AC_C_BIGENDIAN
  AC_SYS_LARGEFILE
  
-diff -r 8a89107c7620 m4/openvswitch.m4
---- a/m4/openvswitch.m4	Tue Jan 25 11:22:27 2011 +0000
-+++ b/m4/openvswitch.m4	Tue Jan 25 16:19:38 2011 +0000
-@@ -228,9 +228,9 @@
+diff -r 6eceee6cd9e0 m4/openvswitch.m4
+--- a/m4/openvswitch.m4
++++ b/m4/openvswitch.m4
+@@ -247,9 +247,9 @@
       [ovs_cv_py_[]AS_TR_SH([$1])],
       [ovs_cv_py_[]AS_TR_SH([$1])=no
        if test $HAVE_PYTHON = yes; then
@@ -60,7 +60,7 @@ diff -r 8a89107c7620 m4/openvswitch.m4
          if $PYTHON -c 'import $1
  import sys
  sys.exit(0)' >&AS_MESSAGE_LOG_FD 2>&1; then
-@@ -282,12 +282,12 @@
+@@ -301,12 +301,12 @@
  mv conftest.$ac_ext conftest2.$ac_ext
  rm -f conftest1.$ac_objext conftest2.$ac_objext conftest$ac_exeext
  ovs_link2='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest1.$ac_ext conftest2.$ac_ext $LIBS >&5'

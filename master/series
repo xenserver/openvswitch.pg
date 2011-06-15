@@ -37,6 +37,8 @@
 0013-xenserver-Don-t-remove-network.dbcache-on-uninstall.patch
 0014-xenserver-Pull-slave-MTU-from-bond-record.patch
 
+# NIC-395
+0016-stream-ssl-Disable-SSL-session-caching.patch
 
 
 # patches proposed upstream

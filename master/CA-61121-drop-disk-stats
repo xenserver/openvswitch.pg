@@ -1,0 +1,13 @@
+# HG changeset patch
+# Parent d0dc843aadd18e10baedfbf7e19ab7f233bc64f6
+
+diff -r d0dc843aadd1 vswitchd/system-stats.c
+--- a/vswitchd/system-stats.c	Tue Jun 14 10:40:15 2011 +0100
++++ b/vswitchd/system-stats.c	Tue Jun 14 10:41:00 2011 +0100
+@@ -498,5 +498,5 @@ get_system_stats(struct shash *stats)
+     get_load_average(stats);
+     get_memory_stats(stats);
+     get_process_stats(stats);
+-    get_filesys_stats(stats);
++    //get_filesys_stats(stats);
+ }

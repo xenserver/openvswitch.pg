@@ -51,6 +51,7 @@ python-uuid.patch
 hgignore
 build-integration.patch
 make-ovs-external-ids-daemon-optional.patch
+CA-61121-drop-disk-stats
 #log-all-mac-learning-msg-for-debug.patch
 
 

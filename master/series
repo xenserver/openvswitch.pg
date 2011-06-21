@@ -40,6 +40,9 @@
 # NIC-395
 0016-stream-ssl-Disable-SSL-session-caching.patch
 
+# NIC-376
+0017-xenserver-allow-dom0-traffic-in-secure-pool-host-whe.patch
+
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch

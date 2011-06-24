@@ -1,0 +1,118 @@
+From baac62663e6f7990a9d60d95896287507b0eab36 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 21 Jun 2011 15:20:56 -0700
+Subject: [PATCH 19/19] bridge: Enable system stats only if turned on in the database.
+
+Most hypervisors have no use for this column, so populating it just wastes
+CPU time.  It can still be enabled explicitly via other-config.
+
+CC: Peter Balland <peter@nicira.com>
+CC: David Tsai <dtsai@nicira.com>
+Bug #5961.
+NIC-397.
+---
+ vswitchd/bridge.c          |   21 ++++++++++++++++++++-
+ vswitchd/vswitch.ovsschema |    6 ++++--
+ vswitchd/vswitch.xml       |   18 ++++++++++++++++++
+ 3 files changed, 42 insertions(+), 3 deletions(-)
+
+diff --git a/vswitchd/bridge.c b/vswitchd/bridge.c
+index 17c18da..d44f480 100644
+--- a/vswitchd/bridge.c
++++ b/vswitchd/bridge.c
+@@ -1343,6 +1343,23 @@ iface_refresh_stats(struct iface *iface)
+     ovsrec_interface_set_statistics(iface->cfg, keys, values, n);
+ }
+ 
++static bool
++enable_system_stats(const struct ovsrec_open_vswitch *cfg)
++{
++    const char *enable;
++
++    /* Use other-config:enable-system-stats by preference. */
++    enable = get_ovsrec_key_value(&cfg->header_,
++                                  &ovsrec_open_vswitch_col_other_config,
++                                  "enable-statistics");
++    if (enable) {
++        return !strcmp(enable, "true");
++    }
++
++    /* Disable by default. */
++    return false;
++}
++
+ static void
+ refresh_system_stats(const struct ovsrec_open_vswitch *cfg)
+ {
+@@ -1350,7 +1367,9 @@ refresh_system_stats(const struct ovsrec_open_vswitch *cfg)
+     struct shash stats;
+ 
+     shash_init(&stats);
+-    get_system_stats(&stats);
++    if (enable_system_stats(cfg)) {
++        get_system_stats(&stats);
++    }
+ 
+     ovsdb_datum_from_shash(&datum, &stats);
+     ovsdb_idl_txn_write(&cfg->header_, &ovsrec_open_vswitch_col_statistics,
+diff --git a/vswitchd/vswitch.ovsschema b/vswitchd/vswitch.ovsschema
+index e808aa3..1cec45f 100644
+--- a/vswitchd/vswitch.ovsschema
++++ b/vswitchd/vswitch.ovsschema
+@@ -1,6 +1,6 @@
+ {"name": "Open_vSwitch",
+- "version": "3.0.0",
+- "cksum": "705848946 15525",
++ "version": "3.1.0",
++ "cksum": "1438894691 15636",
+  "tables": {
+    "Open_vSwitch": {
+      "columns": {
+@@ -16,6 +16,8 @@
+          "type": {"key": {"type": "uuid",
+                           "refTable": "SSL"},
+                   "min": 0, "max": 1}},
++       "other_config": {
++         "type": {"key": "string", "value": "string", "min": 0, "max": "unlimited"}},
+        "external_ids": {
+          "type": {"key": "string", "value": "string",
+                   "min": 0, "max": "unlimited"}},
+diff --git a/vswitchd/vswitch.xml b/vswitchd/vswitch.xml
+index 2b12e29..5c532e5 100644
+--- a/vswitchd/vswitch.xml
++++ b/vswitchd/vswitch.xml
+@@ -25,6 +25,19 @@
+         SSL used globally by the daemon.
+       </column>
+ 
++      <column name="other_config">
++        Key-value pairs for configuring rarely used Open vSwitch features.  The
++        currently defined key-value pairs are:
++        <dl>
++          <dt><code>enable-statistics</code></dt>
++          <dd>
++            Set to <code>true</code> to enable populating the <ref
++            column="statistics"/> column or <code>false</code> (the default)
++            disable populating it.
++          </dd>
++        </dl>
++      </column>
++
+       <column name="external_ids">
+         Key-value pairs for use by external frameworks that integrate
+         with Open vSwitch, rather than by Open vSwitch itself.  System
+@@ -75,6 +88,11 @@
+           apply to a platform are omitted.
+         </p>
+ 
++        <p>
++          Statistics are disabled unless <ref column="other-config"
++          key="enable-statistics"/> is set to <code>true</code>.
++        </p>
++
+         <dl>
+           <dt><code>cpu</code></dt>
+           <dd>
+-- 
+1.6.3.3
+

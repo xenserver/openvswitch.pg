@@ -43,6 +43,10 @@
 # NIC-376
 0017-xenserver-allow-dom0-traffic-in-secure-pool-host-whe.patch
 
+# NIC-397
+0018-ovsdb-doc-Add-support-for-references-to-specific-key.patch
+0019-bridge-Enable-system-stats-only-if-turned-on-in-the-.patch
+
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch
@@ -54,7 +58,7 @@ python-uuid.patch
 hgignore
 build-integration.patch
 make-ovs-external-ids-daemon-optional.patch
-CA-61121-drop-disk-stats
+#CA-61121-drop-disk-stats   (now see patches 0018 & 0019)
 #log-all-mac-learning-msg-for-debug.patch
 
 

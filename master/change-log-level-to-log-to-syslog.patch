@@ -1,0 +1,25 @@
+diff -r 39c40ef63038 xenserver/etc_init.d_openvswitch
+--- a/xenserver/etc_init.d_openvswitch
++++ b/xenserver/etc_init.d_openvswitch
+@@ -90,8 +90,8 @@
+ : ${OVSDB_SERVER_RUN_DIR:=/var/xen/openvswitch}
+ : ${OVSDB_SERVER_PRIORITY:=-10}
+ : ${OVSDB_SERVER_LOGFILE:=/var/log/openvswitch/ovsdb-server.log}
+-: ${OVSDB_SERVER_FILE_LOGLEVEL:=INFO}
+-: ${OVSDB_SERVER_SYSLOG_LOGLEVEL:=ERR}
++: ${OVSDB_SERVER_FILE_LOGLEVEL:=EMER}
++: ${OVSDB_SERVER_SYSLOG_LOGLEVEL:=INFO}
+ : ${OVSDB_SERVER_MEMLEAK_LOGFILE:=}
+ : ${OVSDB_SERVER_STRACE_LOG:=}
+ : ${OVSDB_SERVER_STRACE_OPT:=}
+@@ -106,8 +106,8 @@
+ : ${VSWITCHD_PRIORITY:=-10}
+ : ${VSWITCHD_MLOCKALL:=yes}
+ : ${VSWITCHD_LOGFILE:=/var/log/openvswitch/ovs-vswitchd.log}
+-: ${VSWITCHD_FILE_LOGLEVEL:=INFO}
+-: ${VSWITCHD_SYSLOG_LOGLEVEL:=ERR}
++: ${VSWITCHD_FILE_LOGLEVEL:=EMER}
++: ${VSWITCHD_SYSLOG_LOGLEVEL:=INFO}
+ : ${VSWITCHD_MEMLEAK_LOGFILE:=}
+ : ${VSWITCHD_STRACE_LOG:=}
+ : ${VSWITCHD_STRACE_OPT:=}

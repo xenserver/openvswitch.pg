@@ -50,6 +50,9 @@
 # NIC-405
 0020-datapath-An-expanded-table-should-be-larger-than-its.patch
 
+# NIC-404
+0021-bond-Drop-packets-on-backup-slaves.patch
+
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch

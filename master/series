@@ -47,6 +47,9 @@
 0018-ovsdb-doc-Add-support-for-references-to-specific-key.patch
 0019-bridge-Enable-system-stats-only-if-turned-on-in-the-.patch
 
+# NIC-405
+0020-datapath-An-expanded-table-should-be-larger-than-its.patch
+
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch

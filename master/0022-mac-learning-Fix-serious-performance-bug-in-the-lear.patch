@@ -1,0 +1,27 @@
+From 85d5d28572c1b18c67a9f0c80836205106e92874 Mon Sep 17 00:00:00 2001
+From: Ethan Jackson <ethan@nicira.com>
+Date: Thu, 21 Jul 2011 17:58:47 -0700
+Subject: [PATCH 22/23] mac-learning: Fix serious performance bug in the learning table.
+
+Due to a typo, the mac-learning hash table had dissolved into a
+linked list.  This caused a significant reduction in performance.
+---
+ lib/mac-learning.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/lib/mac-learning.c b/lib/mac-learning.c
+index af46e3c..b7320e8 100644
+--- a/lib/mac-learning.c
++++ b/lib/mac-learning.c
+@@ -73,7 +73,7 @@ mac_table_bucket(const struct mac_learning *ml,
+                  uint16_t vlan)
+ {
+     uint32_t hash = mac_table_hash(mac, vlan);
+-    const struct list *list = &ml->table[hash & MAC_HASH_BITS];
++    const struct list *list = &ml->table[hash & MAC_HASH_MASK];
+     return (struct list *) list;
+ }
+ 
+-- 
+1.6.3.3
+

@@ -53,6 +53,9 @@
 # NIC-404
 0021-bond-Drop-packets-on-backup-slaves.patch
 
+# NIC-408
+0022-mac-learning-Fix-serious-performance-bug-in-the-lear.patch
+
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch

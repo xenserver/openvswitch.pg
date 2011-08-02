@@ -1,0 +1,121 @@
+From d2f723fde889e3b922234359f1ad6046fdcb862c Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Mon, 18 Jul 2011 14:30:42 -0700
+Subject: [PATCH 23/23] ofproto-dpif: Do not mirror L2 multicast switch protocols to VLANs.
+
+Mirroring certain protocols interpreted by switches to a VLAN can deceive
+the switch that receives it.  Drop such packets instead of mirroring them.
+
+CC: David Tsai <dtsai@nicira.com>
+NIC-401.
+---
+ vswitchd/bridge.c    |   43 ++++++++++++++++++++++++++++++++++++++++++-
+ vswitchd/vswitch.xml |   31 +++++++++++++++++++++++++++++++
+ 2 files changed, 73 insertions(+), 1 deletions(-)
+
+diff --git a/vswitchd/bridge.c b/vswitchd/bridge.c
+index 928d03c..86c5040 100644
+--- a/vswitchd/bridge.c
++++ b/vswitchd/bridge.c
+@@ -2702,6 +2702,47 @@ port_is_floodable(const struct port *port)
+     return true;
+ }
+ 
++/* Returns true if a packet with Ethernet destination MAC 'dst' may be mirrored
++ * to a VLAN.  In general most packets may be mirrored but we want to drop
++ * protocols that may confuse switches. */
++static bool
++eth_dst_may_rspan(const uint8_t dst[ETH_ADDR_LEN])
++{
++    /* If you change this function's behavior, please update corresponding
++     * documentation in vswitch.xml at the same time. */
++    if (dst[0] != 0x01) {
++        /* All the currently banned MACs happen to start with 01 currently, so
++         * this is a quick way to eliminate most of the good ones. */
++    } else {
++        if (eth_addr_is_reserved(dst)) {
++            /* Drop STP, IEEE pause frames, and other reserved protocols
++             * (01-80-c2-00-00-0x). */
++            return false;
++        }
++
++        if (dst[0] == 0x01 && dst[1] == 0x00 && dst[2] == 0x0c) {
++            /* Cisco OUI. */
++            if ((dst[3] & 0xfe) == 0xcc &&
++                (dst[4] & 0xfe) == 0xcc &&
++                (dst[5] & 0xfe) == 0xcc) {
++                /* Drop the following protocols plus others following the same
++                   pattern:
++
++                   CDP, VTP, DTP, PAgP  (01-00-0c-cc-cc-cc)
++                   Spanning Tree PVSTP+ (01-00-0c-cc-cc-cd)
++                   STP Uplink Fast      (01-00-0c-cd-cd-cd) */
++                return false;
++            }
++
++            if (!(dst[3] | dst[4] | dst[5])) {
++                /* Drop Inter Switch Link packets (01-00-0c-00-00-00). */
++                return false;
++            }
++        }
++    }
++    return true;
++}
++
+ static void
+ compose_dsts(const struct bridge *br, const struct flow *flow, uint16_t vlan,
+              const struct port *in_port, const struct port *out_port,
+@@ -2744,7 +2785,7 @@ compose_dsts(const struct bridge *br, const struct flow *flow, uint16_t vlan,
+                     && !dst_is_duplicate(set, &dst)) {
+                     dst_set_add(set, &dst);
+                 }
+-            } else {
++            } else if (eth_dst_may_rspan(flow->dl_dst)) {
+                 for (i = 0; i < br->n_ports; i++) {
+                     struct port *port = br->ports[i];
+                     if (port_includes_vlan(port, m->out_vlan)
+diff --git a/vswitchd/vswitch.xml b/vswitchd/vswitch.xml
+index 5c532e5..2f77669 100644
+--- a/vswitchd/vswitch.xml
++++ b/vswitchd/vswitch.xml
+@@ -1586,6 +1586,37 @@
+           <ref column="output_vlan"/>, replacing any existing tag; when it is
+           sent out an implicit VLAN port, the frame will not be tagged.  This
+           type of mirroring is sometimes called RSPAN.</p>
++        <p>
++          The following destination MAC addresses will not be mirrored to a
++          VLAN to avoid confusing switches that interpret the protocols that
++          they represent:
++        </p>
++        <dl>
++          <dt><code>01:80:c2:00:00:00</code></dt>
++          <dd>IEEE 802.1D Spanning Tree Protocol (STP).</dd>
++
++          <dt><code>01:80:c2:00:00:01</code></dt>
++          <dd>IEEE Pause frame.</dd>
++
++          <dt><code>01:80:c2:00:00:0<var>x</var></code></dt>
++          <dd>Other reserved protocols.</dd>
++
++          <dt><code>01:00:0c:cc:cc:cc</code></dt>
++          <dd>
++            Cisco Discovery Protocol (CDP), VLAN Trunking Protocol (VTP),
++            Dynamic Trunking Protocol (DTP), Port Aggregation Protocol (PAgP),
++            and others.
++          </dd>
++
++          <dt><code>01:00:0c:cc:cc:cd</code></dt>
++          <dd>Cisco Shared Spanning Tree Protocol PVSTP+.</dd>
++
++          <dt><code>01:00:0c:cd:cd:cd</code></dt>
++          <dd>Cisco STP Uplink Fast.</dd>
++
++          <dt><code>01:00:0c:00:00:00</code></dt>
++          <dd>Cisco Inter Switch Link.</dd>
++        </dl>
+         <p><em>Please note:</em> Mirroring to a VLAN can disrupt a network that
+           contains unmanaged switches.  Consider an unmanaged physical switch
+           with two ports: port 1, connected to an end host, and port 2,
+-- 
+1.6.3.3
+

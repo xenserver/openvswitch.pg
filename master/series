@@ -56,6 +56,9 @@
 # NIC-408
 0022-mac-learning-Fix-serious-performance-bug-in-the-lear.patch
 
+# NIC-401
+0023-ofproto-dpif-Do-not-mirror-L2-multicast-switch-proto.patch
+
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch

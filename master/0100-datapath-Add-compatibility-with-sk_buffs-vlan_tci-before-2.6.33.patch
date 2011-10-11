@@ -1,0 +1,91 @@
+Describe: 
+commit 3728652303e1d58fe67b90dfa2a07668289902c8
+Author: Ben Pfaff <blp@nicira.com>
+Date:   Wed Mar 23 10:34:37 2011 -0700
+
+    datapath: Add compatibility with sk_buff's vlan_tci before 2.6.33.
+    
+    Between 2.6.27 and 2.6.32, the vlan_tci member of struct sk_buff was the
+    raw value of the 802.1Q header's TCI field, without the CFI bit being set.
+    In 2.6.33 and later, the CFI bit is always set if an 802.1Q header is
+    present, correcting a corner case.
+    
+    Until now, OVS has not consistently dealt with this.  If a packet arrived
+    at a datapath from a network device directly, or if it was set with an
+    ODP_ACTION_ATTR_SET_DL_TCI action, then the CFI bit would not be set in
+    vlan_tci.  In flow_extract(), OVS copies vlan_tci directly to dl_tci in the
+    flow structure (via vlan_get_tci()), so the CFI bit would also not be set
+    in dl_tci.  But if OVS had to send a packet up to userspace (converting the
+    vlan_tci back to an 802.1Q header along the way) and got it back, then it
+    would set the VLAN CFI bit in dl_tci when it parsed the 802.1Q header in
+    parse_vlan().  This had the effect that a flow set up by userspace (with
+    the CFI bit set) would never be matched by a packet arriving from a network
+    device, because they would have different dl_tci values.
+    
+    This fixes the problem, by making the vlan_get_tci() and vlan_set_tci()
+    interface consistent across kernel versions.  Now, they always accept or
+    return a value where the VLAN CFI bit is set if an 802.1Q header is
+    present.
+    
+    Build-tested only.
+    
+    Problem isolated by Ethan Jackson <ethan@nicira.com>
+    
+    Signed-off-by: Ben Pfaff <blp@nicira.com>
+    Acked-by: Jesse Gross <jesse@nicira.com>
+    Reported-by: Ram Jothikumar <rjothikumar@nicira.com>
+    Bug #4915.
+
+diff --git a/datapath/vlan.h b/datapath/vlan.h
+index 02a6290..7e1084e 100644
+--- a/datapath/vlan.h
++++ b/datapath/vlan.h
+@@ -13,6 +13,29 @@
+ #include <linux/skbuff.h>
+ #include <linux/version.h>
+ 
++/**
++ * DOC: VLAN tag manipulation.
++ *
++ * &struct sk_buff handling of VLAN tags has evolved over time:
++ *
++ * In 2.6.26 and earlier, VLAN tags did not have any generic representation in
++ * an skb, other than as a raw 802.1Q header inside the packet data.
++ *
++ * In 2.6.27 &struct sk_buff added a @vlan_tci member.  Between 2.6.27 and
++ * 2.6.32, its value was the raw contents of the 802.1Q TCI field, or zero if
++ * no 802.1Q header was present.  This worked OK except for the corner case of
++ * an 802.1Q header with an all-0-bits TCI, which could not be represented.
++ *
++ * In 2.6.33, @vlan_tci semantics changed.  Now, if an 802.1Q header is
++ * present, then the VLAN_TAG_PRESENT bit is always set.  This fixes the
++ * all-0-bits TCI corner case.
++ *
++ * For compatibility we emulate the 2.6.33+ behavior on earlier kernel
++ * versions.  The client must not access @vlan_tci directly.  Instead, use
++ * vlan_get_tci() to read it or vlan_set_tci() to write it, with semantics
++ * equivalent to those on 2.6.33+.
++ */
++
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+ #define NEED_VLAN_FIELD
+ #endif
+@@ -22,11 +45,18 @@ static inline void vlan_copy_skb_tci(struct sk_buff *skb) { }
+ 
+ static inline u16 vlan_get_tci(struct sk_buff *skb)
+ {
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
++	if (skb->vlan_tci)
++		return skb->vlan_tci | VLAN_TAG_PRESENT;
++#endif
+ 	return skb->vlan_tci;
+ }
+ 
+ static inline void vlan_set_tci(struct sk_buff *skb, u16 vlan_tci)
+ {
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
++	vlan_tci &= ~VLAN_TAG_PRESENT;
++#endif
+ 	skb->vlan_tci = vlan_tci;
+ }
+ #else

@@ -1,4 +1,41 @@
-diff -r 1f259679d73b mk/Makefile
+diff -r 92e07789abce configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -92,7 +92,7 @@
+ 
+ AC_ARG_VAR(KARCH, [Kernel Architecture String])
+ AC_SUBST(KARCH)
+-OVS_CHECK_LINUX
++OVS_CHECK_LINUX26
+ 
+ AC_CONFIG_FILES([Makefile 
+ datapath/Makefile 
+diff -r 92e07789abce datapath/Makefile.am
+--- a/datapath/Makefile.am
++++ b/datapath/Makefile.am
+@@ -1,7 +1,7 @@
+ SUBDIRS = 
+-if LINUX_ENABLED
++#if LINUX_ENABLED
+ SUBDIRS += linux
+-endif
++#endif
+ 
+ EXTRA_DIST = $(dist_headers) $(dist_sources)
+ 
+diff -r 92e07789abce datapath/linux/Makefile.main.in
+--- a/datapath/linux/Makefile.main.in
++++ b/datapath/linux/Makefile.main.in
+@@ -2,7 +2,7 @@
+ export builddir = @abs_builddir@
+ export srcdir = @abs_srcdir@
+ export top_srcdir = @abs_top_srcdir@
+-export KSRC = @KBUILD@
++export KSRC = @KBUILD26@
+ export VERSION = @VERSION@
+ 
+ include $(srcdir)/../Modules.mk
+diff -r 92e07789abce mk/Makefile
 --- /dev/null
 +++ b/mk/Makefile
 @@ -0,0 +1,58 @@
@@ -60,10 +97,10 @@ diff -r 1f259679d73b mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 1f259679d73b mk/openvswitch.spec.in
+diff -r 92e07789abce mk/openvswitch.spec.in
 --- /dev/null
 +++ b/mk/openvswitch.spec.in
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,131 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -153,6 +190,13 @@ diff -r 1f259679d73b mk/openvswitch.spec.in
 +%dir /var/xen/openvswitch
 +%dir /var/lib/openvswitch
 +%dir /var/log/openvswitch
++/etc/openvswitch/bugtool-plugins/kernel-info/openvswitch.xml
++/etc/openvswitch/bugtool-plugins/network-status/openvswitch.xml
++/etc/openvswitch/bugtool-plugins/system-configuration.xml
++/etc/openvswitch/bugtool-plugins/system-configuration/openvswitch.xml
++/etc/openvswitch/bugtool-plugins/system-logs/openvswitch.xml
++%{_bindir}/ovs-benchmark
++%{_bindir}/ovs-parse-leaks
 +%{_bindir}/ovs-appctl
 +%{_bindir}/ovs-dpctl
 +%{_bindir}/ovs-ofctl
@@ -162,6 +206,7 @@ diff -r 1f259679d73b mk/openvswitch.spec.in
 +%{_bindir}/ovs-vsctl
 +%{_bindir}/ovsdb-client
 +%{_bindir}/ovsdb-tool
++%{_sbindir}/ovs-bugtool
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
 +%{_sbindir}/ovsdb-server
@@ -182,5 +227,8 @@ diff -r 1f259679d73b mk/openvswitch.spec.in
 +%{_mandir}/man8/ovs-vsctl.8.gz
 +%{_mandir}/man8/ovs-vswitchd.8.gz
 +%{_mandir}/man8/ovs-vlan-bug-workaround.8.gz
++%{_mandir}/man1/ovs-benchmark.1.gz
++%{_mandir}/man8/ovs-bugtool.8.gz
++%{_mandir}/man8/ovs-ctl.8.gz
 +
 +%changelog

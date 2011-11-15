@@ -1,25 +1,30 @@
-diff -r 39c40ef63038 xenserver/etc_init.d_openvswitch
---- a/xenserver/etc_init.d_openvswitch
-+++ b/xenserver/etc_init.d_openvswitch
-@@ -90,8 +90,8 @@
- : ${OVSDB_SERVER_RUN_DIR:=/var/xen/openvswitch}
- : ${OVSDB_SERVER_PRIORITY:=-10}
- : ${OVSDB_SERVER_LOGFILE:=/var/log/openvswitch/ovsdb-server.log}
--: ${OVSDB_SERVER_FILE_LOGLEVEL:=INFO}
--: ${OVSDB_SERVER_SYSLOG_LOGLEVEL:=ERR}
-+: ${OVSDB_SERVER_FILE_LOGLEVEL:=EMER}
-+: ${OVSDB_SERVER_SYSLOG_LOGLEVEL:=INFO}
- : ${OVSDB_SERVER_MEMLEAK_LOGFILE:=}
- : ${OVSDB_SERVER_STRACE_LOG:=}
- : ${OVSDB_SERVER_STRACE_OPT:=}
-@@ -106,8 +106,8 @@
- : ${VSWITCHD_PRIORITY:=-10}
- : ${VSWITCHD_MLOCKALL:=yes}
- : ${VSWITCHD_LOGFILE:=/var/log/openvswitch/ovs-vswitchd.log}
--: ${VSWITCHD_FILE_LOGLEVEL:=INFO}
--: ${VSWITCHD_SYSLOG_LOGLEVEL:=ERR}
-+: ${VSWITCHD_FILE_LOGLEVEL:=EMER}
-+: ${VSWITCHD_SYSLOG_LOGLEVEL:=INFO}
- : ${VSWITCHD_MEMLEAK_LOGFILE:=}
- : ${VSWITCHD_STRACE_LOG:=}
- : ${VSWITCHD_STRACE_OPT:=}
+diff -r 7bd2342ff7b8 utilities/ovs-ctl.in
+--- a/utilities/ovs-ctl.in
++++ b/utilities/ovs-ctl.in
+@@ -177,7 +177,7 @@
+ 
+ 	# Start ovsdb-server.
+ 	set ovsdb-server "$DB_FILE"
+-	set "$@" -vANY:CONSOLE:EMER -vANY:SYSLOG:ERR -vANY:FILE:INFO
++	set "$@" -vANY:CONSOLE:EMER -vANY:SYSLOG:INFO -vANY:FILE:EMER
+ 	set "$@" --remote=punix:"$DB_SOCK"
+ 	set "$@" --remote=db:Open_vSwitch,manager_options
+ 	set "$@" --private-key=db:SSL,private_key
+@@ -205,7 +205,7 @@
+ 
+ 	# Start ovs-vswitchd.
+ 	set ovs-vswitchd unix:"$DB_SOCK"
+-	set "$@" -vANY:CONSOLE:EMER -vANY:SYSLOG:ERR -vANY:FILE:INFO
++	set "$@" -vANY:CONSOLE:EMER -vANY:SYSLOG:INFO -vANY:FILE:EMER
+ 	if test X"$MLOCKALL" != Xno; then
+ 	    set "$@" --mlockall
+ 	fi
+@@ -216,7 +216,7 @@
+ 	log_success_msg "ovs-brcompatd is already running"
+     elif test X"$BRCOMPAT" = Xyes; then
+         set ovs-brcompatd
+-	set "$@" -vANY:CONSOLE:EMER -vANY:SYSLOG:ERR -vANY:FILE:INFO
++	set "$@" -vANY:CONSOLE:EMER -vANY:SYSLOG:EMER -vANY:FILE:EMER
+ 	start_daemon "$OVS_BRCOMPATD_PRIORITY" "$@"
+     fi
+ }

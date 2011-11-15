@@ -3,63 +3,6 @@
 #  $ git co -b vlan-maint origin/vlan-maint
 #  $ git format-patch -n -o ./output/ 28a14bf3d86e..HEAD
 
-# NIC-372
-0001-ofproto-Consistently-use-netdev-s-name-instead-of-of.patch
-0002-ofproto-Rework-and-fix-bugs-in-port-change-detection.patch
-0003-ofproto-Adjust-netdev_monitor-when-switching-netdevs.patch
-
-# SPEC change for Nicira testing
-0004-xenserver-modify-module-spec-file.patch
-0005-xenserver-remove-unneeded-macro-definitions.patch
-
-# NIC-383
-0006-ovsdb-Truncate-bad-transactions-from-database-log.patch
-
-# NIC-384 prerequisite
-0007-ovsdb-types-Fix-bug-in-ovsdb_base_type_is_ref.patch
-
-# NIC-384
-0008-ovsdb-Force-strong-references-to-non-root-tables-to-.patch
-
-# NIC-386
-0009-datapath-Avoid-memory-leak-in-odp_packet_cmd_execute.patch
-
-# NIC-388
-0010-bridge-Memory-leak-in-port_destroy.patch
-
-# NIC-389
-0011-datapath-Avoid-freeing-wild-pointer-in-corner-case.patch
-
-# NIC-390
-0012-xenserver-Use-.-extra-not-.-kernel-extra-for-kernel-.patch
-
-# NIC-391
-0013-xenserver-Don-t-remove-network.dbcache-on-uninstall.patch
-0014-xenserver-Pull-slave-MTU-from-bond-record.patch
-
-# NIC-395
-0016-stream-ssl-Disable-SSL-session-caching.patch
-
-# NIC-376
-0017-xenserver-allow-dom0-traffic-in-secure-pool-host-whe.patch
-
-# NIC-397
-0018-ovsdb-doc-Add-support-for-references-to-specific-key.patch
-0019-bridge-Enable-system-stats-only-if-turned-on-in-the-.patch
-
-# NIC-405
-0020-datapath-An-expanded-table-should-be-larger-than-its.patch
-
-# NIC-404
-0021-bond-Drop-packets-on-backup-slaves.patch
-
-# NIC-408
-0022-mac-learning-Fix-serious-performance-bug-in-the-lear.patch
-
-# NIC-401
-0023-ofproto-dpif-Do-not-mirror-L2-multicast-switch-proto.patch
-0100-datapath-Add-compatibility-with-sk_buffs-vlan_tci-before-2.6.33.patch
-
 
 # patches proposed upstream
 xenserver-correct-status-when-not-in-vswitch-mode.patch
@@ -70,7 +13,7 @@ disable-incompatible-tests.patch
 python-uuid.patch
 hgignore
 build-integration.patch
-make-ovs-external-ids-daemon-optional.patch
+#make-ovs-external-ids-daemon-optional.patch
 change-log-level-to-log-to-syslog.patch
 #CA-61121-drop-disk-stats   (now see patches 0018 & 0019)
 #log-all-mac-learning-msg-for-debug.patch

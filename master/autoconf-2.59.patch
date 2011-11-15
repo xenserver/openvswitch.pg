@@ -1,4 +1,4 @@
-diff -r 6eceee6cd9e0 Makefile.am
+diff -r a31eafe05965 Makefile.am
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -5,6 +5,8 @@
@@ -10,20 +10,18 @@ diff -r 6eceee6cd9e0 Makefile.am
  AUTOMAKE_OPTIONS = foreign subdir-objects
  ACLOCAL_AMFLAGS = -I m4
  SUBDIRS = datapath
-diff -r 6eceee6cd9e0 configure.ac
+diff -r a31eafe05965 configure.ac
 --- a/configure.ac
 +++ b/configure.ac
-@@ -12,8 +12,8 @@
+@@ -12,7 +12,7 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
  
 -AC_PREREQ(2.64)
--AC_INIT(openvswitch, 1.1.0pre2, ovs-bugs@openvswitch.org)
 +AC_PREREQ(2.59)
-+AC_INIT(openvswitch, 1.0.99, ovs-bugs@openvswitch.org)
+ AC_INIT(openvswitch, 1.2.2, ovs-bugs@openvswitch.org)
  NX_BUILDNR
  AC_CONFIG_SRCDIR([datapath/datapath.c])
- AC_CONFIG_MACRO_DIR([m4])
 @@ -26,7 +26,6 @@
  AM_PROG_CC_C_O
  AC_PROG_CPP
@@ -44,10 +42,10 @@ diff -r 6eceee6cd9e0 configure.ac
  AC_C_BIGENDIAN
  AC_SYS_LARGEFILE
  
-diff -r 6eceee6cd9e0 m4/openvswitch.m4
+diff -r a31eafe05965 m4/openvswitch.m4
 --- a/m4/openvswitch.m4
 +++ b/m4/openvswitch.m4
-@@ -247,9 +247,9 @@
+@@ -251,9 +251,9 @@
       [ovs_cv_py_[]AS_TR_SH([$1])],
       [ovs_cv_py_[]AS_TR_SH([$1])=no
        if test $HAVE_PYTHON = yes; then
@@ -60,7 +58,7 @@ diff -r 6eceee6cd9e0 m4/openvswitch.m4
          if $PYTHON -c 'import $1
  import sys
  sys.exit(0)' >&AS_MESSAGE_LOG_FD 2>&1; then
-@@ -301,12 +301,12 @@
+@@ -305,12 +305,12 @@
  mv conftest.$ac_ext conftest2.$ac_ext
  rm -f conftest1.$ac_objext conftest2.$ac_objext conftest$ac_exeext
  ovs_link2='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest1.$ac_ext conftest2.$ac_ext $LIBS >&5'

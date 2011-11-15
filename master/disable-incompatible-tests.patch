@@ -1,6 +1,6 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r 05308fb35f59 tests/check-structs.at
+diff -r b57b56ae452c tests/check-structs.at
 --- a/tests/check-structs.at
 +++ b/tests/check-structs.at
 @@ -1,11 +1,11 @@
@@ -21,7 +21,7 @@ diff -r 05308fb35f59 tests/check-structs.at
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r 05308fb35f59 tests/classifier.at
+diff -r b57b56ae452c tests/classifier.at
 --- a/tests/classifier.at
 +++ b/tests/classifier.at
 @@ -1,14 +1,14 @@
@@ -52,7 +52,7 @@ diff -r 05308fb35f59 tests/classifier.at
 +dnl  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
 +dnl   AT_CHECK([test-classifier testname], [0], [], [])
 +dnl   AT_CLEANUP])])
-diff -r 05308fb35f59 tests/daemon-py.at
+diff -r b57b56ae452c tests/daemon-py.at
 --- a/tests/daemon-py.at
 +++ b/tests/daemon-py.at
 @@ -1,9 +1,9 @@
@@ -67,7 +67,7 @@ diff -r 05308fb35f59 tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([expected])
  # Start the daemon and wait for the pidfile to get created
  # and that its contents are the correct pid.
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid& echo $! > expected], [0], [ignore], [ignore])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid& echo $! > expected], [0])
 @@ -19,11 +19,11 @@
  AT_CLEANUP
  
@@ -83,7 +83,7 @@ diff -r 05308fb35f59 tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([parentpid])
 +dnl AT_CAPTURE_FILE([newpid])
  # Start the daemon and wait for the pidfile to get created.
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --monitor& echo $! > parent], [0], [ignore], [ignore])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --monitor& echo $! > parent], [0])
  OVS_WAIT_UNTIL([test -s pid], [kill `cat parent`])
 @@ -62,11 +62,11 @@
  AT_CLEANUP
@@ -100,7 +100,7 @@ diff -r 05308fb35f59 tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([parentpid])
 +dnl AT_CAPTURE_FILE([newpid])
  # Start the daemon and wait for the pidfile to get created.
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --monitor& echo $! > parent], [0], [ignore], [ignore])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --monitor& echo $! > parent], [0])
  OVS_WAIT_UNTIL([test -s pid], [kill `cat parent`])
 @@ -105,8 +105,8 @@
  AT_CLEANUP
@@ -186,7 +186,7 @@ diff -r 05308fb35f59 tests/daemon-py.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --detach], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r 05308fb35f59 tests/daemon.at
+diff -r b57b56ae452c tests/daemon.at
 --- a/tests/daemon.at
 +++ b/tests/daemon.at
 @@ -1,10 +1,10 @@
@@ -202,7 +202,7 @@ diff -r 05308fb35f59 tests/daemon.at
 +dnl AT_CAPTURE_FILE([expected])
  # Start the daemon and wait for the pidfile to get created
  # and that its contents are the correct pid.
- AT_CHECK([ovsdb-server --pidfile=$PWD/pid --remote=punix:socket --unixctl=$PWD/unixctl db& echo $! > expected], [0], [ignore], [ignore])
+ AT_CHECK([ovsdb-server --pidfile=$PWD/pid --remote=punix:socket --unixctl=$PWD/unixctl db& echo $! > expected], [0])
 @@ -20,12 +20,12 @@
  AT_CLEANUP
  
@@ -219,7 +219,7 @@ diff -r 05308fb35f59 tests/daemon.at
 +dnl AT_CAPTURE_FILE([parentpid])
 +dnl AT_CAPTURE_FILE([newpid])
  # Start the daemon and wait for the pidfile to get created.
- AT_CHECK([ovsdb-server --monitor --pidfile=$PWD/pid --remote=punix:socket --unixctl=$PWD/unixctl db& echo $! > parent], [0], [ignore], [ignore])
+ AT_CHECK([ovsdb-server --monitor --pidfile=$PWD/pid --remote=punix:socket --unixctl=$PWD/unixctl db& echo $! > parent], [0])
  OVS_WAIT_UNTIL([test -s pid], [kill `cat parent`])
 @@ -64,8 +64,8 @@
  AT_CLEANUP
@@ -304,7 +304,7 @@ diff -r 05308fb35f59 tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r 05308fb35f59 tests/json.at
+diff -r b57b56ae452c tests/json.at
 --- a/tests/json.at
 +++ b/tests/json.at
 @@ -2,7 +2,7 @@
@@ -371,7 +371,7 @@ diff -r 05308fb35f59 tests/json.at
  AT_CHECK([printf '"xxx' > input
  $PYTHON $srcdir/test-json.py input], [1],
    [error: line 0, column 4, byte 4: unexpected end of input in quoted string
-diff -r 05308fb35f59 tests/jsonrpc-py.at
+diff -r b57b56ae452c tests/jsonrpc-py.at
 --- a/tests/jsonrpc-py.at
 +++ b/tests/jsonrpc-py.at
 @@ -1,7 +1,7 @@
@@ -401,7 +401,7 @@ diff -r 05308fb35f59 tests/jsonrpc-py.at
  AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile-name=$PWD/pid listen punix:socket])
  AT_CHECK([test -s pid])
  # When a daemon dies it deletes its pidfile, so make a copy.
-diff -r 05308fb35f59 tests/lockfile.at
+diff -r b57b56ae452c tests/lockfile.at
 --- a/tests/lockfile.at
 +++ b/tests/lockfile.at
 @@ -1,12 +1,12 @@
@@ -424,10 +424,10 @@ diff -r 05308fb35f59 tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r 05308fb35f59 tests/ofp-print.at
+diff -r b57b56ae452c tests/ofp-print.at
 --- a/tests/ofp-print.at
 +++ b/tests/ofp-print.at
-@@ -217,7 +217,7 @@
+@@ -225,7 +225,7 @@
  
  AT_SETUP([OFPT_PACKET_IN])
  AT_KEYWORDS([ofp-print])
@@ -436,31 +436,37 @@ diff -r 05308fb35f59 tests/ofp-print.at
  AT_CHECK([ovs-ofctl ofp-print "\
  01 0a 00 4e 00 00 00 00 00 00 01 11 00 3c 00 03 \
  00 00 50 54 00 00 00 06 50 54 00 00 00 05 08 00 \
-diff -r 05308fb35f59 tests/ofproto-macros.at
+diff -r b57b56ae452c tests/ofproto-macros.at
 --- a/tests/ofproto-macros.at
 +++ b/tests/ofproto-macros.at
-@@ -5,7 +5,7 @@
+@@ -6,7 +6,7 @@
    [OVS_RUNDIR=$PWD; export OVS_RUNDIR
     OVS_LOGDIR=$PWD; export OVS_LOGDIR
-    trap 'kill `cat ovs-openflowd.pid`' 0
--   AT_CAPTURE_FILE([ovs-openflowd.log])
-+dnl   AT_CAPTURE_FILE([ovs-openflowd.log])
+    trap 'kill `cat test-openflowd.pid`' 0
+-   AT_CAPTURE_FILE([test-openflowd.log])
++dnl   AT_CAPTURE_FILE([test-openflowd.log])
     AT_CHECK(
-      [ovs-openflowd --detach --pidfile --enable-dummy --log-file dummy@br0 none --datapath-id=fedcba9876543210 $1],
-      [0], [ignore], [ignore])
-diff -r 05308fb35f59 tests/ofproto.at
+      [test-openflowd --detach --pidfile --enable-dummy --log-file --fail=closed dummy@br0 none --datapath-id=fedcba9876543210 $1],
+      [0], [], [stderr])
+diff -r b57b56ae452c tests/ofproto.at
 --- a/tests/ofproto.at
 +++ b/tests/ofproto.at
-@@ -31,7 +31,7 @@
-     command=$[1] config=$[2] state=$[3]
+@@ -57,10 +57,10 @@
+     command=$[1] config=`echo $[2] | sed 's/,/ /g'` state=$[3]
      AT_CHECK([ovs-ofctl -vANY:ANY:WARN mod-port br0 br0 $command])
      AT_CHECK([ovs-ofctl -vANY:ANY:WARN show br0], [0], [stdout])
 -    AT_CHECK_UNQUOTED([STRIP_XIDS stdout], [0], [dnl
+-OFPT_FEATURES_REPLY: ver:0x1, dpid:fedcba9876543210
+-n_tables:1, n_buffers:256
+-features: capabilities:0x87, actions:0xfff
 +dnl    AT_CHECK_UNQUOTED([STRIP_XIDS stdout], [0], [dnl
- OFPT_FEATURES_REPLY: ver:0x1, dpid:fedcba9876543210
- n_tables:2, n_buffers:256
- features: capabilities:0x87, actions:0xfff
-diff -r 05308fb35f59 tests/ovsdb-idl-py.at
++dnl OFPT_FEATURES_REPLY: ver:0x1, dpid:fedcba9876543210
++dnl n_tables:1, n_buffers:256
++dnl features: capabilities:0x87, actions:0xfff
+  LOCAL(br0): addr:aa:55:aa:55:00:00
+      config:     $config
+      state:      $state
+diff -r b57b56ae452c tests/ovsdb-idl-py.at
 --- a/tests/ovsdb-idl-py.at
 +++ b/tests/ovsdb-idl-py.at
 @@ -18,7 +18,7 @@
@@ -472,7 +478,7 @@ diff -r 05308fb35f59 tests/ovsdb-idl-py.at
     AT_KEYWORDS([ovsdb server idl positive Python $5])
     AT_CHECK([ovsdb-tool create db $abs_srcdir/idltest.ovsschema],
                    [0], [stdout], [ignore])
-diff -r 05308fb35f59 tests/ovsdb-log.at
+diff -r b57b56ae452c tests/ovsdb-log.at
 --- a/tests/ovsdb-log.at
 +++ b/tests/ovsdb-log.at
 @@ -2,7 +2,7 @@
@@ -574,7 +580,7 @@ diff -r 05308fb35f59 tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r 05308fb35f59 tests/ovsdb-monitor.at
+diff -r b57b56ae452c tests/ovsdb-monitor.at
 --- a/tests/ovsdb-monitor.at
 +++ b/tests/ovsdb-monitor.at
 @@ -24,7 +24,7 @@
@@ -586,10 +592,10 @@ diff -r 05308fb35f59 tests/ovsdb-monitor.at
     AT_CHECK([ovsdb-server --detach --pidfile=$PWD/server-pid --remote=punix:socket --unixctl=$PWD/unixctl --log-file=$PWD/ovsdb-server-log db >/dev/null 2>&1],
              [0], [], [])
     AT_CHECK([ovsdb-client -vjsonrpc --detach --pidfile=$PWD/client-pid -d json monitor --format=csv unix:socket $4 $5 $8 > output], 
-diff -r 05308fb35f59 tests/ovsdb-server.at
+diff -r b57b56ae452c tests/ovsdb-server.at
 --- a/tests/ovsdb-server.at
 +++ b/tests/ovsdb-server.at
-@@ -103,11 +103,11 @@
+@@ -198,11 +198,11 @@
  
  AT_SETUP([SSL db: implementation])
  AT_KEYWORDS([ovsdb server positive ssl $5])
@@ -604,7 +610,7 @@ diff -r 05308fb35f59 tests/ovsdb-server.at
  \\]"])
  AT_DATA([schema],
    [[{"name": "mydb",
-@@ -148,10 +148,10 @@
+@@ -243,10 +243,10 @@
             "columns": ["private_key"]}]']], 
    [0], [stdout], [ignore], [test ! -e pid || kill `cat pid`])
  cat stdout >> output
@@ -619,7 +625,7 @@ diff -r 05308fb35f59 tests/ovsdb-server.at
  OVSDB_SERVER_SHUTDOWN
  AT_CLEANUP
  
-@@ -162,7 +162,7 @@
+@@ -257,7 +257,7 @@
  touch .db.~lock~
  AT_CHECK([ovsdb-tool create db schema], [0], [ignore], [ignore])
  AT_CHECK([ovsdb-server --detach --pidfile=$PWD/pid --unixctl=$PWD/unixctl --remote=punix:socket --log-file=$PWD/ovsdb-server.log db], [0], [ignore], [ignore])
@@ -628,7 +634,7 @@ diff -r 05308fb35f59 tests/ovsdb-server.at
  dnl Do a bunch of random transactions that put crap in the database log.
  AT_CHECK(
    [[for pair in 'zero 0' 'one 1' 'two 2' 'three 3' 'four 4' 'five 5'; do
-@@ -232,7 +232,7 @@
+@@ -327,7 +327,7 @@
  dnl We can't fully re-check the contents of the database log, because the
  dnl order of the records is not predictable, but there should only be 4 lines
  dnl in it now.
@@ -637,7 +643,7 @@ diff -r 05308fb35f59 tests/ovsdb-server.at
  AT_CHECK([wc -l < db], [0], [4
  ], [], [test ! -e pid || kill `cat pid`])
  dnl And check that the dumped data is the same too:
-@@ -294,8 +294,8 @@
+@@ -389,8 +389,8 @@
  m4_define([OVSDB_CHECK_EXECUTION], 
    [AT_SETUP([$1])
     AT_KEYWORDS([ovsdb server positive ssl $5])
@@ -648,7 +654,7 @@ diff -r 05308fb35f59 tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r 05308fb35f59 tests/ovsdb-tool.at
+diff -r b57b56ae452c tests/ovsdb-tool.at
 --- a/tests/ovsdb-tool.at
 +++ b/tests/ovsdb-tool.at
 @@ -123,7 +123,7 @@
@@ -678,7 +684,7 @@ diff -r 05308fb35f59 tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r 05308fb35f59 tests/ovsdb.at
+diff -r b57b56ae452c tests/ovsdb.at
 --- a/tests/ovsdb.at
 +++ b/tests/ovsdb.at
 @@ -23,7 +23,7 @@
@@ -699,7 +705,7 @@ diff -r 05308fb35f59 tests/ovsdb.at
     AT_KEYWORDS([ovsdb negative $4])
     AT_CHECK([$PYTHON $srcdir/test-ovsdb.py $2], [1], [], [stderr])
     m4_assert(m4_len([$3]))
-diff -r 05308fb35f59 tests/reconnect.at
+diff -r b57b56ae452c tests/reconnect.at
 --- a/tests/reconnect.at
 +++ b/tests/reconnect.at
 @@ -17,7 +17,7 @@
@@ -711,7 +717,7 @@ diff -r 05308fb35f59 tests/reconnect.at
       [$2],
       [$PYTHON $srcdir/test-reconnect.py < input],
       [$3])])
-diff -r 05308fb35f59 tests/uuid.at
+diff -r b57b56ae452c tests/uuid.at
 --- a/tests/uuid.at
 +++ b/tests/uuid.at
 @@ -32,7 +32,7 @@
@@ -723,7 +729,7 @@ diff -r 05308fb35f59 tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r 05308fb35f59 tests/vconn.at
+diff -r b57b56ae452c tests/vconn.at
 --- a/tests/vconn.at
 +++ b/tests/vconn.at
 @@ -1,21 +1,21 @@

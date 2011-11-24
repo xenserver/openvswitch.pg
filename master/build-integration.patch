@@ -1,4 +1,4 @@
-diff -r 92e07789abce configure.ac
+diff -r fc2bf8e0ac9d configure.ac
 --- a/configure.ac
 +++ b/configure.ac
 @@ -92,7 +92,7 @@
@@ -10,7 +10,7 @@ diff -r 92e07789abce configure.ac
  
  AC_CONFIG_FILES([Makefile 
  datapath/Makefile 
-diff -r 92e07789abce datapath/Makefile.am
+diff -r fc2bf8e0ac9d datapath/Makefile.am
 --- a/datapath/Makefile.am
 +++ b/datapath/Makefile.am
 @@ -1,7 +1,7 @@
@@ -23,7 +23,7 @@ diff -r 92e07789abce datapath/Makefile.am
  
  EXTRA_DIST = $(dist_headers) $(dist_sources)
  
-diff -r 92e07789abce datapath/linux/Makefile.main.in
+diff -r fc2bf8e0ac9d datapath/linux/Makefile.main.in
 --- a/datapath/linux/Makefile.main.in
 +++ b/datapath/linux/Makefile.main.in
 @@ -2,7 +2,7 @@
@@ -35,7 +35,7 @@ diff -r 92e07789abce datapath/linux/Makefile.main.in
  export VERSION = @VERSION@
  
  include $(srcdir)/../Modules.mk
-diff -r 92e07789abce mk/Makefile
+diff -r fc2bf8e0ac9d mk/Makefile
 --- /dev/null
 +++ b/mk/Makefile
 @@ -0,0 +1,58 @@
@@ -97,10 +97,10 @@ diff -r 92e07789abce mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 92e07789abce mk/openvswitch.spec.in
+diff -r fc2bf8e0ac9d mk/openvswitch.spec.in
 --- /dev/null
 +++ b/mk/openvswitch.spec.in
-@@ -0,0 +1,131 @@
+@@ -0,0 +1,170 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -147,8 +147,7 @@ diff -r 92e07789abce mk/openvswitch.spec.in
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-kill.8 \
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-openflowd.8 \
 +    $RPM_BUILD_ROOT/%{_mandir}/man8/ovs-pki.8 \
-+    $RPM_BUILD_ROOT/%{_mandir}/man8/secchan.8 \
-+    $RPM_BUILD_ROOT/usr/share/openvswitch
++    $RPM_BUILD_ROOT/%{_mandir}/man8/secchan.8
 +
 +install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
 +install -d -m 755 $RPM_BUILD_ROOT/var/log/openvswitch
@@ -175,6 +174,11 @@ diff -r 92e07789abce mk/openvswitch.spec.in
 +install -d -m 755 $RPM_BUILD_ROOT/usr/share/openvswitch
 +install -m 644 vswitchd/vswitch.ovsschema \
 +         $RPM_BUILD_ROOT/usr/share/openvswitch/vswitch.ovsschema
++
++install -m 755 xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync \
++         $RPM_BUILD_ROOT/usr/share/openvswitch/scripts/ovs-xapi-sync
++	 
++install xenserver/uuid.py $RPM_BUILD_ROOT/usr/share/openvswitch/python
 +
 +%clean
 +rm -rf %{buildroot}
@@ -211,7 +215,34 @@ diff -r 92e07789abce mk/openvswitch.spec.in
 +%{_sbindir}/ovs-vswitchd
 +%{_sbindir}/ovsdb-server
 +%{_sbindir}/ovs-vlan-bug-workaround
++/usr/share/openvswitch/python/ovs/__init__.py
++/usr/share/openvswitch/python/ovs/daemon.py
++/usr/share/openvswitch/python/ovs/db/__init__.py
++/usr/share/openvswitch/python/ovs/db/data.py
++/usr/share/openvswitch/python/ovs/db/error.py
++/usr/share/openvswitch/python/ovs/db/idl.py
++/usr/share/openvswitch/python/ovs/db/parser.py
++/usr/share/openvswitch/python/ovs/db/schema.py
++/usr/share/openvswitch/python/ovs/db/types.py
++/usr/share/openvswitch/python/ovs/dirs.py
++/usr/share/openvswitch/python/ovs/fatal_signal.py
++/usr/share/openvswitch/python/ovs/json.py
++/usr/share/openvswitch/python/ovs/jsonrpc.py
++/usr/share/openvswitch/python/ovs/ovsuuid.py
++/usr/share/openvswitch/python/ovs/poller.py
++/usr/share/openvswitch/python/ovs/process.py
++/usr/share/openvswitch/python/ovs/reconnect.py
++/usr/share/openvswitch/python/ovs/socket_util.py
++/usr/share/openvswitch/python/ovs/stream.py
++/usr/share/openvswitch/python/ovs/timeval.py
++/usr/share/openvswitch/python/ovs/util.py
++/usr/share/openvswitch/python/uuid.py
 +/usr/share/openvswitch/vswitch.ovsschema
++/usr/share/openvswitch/scripts/ovs-lib.sh
++/usr/share/openvswitch/scripts/ovs-bugtool-*
++/usr/share/openvswitch/scripts/ovs-ctl
++/usr/share/openvswitch/scripts/ovs-save
++/usr/share/openvswitch/scripts/ovs-xapi-sync
 +%{_mandir}/man1/ovsdb-client.1.gz
 +%{_mandir}/man1/ovsdb-tool.1.gz
 +%{_mandir}/man1/ovsdb-server.1.gz
@@ -230,5 +261,24 @@ diff -r 92e07789abce mk/openvswitch.spec.in
 +%{_mandir}/man1/ovs-benchmark.1.gz
 +%{_mandir}/man8/ovs-bugtool.8.gz
 +%{_mandir}/man8/ovs-ctl.8.gz
++#%exclude /usr/lib/xsconsole/plugins-base/*.py[co]
++%exclude /usr/sbin/ovs-brcompatd
++%exclude /usr/share/man/man8/ovs-brcompatd.8.gz
++#%exclude /usr/share/openvswitch/scripts/*.py[co]
++%exclude /usr/share/openvswitch/python/*.py[co]
++%exclude /usr/share/openvswitch/python/ovs/*.py[co]
++%exclude /usr/share/openvswitch/python/ovs/db/*.py[co]
++
 +
 +%changelog
+diff -r fc2bf8e0ac9d xenserver/openvswitch-xen.spec
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -395,6 +395,7 @@
+ %exclude /usr/share/openvswitch/python/ovs/*.py[co]
+ %exclude /usr/share/openvswitch/python/ovs/db/*.py[co]
+ 
++
+ %files %{module_package}
+ /lib/modules/%{xen_version}/extra/openvswitch/openvswitch_mod.ko
+ %exclude /lib/modules/%{xen_version}/extra/openvswitch/brcompat_mod.ko

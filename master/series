@@ -13,6 +13,7 @@ disable-incompatible-tests.patch
 python-uuid.patch
 hgignore
 build-integration.patch
+fixup-of-acinclude.m4-to-work-with-older-tools.patch
 #make-ovs-external-ids-daemon-optional.patch
 change-log-level-to-log-to-syslog.patch
 #CA-61121-drop-disk-stats   (now see patches 0018 & 0019)

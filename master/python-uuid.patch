@@ -1,8 +1,8 @@
-diff -r 315dc9103882 python/ovs/db/data.py
---- a/python/ovs/db/data.py	Mon Sep 13 14:57:42 2010 +0100
-+++ b/python/ovs/db/data.py	Mon Sep 13 14:58:30 2010 +0100
-@@ -220,8 +220,8 @@ class Atom(object):
-             t = ovs.db.types.RealType
+diff -r 43115036e5b8 python/ovs/db/data.py
+--- a/python/ovs/db/data.py
++++ b/python/ovs/db/data.py
+@@ -243,8 +243,8 @@
+             t = ovs.db.types.BooleanType
          elif type(x) in [str, unicode]:
              t = ovs.db.types.StringType
 -        elif isinstance(x, uuid):
@@ -12,9 +12,9 @@ diff -r 315dc9103882 python/ovs/db/data.py
          else:
              raise TypeError
          return Atom(t, x)
-diff -r 315dc9103882 python/uuid.py
---- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/python/uuid.py	Mon Sep 13 14:58:30 2010 +0100
+diff -r 43115036e5b8 python/uuid.py
+--- /dev/null
++++ b/python/uuid.py
 @@ -0,0 +1,541 @@
 +r"""UUID objects (universally unique identifiers) according to RFC 4122.
 +

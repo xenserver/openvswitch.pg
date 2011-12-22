@@ -1,16 +1,4 @@
-diff -r fc2bf8e0ac9d configure.ac
---- a/configure.ac
-+++ b/configure.ac
-@@ -92,7 +92,7 @@
- 
- AC_ARG_VAR(KARCH, [Kernel Architecture String])
- AC_SUBST(KARCH)
--OVS_CHECK_LINUX
-+OVS_CHECK_LINUX26
- 
- AC_CONFIG_FILES([Makefile 
- datapath/Makefile 
-diff -r fc2bf8e0ac9d datapath/Makefile.am
+diff -r 22fa0ee1b4eb datapath/Makefile.am
 --- a/datapath/Makefile.am
 +++ b/datapath/Makefile.am
 @@ -1,7 +1,7 @@
@@ -21,21 +9,9 @@ diff -r fc2bf8e0ac9d datapath/Makefile.am
 -endif
 +#endif
  
- EXTRA_DIST = $(dist_headers) $(dist_sources)
+ EXTRA_DIST = $(dist_headers) $(dist_sources) $(dist_extras)
  
-diff -r fc2bf8e0ac9d datapath/linux/Makefile.main.in
---- a/datapath/linux/Makefile.main.in
-+++ b/datapath/linux/Makefile.main.in
-@@ -2,7 +2,7 @@
- export builddir = @abs_builddir@
- export srcdir = @abs_srcdir@
- export top_srcdir = @abs_top_srcdir@
--export KSRC = @KBUILD@
-+export KSRC = @KBUILD26@
- export VERSION = @VERSION@
- 
- include $(srcdir)/../Modules.mk
-diff -r fc2bf8e0ac9d mk/Makefile
+diff -r 22fa0ee1b4eb mk/Makefile
 --- /dev/null
 +++ b/mk/Makefile
 @@ -0,0 +1,58 @@
@@ -97,10 +73,10 @@ diff -r fc2bf8e0ac9d mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r fc2bf8e0ac9d mk/openvswitch.spec.in
+diff -r 22fa0ee1b4eb mk/openvswitch.spec.in
 --- /dev/null
 +++ b/mk/openvswitch.spec.in
-@@ -0,0 +1,170 @@
+@@ -0,0 +1,173 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -178,7 +154,8 @@ diff -r fc2bf8e0ac9d mk/openvswitch.spec.in
 +install -m 755 xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync \
 +         $RPM_BUILD_ROOT/usr/share/openvswitch/scripts/ovs-xapi-sync
 +	 
-+install xenserver/uuid.py $RPM_BUILD_ROOT/usr/share/openvswitch/python
++install python/compat/uuid.py $RPM_BUILD_ROOT/usr/share/openvswitch/python
++install python/compat/argparse.py $RPM_BUILD_ROOT/usr/share/openvswitch/python
 +
 +%clean
 +rm -rf %{buildroot}
@@ -236,6 +213,8 @@ diff -r fc2bf8e0ac9d mk/openvswitch.spec.in
 +/usr/share/openvswitch/python/ovs/stream.py
 +/usr/share/openvswitch/python/ovs/timeval.py
 +/usr/share/openvswitch/python/ovs/util.py
++/usr/share/openvswitch/python/ovs/vlog.py
++/usr/share/openvswitch/python/argparse.py
 +/usr/share/openvswitch/python/uuid.py
 +/usr/share/openvswitch/vswitch.ovsschema
 +/usr/share/openvswitch/scripts/ovs-lib.sh
@@ -271,10 +250,10 @@ diff -r fc2bf8e0ac9d mk/openvswitch.spec.in
 +
 +
 +%changelog
-diff -r fc2bf8e0ac9d xenserver/openvswitch-xen.spec
+diff -r 22fa0ee1b4eb xenserver/openvswitch-xen.spec
 --- a/xenserver/openvswitch-xen.spec
 +++ b/xenserver/openvswitch-xen.spec
-@@ -395,6 +395,7 @@
+@@ -375,6 +375,7 @@
  %exclude /usr/share/openvswitch/python/ovs/*.py[co]
  %exclude /usr/share/openvswitch/python/ovs/db/*.py[co]
  

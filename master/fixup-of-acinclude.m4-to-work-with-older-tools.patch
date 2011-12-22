@@ -1,0 +1,64 @@
+# HG changeset patch
+# Parent 6812cffed424b967b22cb31a04b3c38f716b7df5
+
+# Backup some AS macros to work with autoconf 2.59
+
+diff -r 6812cffed424 acinclude.m4
+--- a/acinclude.m4
++++ b/acinclude.m4
+@@ -394,9 +394,9 @@
+ .PHONY: all
+ EOF
+       rm -f conftest.out
+-      AS_ECHO(["$as_me:$LINENO: invoking ${MAKE-make} -f conftest.mk all:"]) >&AS_MESSAGE_LOG_FD 2>&1
++      echo "$as_me:$LINENO: invoking ${MAKE-make} -f conftest.mk all:"  >&AS_MESSAGE_LOG_FD 2>&1
+       ${MAKE-make} -f conftest.mk conftest.out >&AS_MESSAGE_LOG_FD 2>&1
+-      AS_ECHO(["$as_me:$LINENO: conftest.out contains:"]) >&AS_MESSAGE_LOG_FD 2>&1
++      echo "$as_me:$LINENO: conftest.out contains:"  >&AS_MESSAGE_LOG_FD 2>&1
+       cat conftest.out >&AS_MESSAGE_LOG_FD 2>&1
+       result=`cat conftest.out`
+       rm -f conftest.mk conftest.out
+@@ -405,7 +405,7 @@
+       else
+         ovs_cv_gnu_make_if=no
+       fi])
+-   AS_IF([test $ovs_cv_gnu_make_if = yes], [$1], [$2])])
++   AS_IF([test $ovs_cv_gnu_make_if = yes], [$1:], [$2])])
+ 
+ dnl OVS_CHECK_SPARSE_TARGET
+ dnl
+@@ -415,16 +415,25 @@
+   [AC_CACHE_CHECK(
+     [target hint for cgcc],
+     [ac_cv_sparse_target],
+-    [AS_CASE([`$CC -dumpmachine 2>/dev/null`],
+-       [i?86-* | athlon-*], [ac_cv_sparse_target=x86],
+-       [x86_64-*], [ac_cv_sparse_target=x86_64],
+-       [ac_cv_sparse_target=other])])
+-   AS_CASE([$ac_cv_sparse_target],
+-     [x86], [SPARSEFLAGS= CGCCFLAGS=-target=i86],
+-     [x86_64], [SPARSEFLAGS=-m64 CGCCFLAGS=-target=x86_64],
+-     [SPARSEFLAGS= CGCCFLAGS=])
++    [case `$CC -dumpmachine 2>/dev/null` in
++       i?86-* | athlon-*) :
++            ac_cv_sparse_target=x86 ;;
++       x86_64-*) :
++            ac_cv_sparse_target=x86_64 ;;
++       *) :
++            ac_cv_sparse_target=other ;;
++      esac])
+    AC_SUBST([SPARSEFLAGS])
+-   AC_SUBST([CGCCFLAGS])])
++   AC_SUBST([CGCCFLAGS])
++   [case $ac_cv_sparse_target in
++       x86) :
++            SPARSEFLAGS= CGCCFLAGS=-target=i86 ;;
++       x86_64) :
++            SPARSEFLAGS=-m64 CGCCFLAGS=-target=x86_64 ;;
++       *) :
++            SPARSEFLAGS= CGCCFLAGS= ;;
++    esac]])
++
+ 
+ dnl OVS_ENABLE_SPARSE
+ AC_DEFUN([OVS_ENABLE_SPARSE],

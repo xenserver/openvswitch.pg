@@ -1,27 +1,22 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r b57b56ae452c tests/check-structs.at
+diff -r e8ef8deae5cc tests/check-structs.at
 --- a/tests/check-structs.at
 +++ b/tests/check-structs.at
-@@ -1,11 +1,11 @@
- AT_BANNER([struct alignment checker unit tests])
- 
--m4_define([check_structs], [$top_srcdir/build-aux/check-structs])
--m4_define([RUN_STRUCT_CHECKER], 
--  [AT_SKIP_IF([test $HAVE_PYTHON = no])
--   AT_DATA([test.h], [$1
--])
+@@ -3,10 +3,10 @@
+ m4_define([check_structs], [$top_srcdir/build-aux/check-structs])
+ m4_define([RUN_STRUCT_CHECKER], 
+   [AT_KEYWORDS([check-structs])
+-   AT_SKIP_IF([test $HAVE_PYTHON = no])
++dnl   AT_SKIP_IF([test $HAVE_PYTHON = no])
+    AT_DATA([test.h], [$1
+ ])
 -   AT_CHECK_UNQUOTED([$PYTHON check_structs test.h], [$2], [$3], [$4])])
-+dnl m4_define([check_structs], [$top_srcdir/build-aux/check-structs])
-+dnl m4_define([RUN_STRUCT_CHECKER], 
-+dnl   [dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
-+dnl    AT_DATA([test.h], [$1
-+dnl ])
-+dnl    AT_CHECK_UNQUOTED([$PYTHON check_structs test.h], [$2], [$3], [$4])])
++dnl   AT_CHECK_UNQUOTED([$PYTHON check_structs test.h], [$2], [$3], [$4])])
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r b57b56ae452c tests/classifier.at
+diff -r e8ef8deae5cc tests/classifier.at
 --- a/tests/classifier.at
 +++ b/tests/classifier.at
 @@ -1,14 +1,14 @@
@@ -52,7 +47,7 @@ diff -r b57b56ae452c tests/classifier.at
 +dnl  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
 +dnl   AT_CHECK([test-classifier testname], [0], [], [])
 +dnl   AT_CLEANUP])])
-diff -r b57b56ae452c tests/daemon-py.at
+diff -r e8ef8deae5cc tests/daemon-py.at
 --- a/tests/daemon-py.at
 +++ b/tests/daemon-py.at
 @@ -1,9 +1,9 @@
@@ -67,7 +62,7 @@ diff -r b57b56ae452c tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([expected])
  # Start the daemon and wait for the pidfile to get created
  # and that its contents are the correct pid.
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid& echo $! > expected], [0])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid& echo $! > expected], [0])
 @@ -19,11 +19,11 @@
  AT_CLEANUP
  
@@ -83,7 +78,7 @@ diff -r b57b56ae452c tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([parentpid])
 +dnl AT_CAPTURE_FILE([newpid])
  # Start the daemon and wait for the pidfile to get created.
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --monitor& echo $! > parent], [0])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --monitor& echo $! > parent], [0])
  OVS_WAIT_UNTIL([test -s pid], [kill `cat parent`])
 @@ -62,11 +62,11 @@
  AT_CLEANUP
@@ -100,7 +95,7 @@ diff -r b57b56ae452c tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([parentpid])
 +dnl AT_CAPTURE_FILE([newpid])
  # Start the daemon and wait for the pidfile to get created.
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --monitor& echo $! > parent], [0])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --monitor& echo $! > parent], [0])
  OVS_WAIT_UNTIL([test -s pid], [kill `cat parent`])
 @@ -105,8 +105,8 @@
  AT_CLEANUP
@@ -144,7 +139,7 @@ diff -r b57b56ae452c tests/daemon-py.at
 -AT_CAPTURE_FILE([pid])
 +dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
 +dnl AT_CAPTURE_FILE([pid])
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --detach --bail], [1], [], [stderr])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --detach --bail], [1], [], [stderr])
  AT_CHECK([grep 'test-daemon.py: exiting after daemonize_start() as requested' stderr],
    [0], [ignore], [])
 @@ -179,8 +179,8 @@
@@ -155,7 +150,7 @@ diff -r b57b56ae452c tests/daemon-py.at
 -AT_CAPTURE_FILE([pid])
 +dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
 +dnl AT_CAPTURE_FILE([pid])
- AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --detach --monitor --bail], [1], [], [stderr])
+ AT_CHECK([$PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --detach --monitor --bail], [1], [], [stderr])
  AT_CHECK([grep 'test-daemon.py: exiting after daemonize_start() as requested' stderr],
    [0], [ignore], [])
 @@ -188,10 +188,10 @@
@@ -170,7 +165,7 @@ diff -r b57b56ae452c tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([pid])
 +dnl AT_CAPTURE_FILE([status])
 +dnl AT_CAPTURE_FILE([stderr])
- AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --detach], [0], [], [])
+ AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --detach], [0], [], [])
  AT_CHECK([kill `cat pid`])
  AT_CHECK([test -s status])
 @@ -208,9 +208,9 @@
@@ -184,9 +179,9 @@ diff -r b57b56ae452c tests/daemon-py.at
 +dnl AT_CAPTURE_FILE([status])
 +dnl AT_CAPTURE_FILE([stderr])
  OVSDB_INIT([db])
- AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile-name=$PWD/pid --detach], [0], [], [])
+ AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --detach], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r b57b56ae452c tests/daemon.at
+diff -r e8ef8deae5cc tests/daemon.at
 --- a/tests/daemon.at
 +++ b/tests/daemon.at
 @@ -1,10 +1,10 @@
@@ -304,7 +299,7 @@ diff -r b57b56ae452c tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r b57b56ae452c tests/json.at
+diff -r e8ef8deae5cc tests/json.at
 --- a/tests/json.at
 +++ b/tests/json.at
 @@ -2,7 +2,7 @@
@@ -371,7 +366,7 @@ diff -r b57b56ae452c tests/json.at
  AT_CHECK([printf '"xxx' > input
  $PYTHON $srcdir/test-json.py input], [1],
    [error: line 0, column 4, byte 4: unexpected end of input in quoted string
-diff -r b57b56ae452c tests/jsonrpc-py.at
+diff -r e8ef8deae5cc tests/jsonrpc-py.at
 --- a/tests/jsonrpc-py.at
 +++ b/tests/jsonrpc-py.at
 @@ -1,7 +1,7 @@
@@ -380,7 +375,7 @@ diff -r b57b56ae452c tests/jsonrpc-py.at
  AT_SETUP([JSON-RPC request and successful reply - Python])
 -AT_SKIP_IF([test $HAVE_PYTHON = no])
 +dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
- AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile-name=$PWD/pid listen punix:socket])
+ AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile=`pwd`/pid listen punix:socket])
  AT_CHECK([test -s pid])
  AT_CHECK([kill -0 `cat pid`])
 @@ -13,7 +13,7 @@
@@ -389,7 +384,7 @@ diff -r b57b56ae452c tests/jsonrpc-py.at
  AT_SETUP([JSON-RPC request and error reply - Python])
 -AT_SKIP_IF([test $HAVE_PYTHON = no])
 +dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
- AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile-name=$PWD/pid listen punix:socket])
+ AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile=`pwd`/pid listen punix:socket])
  AT_CHECK([test -s pid])
  AT_CHECK([kill -0 `cat pid`])
 @@ -25,7 +25,7 @@
@@ -398,10 +393,10 @@ diff -r b57b56ae452c tests/jsonrpc-py.at
  AT_SETUP([JSON-RPC notification - Python])
 -AT_SKIP_IF([test $HAVE_PYTHON = no])
 +dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
- AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile-name=$PWD/pid listen punix:socket])
+ AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile=`pwd`/pid listen punix:socket])
  AT_CHECK([test -s pid])
  # When a daemon dies it deletes its pidfile, so make a copy.
-diff -r b57b56ae452c tests/lockfile.at
+diff -r e8ef8deae5cc tests/lockfile.at
 --- a/tests/lockfile.at
 +++ b/tests/lockfile.at
 @@ -1,12 +1,12 @@
@@ -424,7 +419,21 @@ diff -r b57b56ae452c tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r b57b56ae452c tests/ofp-print.at
+diff -r e8ef8deae5cc tests/odp.at
+--- a/tests/odp.at
++++ b/tests/odp.at
+@@ -44,8 +44,8 @@
+  echo
+  echo '# Valid forms with IP later fragment.'
+ sed -n 's/,frag=no),.*/,frag=later)/p' odp-base.txt) > odp.txt
+-AT_CAPTURE_FILE([odp.txt])
+-AT_CHECK_UNQUOTED([test-odp < odp.txt], [0], [`cat odp.txt`
++dnl AT_CAPTURE_FILE([odp.txt])
++dnl AT_CHECK_UNQUOTED([test-odp < odp.txt], [0], [`cat odp.txt`
+ ])
+ AT_CLEANUP
+ 
+diff -r e8ef8deae5cc tests/ofp-print.at
 --- a/tests/ofp-print.at
 +++ b/tests/ofp-print.at
 @@ -225,7 +225,7 @@
@@ -436,19 +445,48 @@ diff -r b57b56ae452c tests/ofp-print.at
  AT_CHECK([ovs-ofctl ofp-print "\
  01 0a 00 4e 00 00 00 00 00 00 01 11 00 3c 00 03 \
  00 00 50 54 00 00 00 06 50 54 00 00 00 05 08 00 \
-diff -r b57b56ae452c tests/ofproto-macros.at
+diff -r e8ef8deae5cc tests/ofproto-dpif.at
+--- a/tests/ofproto-dpif.at
++++ b/tests/ofproto-dpif.at
+@@ -256,7 +256,7 @@
+   for type in no first later; do
+     eval flow=\$${type}_flow exp_output=\$$type
+     AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
+-    AT_CHECK_UNQUOTED([tail -1 stdout], [0], [Datapath actions: $exp_output
++dnl    AT_CHECK_UNQUOTED([tail -1 stdout], [0], [Datapath actions: $exp_output
+ ])
+   done
+ done
+diff -r e8ef8deae5cc tests/ofproto-macros.at
 --- a/tests/ofproto-macros.at
 +++ b/tests/ofproto-macros.at
-@@ -6,7 +6,7 @@
-   [OVS_RUNDIR=$PWD; export OVS_RUNDIR
+@@ -5,7 +5,7 @@
+ m4_define([OVS_VSWITCHD_START],
+   [dnl Skip this test if running as root.  Otherwise ovs-vswitchd will tear
+    dnl down any existing datapaths if the kernel module is loaded.
+-   AT_SKIP_IF([test "`id -u`" = 0])
++dnl   AT_SKIP_IF([test "`id -u`" = 0])
+ 
+    OVS_RUNDIR=$PWD; export OVS_RUNDIR
     OVS_LOGDIR=$PWD; export OVS_LOGDIR
-    trap 'kill `cat test-openflowd.pid`' 0
--   AT_CAPTURE_FILE([test-openflowd.log])
-+dnl   AT_CAPTURE_FILE([test-openflowd.log])
-    AT_CHECK(
-      [test-openflowd --detach --pidfile --enable-dummy --log-file --fail=closed dummy@br0 none --datapath-id=fedcba9876543210 $1],
-      [0], [], [stderr])
-diff -r b57b56ae452c tests/ofproto.at
+@@ -20,14 +20,14 @@
+    dnl Start ovsdb-server.
+    AT_CHECK([ovsdb-server --detach --pidfile --log-file --remote=punix:$OVS_RUNDIR/db.sock], [0], [], [stderr])
+    AT_CHECK([[sed < stderr '/vlog|INFO|opened log file/d']])
+-   AT_CAPTURE_FILE([ovsdb-server.log])
++dnl   AT_CAPTURE_FILE([ovsdb-server.log])
+ 
+    dnl Initialize database.
+    AT_CHECK([ovs-vsctl --no-wait init])
+ 
+    dnl Start ovs-vswitchd.
+    AT_CHECK([ovs-vswitchd --detach --pidfile --enable-dummy --log-file], [0], [], [stderr])
+-   AT_CAPTURE_FILE([ovs-vswitchd.log])
++dnl   AT_CAPTURE_FILE([ovs-vswitchd.log])
+    AT_CHECK([[sed < stderr '
+ /vlog|INFO|opened log file/d
+ /reconnect|INFO|/d
+diff -r e8ef8deae5cc tests/ofproto.at
 --- a/tests/ofproto.at
 +++ b/tests/ofproto.at
 @@ -57,10 +57,10 @@
@@ -457,28 +495,72 @@ diff -r b57b56ae452c tests/ofproto.at
      AT_CHECK([ovs-ofctl -vANY:ANY:WARN show br0], [0], [stdout])
 -    AT_CHECK_UNQUOTED([STRIP_XIDS stdout], [0], [dnl
 -OFPT_FEATURES_REPLY: ver:0x1, dpid:fedcba9876543210
--n_tables:1, n_buffers:256
--features: capabilities:0x87, actions:0xfff
+-n_tables:255, n_buffers:256
+-features: capabilities:0xc7, actions:0xfff
 +dnl    AT_CHECK_UNQUOTED([STRIP_XIDS stdout], [0], [dnl
 +dnl OFPT_FEATURES_REPLY: ver:0x1, dpid:fedcba9876543210
-+dnl n_tables:1, n_buffers:256
-+dnl features: capabilities:0x87, actions:0xfff
++dnl n_tables:255, n_buffers:256
++dnl features: capabilities:0xc7, actions:0xfff
   LOCAL(br0): addr:aa:55:aa:55:00:00
       config:     $config
       state:      $state
-diff -r b57b56ae452c tests/ovsdb-idl-py.at
---- a/tests/ovsdb-idl-py.at
-+++ b/tests/ovsdb-idl-py.at
-@@ -18,7 +18,7 @@
- # TITLE is provided to AT_SETUP and KEYWORDS to AT_KEYWORDS.
- m4_define([OVSDB_CHECK_IDL_PY], 
-   [AT_SETUP([$1])
+diff -r e8ef8deae5cc tests/ovs-monitor-ipsec.at
+--- a/tests/ovs-monitor-ipsec.at
++++ b/tests/ovs-monitor-ipsec.at
+@@ -1,7 +1,7 @@
+ AT_BANNER([ovs-monitor-ipsec])
+ 
+ AT_SETUP([ovs-monitor-ipsec])
+-AT_SKIP_IF([test $HAVE_PYTHON = no])
++dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
+ 
+ OVS_PKGDATADIR=`pwd`; export OVS_PKGDATADIR
+ cp "$top_srcdir/vswitchd/vswitch.ovsschema" .
+@@ -49,8 +49,8 @@
+   [$PYTHON $top_srcdir/debian/ovs-monitor-ipsec "--root-prefix=`pwd`" \
+         "--pidfile=`pwd`/ovs-monitor-ipsec.pid" \
+         unix:socket 2>log 3>actions &])
+-AT_CAPTURE_FILE([log])
+-AT_CAPTURE_FILE([actions])
++dnl AT_CAPTURE_FILE([log])
++dnl AT_CAPTURE_FILE([actions])
+ OVS_WAIT_UNTIL([test ! -f etc/racoon/certs/ovs-stale.pem])
+ 
+ ###
+diff -r e8ef8deae5cc tests/ovs-xapi-sync.at
+--- a/tests/ovs-xapi-sync.at
++++ b/tests/ovs-xapi-sync.at
+@@ -1,7 +1,7 @@
+ AT_BANNER([ovs-xapi-sync])
+ 
+ AT_SETUP([ovs-xapi-sync])
+-AT_SKIP_IF([test $HAVE_PYTHON = no])
++dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
+ 
+ # Mock up the XenAPI.
+ cp "$top_srcdir/tests/MockXenAPI.py" XenAPI.py
+@@ -29,7 +29,7 @@
+ # Start ovs-xapi-sync.
+ AT_CHECK([$PYTHON ./ovs-xapi-sync "--pidfile=`pwd`/ovs-xapi-sync.pid" \
+                   "--root-prefix=`pwd`" unix:socket >log 2>&1 &])
+-AT_CAPTURE_FILE([log])
++dnl AT_CAPTURE_FILE([log])
+ 
+ # Add bridges and check ovs-xapi-sync's work.
+ AT_CHECK([ovs_vsctl -- add-br xenbr0 -- add-br xenbr1])
+diff -r e8ef8deae5cc tests/ovsdb-idl.at
+--- a/tests/ovsdb-idl.at
++++ b/tests/ovsdb-idl.at
+@@ -34,7 +34,7 @@
+ # same as OVSDB_CHECK_IDL but uses the Python IDL implementation.
+ m4_define([OVSDB_CHECK_IDL_PY],
+   [AT_SETUP([$1 - Python])
 -   AT_SKIP_IF([test $HAVE_PYTHON = no])
-+   dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
++dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
     AT_KEYWORDS([ovsdb server idl positive Python $5])
     AT_CHECK([ovsdb-tool create db $abs_srcdir/idltest.ovsschema],
                    [0], [stdout], [ignore])
-diff -r b57b56ae452c tests/ovsdb-log.at
+diff -r e8ef8deae5cc tests/ovsdb-log.at
 --- a/tests/ovsdb-log.at
 +++ b/tests/ovsdb-log.at
 @@ -2,7 +2,7 @@
@@ -580,7 +662,7 @@ diff -r b57b56ae452c tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r b57b56ae452c tests/ovsdb-monitor.at
+diff -r e8ef8deae5cc tests/ovsdb-monitor.at
 --- a/tests/ovsdb-monitor.at
 +++ b/tests/ovsdb-monitor.at
 @@ -24,7 +24,7 @@
@@ -592,7 +674,7 @@ diff -r b57b56ae452c tests/ovsdb-monitor.at
     AT_CHECK([ovsdb-server --detach --pidfile=$PWD/server-pid --remote=punix:socket --unixctl=$PWD/unixctl --log-file=$PWD/ovsdb-server-log db >/dev/null 2>&1],
              [0], [], [])
     AT_CHECK([ovsdb-client -vjsonrpc --detach --pidfile=$PWD/client-pid -d json monitor --format=csv unix:socket $4 $5 $8 > output], 
-diff -r b57b56ae452c tests/ovsdb-server.at
+diff -r e8ef8deae5cc tests/ovsdb-server.at
 --- a/tests/ovsdb-server.at
 +++ b/tests/ovsdb-server.at
 @@ -198,11 +198,11 @@
@@ -654,7 +736,7 @@ diff -r b57b56ae452c tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r b57b56ae452c tests/ovsdb-tool.at
+diff -r e8ef8deae5cc tests/ovsdb-tool.at
 --- a/tests/ovsdb-tool.at
 +++ b/tests/ovsdb-tool.at
 @@ -123,7 +123,7 @@
@@ -684,7 +766,7 @@ diff -r b57b56ae452c tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r b57b56ae452c tests/ovsdb.at
+diff -r e8ef8deae5cc tests/ovsdb.at
 --- a/tests/ovsdb.at
 +++ b/tests/ovsdb.at
 @@ -23,7 +23,7 @@
@@ -705,7 +787,7 @@ diff -r b57b56ae452c tests/ovsdb.at
     AT_KEYWORDS([ovsdb negative $4])
     AT_CHECK([$PYTHON $srcdir/test-ovsdb.py $2], [1], [], [stderr])
     m4_assert(m4_len([$3]))
-diff -r b57b56ae452c tests/reconnect.at
+diff -r e8ef8deae5cc tests/reconnect.at
 --- a/tests/reconnect.at
 +++ b/tests/reconnect.at
 @@ -17,7 +17,7 @@
@@ -717,7 +799,7 @@ diff -r b57b56ae452c tests/reconnect.at
       [$2],
       [$PYTHON $srcdir/test-reconnect.py < input],
       [$3])])
-diff -r b57b56ae452c tests/uuid.at
+diff -r e8ef8deae5cc tests/uuid.at
 --- a/tests/uuid.at
 +++ b/tests/uuid.at
 @@ -32,7 +32,7 @@
@@ -729,7 +811,7 @@ diff -r b57b56ae452c tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r b57b56ae452c tests/vconn.at
+diff -r e8ef8deae5cc tests/vconn.at
 --- a/tests/vconn.at
 +++ b/tests/vconn.at
 @@ -1,21 +1,21 @@
@@ -772,3 +854,22 @@ diff -r b57b56ae452c tests/vconn.at
  
  TEST_VCONN_CLASS([unix])
  TEST_VCONN_CLASS([tcp])
+diff -r e8ef8deae5cc tests/vlog.at
+--- a/tests/vlog.at
++++ b/tests/vlog.at
+@@ -1,12 +1,12 @@
+ AT_BANNER([vlog])
+ 
+ AT_SETUP([vlog - Python])
+-AT_SKIP_IF([test $HAVE_PYTHON = no])
++dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
+ AT_CHECK([$PYTHON $srcdir/test-vlog.py --log-file log_file \
+ -v ANY:ANY:dbg module_1:ANY:info module_2:ANY:warn ANY:syslog:off \
+ 2>stderr_log])
+-AT_CAPTURE_FILE([log_file])
+-AT_CAPTURE_FILE([stderr_log])
++dnl AT_CAPTURE_FILE([log_file])
++dnl AT_CAPTURE_FILE([stderr_log])
+ 
+ AT_CHECK([diff log_file stderr_log])
+ 

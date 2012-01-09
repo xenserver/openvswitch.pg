@@ -58,6 +58,7 @@
 
 # NIC-401
 0023-ofproto-dpif-Do-not-mirror-L2-multicast-switch-proto.patch
+0025-bond-Only-drop-packets-that-indicate-moves-on-SLB-bo.patch
 0100-datapath-Add-compatibility-with-sk_buffs-vlan_tci-before-2.6.33.patch
 
 

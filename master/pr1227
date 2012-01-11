@@ -1,5 +1,5 @@
 # HG changeset patch
-# Parent 81291c669404a534921cf3ddc4a9a73d01fb2740
+# Parent cc0c81f812650fbcfb5eca07bddcfe3c678052e6
 Reduce number of xapi DB calls in plugin
 
 When there are lots of PIFs in a XenServer/XCP pool, for example when
@@ -11,30 +11,3 @@ update function of the openvswitch-cfg-update xapi plugin.
 
 Signed-off-by: Rob Hoes <rob.hoes@citrix.com>
 
-diff -r 81291c669404 xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
---- a/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
-+++ b/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
-@@ -86,8 +86,7 @@
- 
-     bton = {}
- 
--    for n in session.xenapi.network.get_all():
--        rec = session.xenapi.network.get_record(n)
-+    for rec in session.xenapi.network.get_all_records().values():
-         try:
-             bton[rec['bridge']] = rec
-         except KeyError:
-@@ -100,10 +99,9 @@
-     host_mgmt_device = None
-     pool_mgmt_macs = {}
-     if new_controller:
--        for n in session.xenapi.PIF.get_all():
--            rec = session.xenapi.PIF.get_record(n)
--            if rec.get('management', False):
--                pool_mgmt_macs[rec.get('MAC')] = rec.get('device')
-+        recs = session.xenapi.PIF.get_all_records_where('field "management"="true"')
-+        for rec in recs:
-+            pool_mgmt_macs[rec.get('MAC')] = rec.get('device')
- 
-     dib_changed = False
-     fail_mode_changed = False

@@ -1,0 +1,24 @@
+# HG changeset patch
+# Parent 2c4f2952a0ff5d4f2b641252c4ecb15cbaa37b3f
+
+diff -r 2c4f2952a0ff python/ovs/automake.mk
+--- a/python/ovs/automake.mk	Mon Jan 23 16:17:21 2012 +0000
++++ b/python/ovs/automake.mk	Tue Jan 24 12:17:45 2012 +0000
+@@ -26,13 +26,14 @@ EXTRA_DIST += $(ovs_pyfiles) python/ovs/
+ 
+ if HAVE_PYTHON
+ nobase_pkgdata_DATA = $(ovs_pyfiles)
++ovs-install-data-local: base=$(shell echo $$RPM_BUILD_ROOT)
+ ovs-install-data-local:
+ 	$(MKDIR_P) python/ovs
+ 	(echo "import os" && \
+-	 echo 'PKGDATADIR = os.environ.get("OVS_PKGDATADIR", """$(pkgdatadir)""")' && \
+-	 echo 'RUNDIR = os.environ.get("OVS_RUNDIR", """@RUNDIR@""")' && \
++	 echo 'PKGDATADIR = os.environ.get("OVS_PKGDATADIR", """$(subst $(base),,$(pkgdatadir))""")' && \
++	 echo 'RUNDIR = os.environ.get("OVS_RUNDIR", """$(subst $(base),,@RUNDIR@)""")' && \
+ 	 echo 'LOGDIR = os.environ.get("OVS_LOGDIR", """@LOGDIR@""")' && \
+-	 echo 'BINDIR = os.environ.get("OVS_BINDIR", """$(bindir)""")') \
++	 echo 'BINDIR = os.environ.get("OVS_BINDIR", """$(subst $(base),,$(bindir))""")') \
+ 		> python/ovs/dirs.py.tmp
+ 	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/python/ovs
+ 	$(INSTALL_DATA) python/ovs/dirs.py.tmp $(DESTDIR)$(pkgdatadir)/python/ovs/dirs.py

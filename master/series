@@ -16,9 +16,6 @@ build-integration.patch
 fixup-of-acinclude.m4-to-work-with-older-tools.patch
 #make-ovs-external-ids-daemon-optional.patch
 change-log-level-to-log-to-syslog.patch
-CA-72973-hack-to-strip-temp-dirs-from-paths.patch
-NIC-454-xenserver-Fix-iteration-of-dictionary.patch
-#CA-61121-drop-disk-stats   (now see patches 0018 & 0019)
-#log-all-mac-learning-msg-for-debug.patch
+#CA-72973-hack-to-strip-temp-dirs-from-paths.patch
 
 

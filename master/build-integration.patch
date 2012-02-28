@@ -1,8 +1,8 @@
-diff -r 22fa0ee1b4eb datapath/Makefile.am
+diff -r dbd7a395d00b datapath/Makefile.am
 --- a/datapath/Makefile.am
 +++ b/datapath/Makefile.am
 @@ -1,7 +1,7 @@
- SUBDIRS = 
+ SUBDIRS =
 -if LINUX_ENABLED
 +#if LINUX_ENABLED
  SUBDIRS += linux
@@ -11,7 +11,7 @@ diff -r 22fa0ee1b4eb datapath/Makefile.am
  
  EXTRA_DIST = $(dist_headers) $(dist_sources) $(dist_extras)
  
-diff -r 22fa0ee1b4eb mk/Makefile
+diff -r dbd7a395d00b mk/Makefile
 --- /dev/null
 +++ b/mk/Makefile
 @@ -0,0 +1,58 @@
@@ -73,10 +73,10 @@ diff -r 22fa0ee1b4eb mk/Makefile
 +
 +$(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
 +	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
-diff -r 22fa0ee1b4eb mk/openvswitch.spec.in
+diff -r dbd7a395d00b mk/openvswitch.spec.in
 --- /dev/null
 +++ b/mk/openvswitch.spec.in
-@@ -0,0 +1,173 @@
+@@ -0,0 +1,180 @@
 +Name: openvswitch
 +Summary: Virtual switch
 +Group: System Environment/Daemons
@@ -171,11 +171,6 @@ diff -r 22fa0ee1b4eb mk/openvswitch.spec.in
 +%dir /var/xen/openvswitch
 +%dir /var/lib/openvswitch
 +%dir /var/log/openvswitch
-+/etc/openvswitch/bugtool-plugins/kernel-info/openvswitch.xml
-+/etc/openvswitch/bugtool-plugins/network-status/openvswitch.xml
-+/etc/openvswitch/bugtool-plugins/system-configuration.xml
-+/etc/openvswitch/bugtool-plugins/system-configuration/openvswitch.xml
-+/etc/openvswitch/bugtool-plugins/system-logs/openvswitch.xml
 +%{_bindir}/ovs-benchmark
 +%{_bindir}/ovs-parse-leaks
 +%{_bindir}/ovs-appctl
@@ -187,11 +182,17 @@ diff -r 22fa0ee1b4eb mk/openvswitch.spec.in
 +%{_bindir}/ovs-vsctl
 +%{_bindir}/ovsdb-client
 +%{_bindir}/ovsdb-tool
++%{_bindir}/ovs-test
 +%{_sbindir}/ovs-bugtool
 +%{_sbindir}/ovs-brcompatd
 +%{_sbindir}/ovs-vswitchd
 +%{_sbindir}/ovsdb-server
 +%{_sbindir}/ovs-vlan-bug-workaround
++/usr/share/openvswitch/bugtool-plugins/kernel-info/openvswitch.xml
++/usr/share/openvswitch/bugtool-plugins/network-status/openvswitch.xml
++/usr/share/openvswitch/bugtool-plugins/system-configuration.xml
++/usr/share/openvswitch/bugtool-plugins/system-configuration/openvswitch.xml
++/usr/share/openvswitch/bugtool-plugins/system-logs/openvswitch.xml
 +/usr/share/openvswitch/python/ovs/__init__.py
 +/usr/share/openvswitch/python/ovs/daemon.py
 +/usr/share/openvswitch/python/ovs/db/__init__.py
@@ -217,11 +218,17 @@ diff -r 22fa0ee1b4eb mk/openvswitch.spec.in
 +/usr/share/openvswitch/python/argparse.py
 +/usr/share/openvswitch/python/uuid.py
 +/usr/share/openvswitch/vswitch.ovsschema
-+/usr/share/openvswitch/scripts/ovs-lib.sh
++/usr/share/openvswitch/scripts/ovs-lib
 +/usr/share/openvswitch/scripts/ovs-bugtool-*
 +/usr/share/openvswitch/scripts/ovs-ctl
 +/usr/share/openvswitch/scripts/ovs-save
 +/usr/share/openvswitch/scripts/ovs-xapi-sync
++/usr/share/openvswitch/python/ovstest/__init__.py
++/usr/share/openvswitch/python/ovstest/args.py
++/usr/share/openvswitch/python/ovstest/rpcserver.py
++/usr/share/openvswitch/python/ovstest/tcp.py
++/usr/share/openvswitch/python/ovstest/udp.py
++/usr/share/openvswitch/python/ovstest/util.py
 +%{_mandir}/man1/ovsdb-client.1.gz
 +%{_mandir}/man1/ovsdb-tool.1.gz
 +%{_mandir}/man1/ovsdb-server.1.gz
@@ -240,20 +247,20 @@ diff -r 22fa0ee1b4eb mk/openvswitch.spec.in
 +%{_mandir}/man1/ovs-benchmark.1.gz
 +%{_mandir}/man8/ovs-bugtool.8.gz
 +%{_mandir}/man8/ovs-ctl.8.gz
-+#%exclude /usr/lib/xsconsole/plugins-base/*.py[co]
++%{_mandir}/man8/ovs-test.8.gz
 +%exclude /usr/sbin/ovs-brcompatd
 +%exclude /usr/share/man/man8/ovs-brcompatd.8.gz
-+#%exclude /usr/share/openvswitch/scripts/*.py[co]
 +%exclude /usr/share/openvswitch/python/*.py[co]
 +%exclude /usr/share/openvswitch/python/ovs/*.py[co]
 +%exclude /usr/share/openvswitch/python/ovs/db/*.py[co]
++%exclude /usr/share/openvswitch/python/ovstest/*.py[co]
 +
 +
 +%changelog
-diff -r 22fa0ee1b4eb xenserver/openvswitch-xen.spec
+diff -r dbd7a395d00b xenserver/openvswitch-xen.spec
 --- a/xenserver/openvswitch-xen.spec
 +++ b/xenserver/openvswitch-xen.spec
-@@ -375,6 +375,7 @@
+@@ -436,6 +436,7 @@
  %exclude /usr/share/openvswitch/python/ovs/*.py[co]
  %exclude /usr/share/openvswitch/python/ovs/db/*.py[co]
  

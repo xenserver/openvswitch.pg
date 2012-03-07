@@ -1,13 +1,13 @@
 # HG changeset patch
-# Parent 2c4f2952a0ff5d4f2b641252c4ecb15cbaa37b3f
+# Parent 13de731f4f7e162ddec358fa212b286d245d5dbd
 
-diff -r 2c4f2952a0ff python/ovs/automake.mk
---- a/python/ovs/automake.mk	Mon Jan 23 16:17:21 2012 +0000
-+++ b/python/ovs/automake.mk	Tue Jan 24 12:17:45 2012 +0000
-@@ -26,13 +26,14 @@ EXTRA_DIST += $(ovs_pyfiles) python/ovs/
+diff -r 13de731f4f7e python/automake.mk
+--- a/python/automake.mk
++++ b/python/automake.mk
+@@ -34,13 +34,14 @@
  
  if HAVE_PYTHON
- nobase_pkgdata_DATA = $(ovs_pyfiles)
+ nobase_pkgdata_DATA = $(ovs_pyfiles) $(ovstest_pyfiles)
 +ovs-install-data-local: base=$(shell echo $$RPM_BUILD_ROOT)
  ovs-install-data-local:
  	$(MKDIR_P) python/ovs

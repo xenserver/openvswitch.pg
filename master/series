@@ -16,6 +16,6 @@ build-integration.patch
 fixup-of-acinclude.m4-to-work-with-older-tools.patch
 #make-ovs-external-ids-daemon-optional.patch
 change-log-level-to-log-to-syslog.patch
-#CA-72973-hack-to-strip-temp-dirs-from-paths.patch
+CA-72973-hack-to-strip-temp-dirs-from-paths.patch
 
 

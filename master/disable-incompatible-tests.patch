@@ -1,6 +1,6 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r a6199d9a09bf tests/check-structs.at
+diff -r 22ac83eb1429 tests/check-structs.at
 --- a/tests/check-structs.at
 +++ b/tests/check-structs.at
 @@ -3,10 +3,10 @@
@@ -16,7 +16,7 @@ diff -r a6199d9a09bf tests/check-structs.at
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r a6199d9a09bf tests/classifier.at
+diff -r 22ac83eb1429 tests/classifier.at
 --- a/tests/classifier.at
 +++ b/tests/classifier.at
 @@ -1,14 +1,14 @@
@@ -47,7 +47,7 @@ diff -r a6199d9a09bf tests/classifier.at
 +dnl  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
 +dnl   AT_CHECK([test-classifier testname], [0], [], [])
 +dnl   AT_CLEANUP])])
-diff -r a6199d9a09bf tests/daemon-py.at
+diff -r 22ac83eb1429 tests/daemon-py.at
 --- a/tests/daemon-py.at
 +++ b/tests/daemon-py.at
 @@ -1,9 +1,9 @@
@@ -181,7 +181,7 @@ diff -r a6199d9a09bf tests/daemon-py.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --detach], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r a6199d9a09bf tests/daemon.at
+diff -r 22ac83eb1429 tests/daemon.at
 --- a/tests/daemon.at
 +++ b/tests/daemon.at
 @@ -1,10 +1,10 @@
@@ -299,7 +299,7 @@ diff -r a6199d9a09bf tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r a6199d9a09bf tests/json.at
+diff -r 22ac83eb1429 tests/json.at
 --- a/tests/json.at
 +++ b/tests/json.at
 @@ -2,7 +2,7 @@
@@ -366,7 +366,7 @@ diff -r a6199d9a09bf tests/json.at
  AT_CHECK([printf '"xxx' > input
  $PYTHON $srcdir/test-json.py input], [1],
    [error: line 0, column 4, byte 4: unexpected end of input in quoted string
-diff -r a6199d9a09bf tests/jsonrpc-py.at
+diff -r 22ac83eb1429 tests/jsonrpc-py.at
 --- a/tests/jsonrpc-py.at
 +++ b/tests/jsonrpc-py.at
 @@ -1,7 +1,7 @@
@@ -396,7 +396,7 @@ diff -r a6199d9a09bf tests/jsonrpc-py.at
  AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile=`pwd`/pid listen punix:socket])
  AT_CHECK([test -s pid])
  # When a daemon dies it deletes its pidfile, so make a copy.
-diff -r a6199d9a09bf tests/lockfile.at
+diff -r 22ac83eb1429 tests/lockfile.at
 --- a/tests/lockfile.at
 +++ b/tests/lockfile.at
 @@ -1,12 +1,12 @@
@@ -419,7 +419,7 @@ diff -r a6199d9a09bf tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r a6199d9a09bf tests/odp.at
+diff -r 22ac83eb1429 tests/odp.at
 --- a/tests/odp.at
 +++ b/tests/odp.at
 @@ -54,8 +54,8 @@
@@ -433,7 +433,7 @@ diff -r a6199d9a09bf tests/odp.at
  ])
  AT_CLEANUP
  
-diff -r a6199d9a09bf tests/ofp-print.at
+diff -r 22ac83eb1429 tests/ofp-print.at
 --- a/tests/ofp-print.at
 +++ b/tests/ofp-print.at
 @@ -225,7 +225,7 @@
@@ -445,7 +445,7 @@ diff -r a6199d9a09bf tests/ofp-print.at
  AT_CHECK([ovs-ofctl ofp-print "\
  01 0a 00 4e 00 00 00 00 00 00 01 11 00 3c 00 03 \
  00 00 50 54 00 00 00 06 50 54 00 00 00 05 08 00 \
-diff -r a6199d9a09bf tests/ofproto-dpif.at
+diff -r 22ac83eb1429 tests/ofproto-dpif.at
 --- a/tests/ofproto-dpif.at
 +++ b/tests/ofproto-dpif.at
 @@ -358,8 +358,8 @@
@@ -677,7 +677,7 @@ diff -r a6199d9a09bf tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-diff -r a6199d9a09bf tests/ofproto-macros.at
+diff -r 22ac83eb1429 tests/ofproto-macros.at
 --- a/tests/ofproto-macros.at
 +++ b/tests/ofproto-macros.at
 @@ -16,14 +16,14 @@
@@ -697,7 +697,7 @@ diff -r a6199d9a09bf tests/ofproto-macros.at
     AT_CHECK([[sed < stderr '
  /vlog|INFO|opened log file/d
  /reconnect|INFO|/d
-diff -r a6199d9a09bf tests/ofproto.at
+diff -r 22ac83eb1429 tests/ofproto.at
 --- a/tests/ofproto.at
 +++ b/tests/ofproto.at
 @@ -57,10 +57,10 @@
@@ -715,7 +715,7 @@ diff -r a6199d9a09bf tests/ofproto.at
   LOCAL(br0): addr:aa:55:aa:55:00:00
       config:     $config
       state:      $state
-diff -r a6199d9a09bf tests/ovs-monitor-ipsec.at
+diff -r 22ac83eb1429 tests/ovs-monitor-ipsec.at
 --- a/tests/ovs-monitor-ipsec.at
 +++ b/tests/ovs-monitor-ipsec.at
 @@ -1,7 +1,7 @@
@@ -738,7 +738,7 @@ diff -r a6199d9a09bf tests/ovs-monitor-ipsec.at
  OVS_WAIT_UNTIL([test ! -f etc/racoon/certs/ovs-stale.pem])
  
  ###
-diff -r a6199d9a09bf tests/ovs-xapi-sync.at
+diff -r 22ac83eb1429 tests/ovs-xapi-sync.at
 --- a/tests/ovs-xapi-sync.at
 +++ b/tests/ovs-xapi-sync.at
 @@ -1,7 +1,7 @@
@@ -759,7 +759,7 @@ diff -r a6199d9a09bf tests/ovs-xapi-sync.at
  
  # Add bridges and check ovs-xapi-sync's work.
  AT_CHECK([ovs_vsctl -- add-br xenbr0 -- add-br xenbr1])
-diff -r a6199d9a09bf tests/ovsdb-idl.at
+diff -r 22ac83eb1429 tests/ovsdb-idl.at
 --- a/tests/ovsdb-idl.at
 +++ b/tests/ovsdb-idl.at
 @@ -34,7 +34,7 @@
@@ -771,7 +771,7 @@ diff -r a6199d9a09bf tests/ovsdb-idl.at
     AT_KEYWORDS([ovsdb server idl positive Python $5])
     AT_CHECK([ovsdb-tool create db $abs_srcdir/idltest.ovsschema],
                    [0], [stdout], [ignore])
-diff -r a6199d9a09bf tests/ovsdb-log.at
+diff -r 22ac83eb1429 tests/ovsdb-log.at
 --- a/tests/ovsdb-log.at
 +++ b/tests/ovsdb-log.at
 @@ -2,7 +2,7 @@
@@ -873,7 +873,7 @@ diff -r a6199d9a09bf tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r a6199d9a09bf tests/ovsdb-monitor.at
+diff -r 22ac83eb1429 tests/ovsdb-monitor.at
 --- a/tests/ovsdb-monitor.at
 +++ b/tests/ovsdb-monitor.at
 @@ -24,7 +24,7 @@
@@ -885,7 +885,7 @@ diff -r a6199d9a09bf tests/ovsdb-monitor.at
     AT_CHECK([ovsdb-server --detach --pidfile=$PWD/server-pid --remote=punix:socket --unixctl=$PWD/unixctl --log-file=$PWD/ovsdb-server-log db >/dev/null 2>&1],
              [0], [], [])
     AT_CHECK([ovsdb-client -vjsonrpc --detach --pidfile=$PWD/client-pid -d json monitor --format=csv unix:socket $4 $5 $8 > output], 
-diff -r a6199d9a09bf tests/ovsdb-server.at
+diff -r 22ac83eb1429 tests/ovsdb-server.at
 --- a/tests/ovsdb-server.at
 +++ b/tests/ovsdb-server.at
 @@ -198,11 +198,11 @@
@@ -947,7 +947,7 @@ diff -r a6199d9a09bf tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r a6199d9a09bf tests/ovsdb-tool.at
+diff -r 22ac83eb1429 tests/ovsdb-tool.at
 --- a/tests/ovsdb-tool.at
 +++ b/tests/ovsdb-tool.at
 @@ -123,7 +123,7 @@
@@ -977,7 +977,7 @@ diff -r a6199d9a09bf tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r a6199d9a09bf tests/ovsdb.at
+diff -r 22ac83eb1429 tests/ovsdb.at
 --- a/tests/ovsdb.at
 +++ b/tests/ovsdb.at
 @@ -23,7 +23,7 @@
@@ -985,8 +985,8 @@ diff -r a6199d9a09bf tests/ovsdb.at
  m4_define([OVSDB_CHECK_POSITIVE_PY], 
    [AT_SETUP([$1])
 -   AT_SKIP_IF([test $HAVE_PYTHON = no])
-+   dnl AT_SKIP_IF([test $HAVE_PYTHON = no])
-    m4_if([$6], [], [], [AT_XFAIL_IF([:])])
++dnl   AT_SKIP_IF([test $HAVE_PYTHON = no])
+    $6
     AT_KEYWORDS([ovsdb positive Python $4])
     AT_CHECK([$PYTHON $srcdir/test-ovsdb.py $2], [0], [$3
 @@ -65,7 +65,7 @@
@@ -998,7 +998,7 @@ diff -r a6199d9a09bf tests/ovsdb.at
     AT_KEYWORDS([ovsdb negative $4])
     AT_CHECK([$PYTHON $srcdir/test-ovsdb.py $2], [1], [], [stderr])
     m4_assert(m4_len([$3]))
-diff -r a6199d9a09bf tests/reconnect.at
+diff -r 22ac83eb1429 tests/reconnect.at
 --- a/tests/reconnect.at
 +++ b/tests/reconnect.at
 @@ -17,7 +17,7 @@
@@ -1010,7 +1010,7 @@ diff -r a6199d9a09bf tests/reconnect.at
       [$2],
       [$PYTHON $srcdir/test-reconnect.py < input],
       [$3])])
-diff -r a6199d9a09bf tests/uuid.at
+diff -r 22ac83eb1429 tests/uuid.at
 --- a/tests/uuid.at
 +++ b/tests/uuid.at
 @@ -32,7 +32,7 @@
@@ -1022,7 +1022,7 @@ diff -r a6199d9a09bf tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r a6199d9a09bf tests/vconn.at
+diff -r 22ac83eb1429 tests/vconn.at
 --- a/tests/vconn.at
 +++ b/tests/vconn.at
 @@ -1,21 +1,21 @@
@@ -1065,7 +1065,7 @@ diff -r a6199d9a09bf tests/vconn.at
  
  TEST_VCONN_CLASS([unix])
  TEST_VCONN_CLASS([tcp])
-diff -r a6199d9a09bf tests/vlog.at
+diff -r 22ac83eb1429 tests/vlog.at
 --- a/tests/vlog.at
 +++ b/tests/vlog.at
 @@ -1,12 +1,12 @@

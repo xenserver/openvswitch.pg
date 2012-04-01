@@ -18,4 +18,9 @@ change-log-level-to-log-to-syslog.patch
 CA-72973-hack-to-strip-temp-dirs-from-paths.patch
 drop-mod-suffix.patch
 
+# CP-2829: Patches to build openvswitch kernel modules into seperate RPMs
+build-kernel-module-into-rpm.patch
+remove-sections-of-niciras-spec-file.patch
+write-modules.inc-file-to-output-dir.patch
+
 

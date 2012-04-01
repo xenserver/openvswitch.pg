@@ -1,0 +1,343 @@
+# HG changeset patch
+# Parent b4c1119fd86825c939f0e7f82bcbd221311b47a1
+
+diff -r b4c1119fd868 xenserver/openvswitch-xen.spec
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -38,7 +38,7 @@
+ Release: 1
+ Source: openvswitch-%{openvswitch_version}.tar.gz
+ Buildroot: /tmp/openvswitch-xen-rpm
+-Requires: openvswitch_mod.ko.%{module_abi_version}
++#Requires: openvswitch_mod.ko.%{module_abi_version}
+ 
+ %description
+ Open vSwitch provides standard network bridging functions augmented with
+@@ -50,7 +50,7 @@
+ Group: System Environment/Kernel
+ License: GPLv2
+ Provides: %{name}-modules-%{kernel_flavor} = %{kernel_version}, openvswitch_mod.ko.%{module_abi_version}
+-Requires: kernel-%{kernel_name} = %{kernel_version}
++#Requires: kernel-%{kernel_name} = %{kernel_version}
+ 
+ %description %{module_package}
+ Open vSwitch Linux kernel module compiled against kernel version
+@@ -143,22 +143,22 @@
+ # upgrading an older version of the package that moved the files out
+ # of the way, so we need to look for the files in those out-of-the-way
+ # locations first.
+-md5sums=
+-for script in $scripts; do
+-    b=$(basename "$script")
+-    if test -e /usr/lib/openvswitch/xs-saved/"$b"; then
+-        f=/usr/lib/openvswitch/xs-saved/"$b"
+-    elif test -e /usr/lib/openvswitch/xs-original/"$b"; then
+-        f=/usr/lib/openvswitch/xs-original/"$b"
+-    elif test -e "$script" && test ! -h "$script"; then
+-        f=$script
+-    else
+-        printf "\n$script: not found\n"
+-        f=/dev/null
+-    fi
+-    md5sums="$md5sums,$(md5sum $f | awk '{print $1}')"
+-done
+-md5sums=${md5sums#,}
++# md5sums=
++# for script in $scripts; do
++#     b=$(basename "$script")
++#     if test -e /usr/lib/openvswitch/xs-saved/"$b"; then
++#         f=/usr/lib/openvswitch/xs-saved/"$b"
++#     elif test -e /usr/lib/openvswitch/xs-original/"$b"; then
++#         f=/usr/lib/openvswitch/xs-original/"$b"
++#     elif test -e "$script" && test ! -h "$script"; then
++#         f=$script
++#     else
++#         printf "\n$script: not found\n"
++#         f=/dev/null
++#     fi
++#     md5sums="$md5sums,$(md5sum $f | awk '{print $1}')"
++# done
++# md5sums=${md5sums#,}
+ 
+ # Now check the md5sums against the known sets of md5sums:
+ #
+@@ -169,42 +169,42 @@
+ #     improvements that our versions of the scripts provide are minimal, so
+ #     it's better to avoid possibly breaking any changes made upstream by
+ #     Citrix.
+-case $md5sums in
+-    cf09a68d9f8b434e79a4c83b01a3bb4b,395866df1b0b20c12c4dd2f7de0ecdb4,9d493545ae81463239d3162cbc798852,862d0939b441de9264a900628e950fe9,21f85db25599d7f026cd489385d58aa6)
+-        keep_files=
+-        replace_files=$scripts
+-        printf "\nVerified host scripts from XenServer 6.0.0.\n"
+-        ;;
+-
+-    c5f48246577a17cf1b971fb5ce4e920b,2e2c912f86f9c536c89adc34ff3c2b2b,28d3ff72d72bdec4f37d70699f5edb76,67e1d0af16fc1ddf10009c5c063ad2ba,f3feff30aa3b3f8b514664a96a8dc0ab)
+-        keep_files=
+-        replace_files=$scripts
+-        printf "\nVerified host scripts from XenServer 5.6-SP2.\n"
+-        ;;
+-        
+-    c5f48246577a17cf1b971fb5ce4e920b,2e2c912f86f9c536c89adc34ff3c2b2b,28d3ff72d72bdec4f37d70699f5edb76,67e1d0af16fc1ddf10009c5c063ad2ba,24bae6906d182ba47668174f8e480cc6)
+-        keep_files=
+-        replace_files=$scripts
+-        printf "\nVerified host scripts from XenServer 5.6-FP1.\n"
+-        ;;
+-
+-    *)
+-        keep_files=$scripts
+-        replace_files=
+-        cat <<EOF
+-
+-The host scripts on this machine are not those of any supported
+-version of XenServer.  On XenServer earlier than 5.6-FP1, your Open
+-vSwitch installation will not work.  On XenServer 5.6-FP1 or later,
+-Open vSwitch is not verified to work, which could lead to unexpected
+-behavior.
+-
+-EOF
+-        ;;
+-esac
+-
+-if grep -F net.ipv4.conf.all.arp_filter /etc/sysctl.conf >/dev/null 2>&1; then :; else
+-    cat >>/etc/sysctl.conf <<EOF
++# case $md5sums in
++#     cf09a68d9f8b434e79a4c83b01a3bb4b,395866df1b0b20c12c4dd2f7de0ecdb4,9d493545ae81463239d3162cbc798852,862d0939b441de9264a900628e950fe9,21f85db25599d7f026cd489385d58aa6)
++#         keep_files=
++#         replace_files=$scripts
++#         printf "\nVerified host scripts from XenServer 6.0.0.\n"
++#         ;;
++# 
++#     c5f48246577a17cf1b971fb5ce4e920b,2e2c912f86f9c536c89adc34ff3c2b2b,28d3ff72d72bdec4f37d70699f5edb76,67e1d0af16fc1ddf10009c5c063ad2ba,f3feff30aa3b3f8b514664a96a8dc0ab)
++#         keep_files=
++#         replace_files=$scripts
++#         printf "\nVerified host scripts from XenServer 5.6-SP2.\n"
++#         ;;
++#         
++#     c5f48246577a17cf1b971fb5ce4e920b,2e2c912f86f9c536c89adc34ff3c2b2b,28d3ff72d72bdec4f37d70699f5edb76,67e1d0af16fc1ddf10009c5c063ad2ba,24bae6906d182ba47668174f8e480cc6)
++#         keep_files=
++#         replace_files=$scripts
++#         printf "\nVerified host scripts from XenServer 5.6-FP1.\n"
++#         ;;
++# 
++#     *)
++#         keep_files=$scripts
++#         replace_files=
++#         cat <<EOF
++# 
++# The host scripts on this machine are not those of any supported
++# version of XenServer.  On XenServer earlier than 5.6-FP1, your Open
++# vSwitch installation will not work.  On XenServer 5.6-FP1 or later,
++# Open vSwitch is not verified to work, which could lead to unexpected
++# behavior.
++# 
++# EOF
++#         ;;
++# esac
++# 
++# if grep -F net.ipv4.conf.all.arp_filter /etc/sysctl.conf >/dev/null 2>&1; then :; else
++#     cat >>/etc/sysctl.conf <<EOF
+ # This works around an issue in xhad, which binds to a particular
+ # Ethernet device, which in turn causes ICMP port unreachable messages
+ # if packets are received are on the wrong interface, which in turn
+@@ -214,22 +214,22 @@
+ # around.
+ #
+ # Bug #1378.
+-net.ipv4.conf.all.arp_filter = 1
+-EOF
+-fi
++# net.ipv4.conf.all.arp_filter = 1
++# EOF
++# fi
+ 
+-if test ! -e /etc/openvswitch/conf.db; then
+-    install -d -m 755 -o root -g root /etc/openvswitch
+-
+-    # Create ovs-vswitchd config database
+-    ovsdb-tool -vANY:console:off create /etc/openvswitch/conf.db \
+-            /usr/share/openvswitch/vswitch.ovsschema
+-
+-    # Create initial table in config database
+-    ovsdb-tool -vANY:console:off transact /etc/openvswitch/conf.db \
+-            '[{"op": "insert", "table": "Open_vSwitch", "row": {}}]' \
+-            > /dev/null
+-fi
++# if test ! -e /etc/openvswitch/conf.db; then
++#     install -d -m 755 -o root -g root /etc/openvswitch
++# 
++#     # Create ovs-vswitchd config database
++#     ovsdb-tool -vANY:console:off create /etc/openvswitch/conf.db \
++#             /usr/share/openvswitch/vswitch.ovsschema
++# 
++#     # Create initial table in config database
++#     ovsdb-tool -vANY:console:off transact /etc/openvswitch/conf.db \
++#             '[{"op": "insert", "table": "Open_vSwitch", "row": {}}]' \
++#             > /dev/null
++# fi
+ 
+ # Create default or update existing /etc/sysconfig/openvswitch.
+ SYSCONFIG=/etc/sysconfig/openvswitch
+@@ -249,37 +249,37 @@
+ # Deliberately break %postun in broken OVS builds that revert original
+ # XenServer scripts during rpm -U by moving the directory where it thinks
+ # they are saved.
+-if [ -d /usr/lib/openvswitch/xs-original ]; then
+-    mkdir -p /usr/lib/openvswitch/xs-saved
+-    mv /usr/lib/openvswitch/xs-original/* /usr/lib/openvswitch/xs-saved/ &&
+-        rmdir /usr/lib/openvswitch/xs-original
+-fi
++# if [ -d /usr/lib/openvswitch/xs-original ]; then
++#     mkdir -p /usr/lib/openvswitch/xs-saved
++#     mv /usr/lib/openvswitch/xs-original/* /usr/lib/openvswitch/xs-saved/ &&
++#         rmdir /usr/lib/openvswitch/xs-original
++# fi
+ 
+ # Replace XenServer files by our versions.
+-mkdir -p /usr/lib/openvswitch/xs-saved \
+-    || printf "Could not create script backup directory.\n"
+-for f in $replace_files; do
+-    s=$(basename "$f")
+-    t=$(readlink "$f")
+-    if [ -f "$f" ] && [ "$t" != "/usr/share/openvswitch/scripts/$s" ]; then
+-        mv "$f" /usr/lib/openvswitch/xs-saved/ \
+-            || printf "Could not save original XenServer $s script\n"
+-        ln -s "/usr/share/openvswitch/scripts/$s" "$f" \
+-            || printf "Could not link to Open vSwitch $s script\n"
+-    fi
+-done
++# mkdir -p /usr/lib/openvswitch/xs-saved \
++#     || printf "Could not create script backup directory.\n"
++# for f in $replace_files; do
++#     s=$(basename "$f")
++#     t=$(readlink "$f")
++#     if [ -f "$f" ] && [ "$t" != "/usr/share/openvswitch/scripts/$s" ]; then
++#         mv "$f" /usr/lib/openvswitch/xs-saved/ \
++#             || printf "Could not save original XenServer $s script\n"
++#         ln -s "/usr/share/openvswitch/scripts/$s" "$f" \
++#             || printf "Could not link to Open vSwitch $s script\n"
++#     fi
++# done
+ 
+ # Clean up dangling symlinks to removed OVS replacement scripts no longer
+ # provided by OVS. Any time a replacement script is removed from OVS,
+ # it should be added here to ensure correct reversion from old versions of
+ # OVS that don't clean up dangling symlinks during the uninstall phase.
+-for orig in /usr/sbin/brctl /usr/sbin/xen-bugtool $keep_files; do
+-    saved=/usr/lib/openvswitch/xs-saved/$(basename "$orig")
+-    [ -e "$saved" ] && mv -f "$saved" "$orig"
+-done
++# for orig in /usr/sbin/brctl /usr/sbin/xen-bugtool $keep_files; do
++#     saved=/usr/lib/openvswitch/xs-saved/$(basename "$orig")
++#     [ -e "$saved" ] && mv -f "$saved" "$orig"
++# done
+ 
+ # Ensure all required services are set to run
+-for s in openvswitch openvswitch-xapi-update; do
++for s in openvswitch; do
+     if chkconfig --list $s >/dev/null 2>&1; then
+         chkconfig --del $s || printf "Could not remove $s init script."
+     fi
+@@ -287,10 +287,7 @@
+     chkconfig $s on || printf "Could not enable $s init script."
+ done
+ 
+-if [ "$1" = "1" ]; then    # $1 = 1 for install
+-    # Configure system to use Open vSwitch
+-    /opt/xensource/bin/xe-switch-network-backend vswitch
+-else    # $1 = 2 for upgrade
++if [ "$1" = "2" ]; then    # $1 = 2 for upgrade
+ 
+     mode=$(cat /etc/xensource/network.conf)
+     if [ "$mode" != "vswitch" ] && [ "$mode" != "openvswitch" ]; then
+@@ -338,48 +335,48 @@
+ # Also be sure to add removed script paths to the %post scriptlet above to
+ # prevent the same problem when upgrading from old versions of OVS that lack
+ # this restore-on-upgrade logic.
+-for f in \
+-    /etc/xensource/scripts/vif \
+-    /usr/sbin/brctl \
+-    /usr/sbin/xen-bugtool \
+-    /opt/xensource/libexec/interface-reconfigure \
+-    /opt/xensource/libexec/InterfaceReconfigure.py \
+-    /opt/xensource/libexec/InterfaceReconfigureBridge.py \
+-    /opt/xensource/libexec/InterfaceReconfigureVswitch.py
+-do
+-    # Only revert dangling symlinks.
+-    if [ -h "$f" ] && [ ! -e "$f" ]; then
+-        s=$(basename "$f")
+-        if [ ! -f "/usr/lib/openvswitch/xs-saved/$s" ]; then
+-            printf "Original XenServer $s script not present in /usr/lib/openvswitch/xs-saved\n" >&2
+-            printf "Could not restore original XenServer script.\n" >&2
+-        else
+-            (rm -f "$f" \
+-                && mv "/usr/lib/openvswitch/xs-saved/$s" "$f") \
+-                || printf "Could not restore original XenServer $s script.\n" >&2
+-        fi
+-    fi
+-done
+-
+-if [ "$1" = "0" ]; then     # $1 = 0 for uninstall
+-    rm -f /usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyc \
+-        /usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyo
+-
+-    rm -f /usr/share/openvswitch/scripts/InterfaceReconfigure.pyc \
+-        /usr/share/openvswitch/scripts/InterfaceReconfigure.pyo \
+-        /usr/share/openvswitch/scripts/InterfaceReconfigureBridge.pyc \
+-        /usr/share/openvswitch/scripts/InterfaceReconfigureBridge.pyo \
+-        /usr/share/openvswitch/scripts/InterfaceReconfigureVSwitch.pyc \
+-        /usr/share/openvswitch/scripts/InterfaceReconfigureVSwitch.pyo
+-
+-    # Remove all configuration files
+-    rm -f /etc/openvswitch/conf.db
+-    rm -f /etc/sysconfig/openvswitch
+-    rm -f /etc/openvswitch/vswitchd.cacert
+-
+-    # Remove saved XenServer scripts directory, but only if it's empty
+-    rmdir -p /usr/lib/openvswitch/xs-saved 2>/dev/null
+-fi
++# for f in \
++#     /etc/xensource/scripts/vif \
++#     /usr/sbin/brctl \
++#     /usr/sbin/xen-bugtool \
++#     /opt/xensource/libexec/interface-reconfigure \
++#     /opt/xensource/libexec/InterfaceReconfigure.py \
++#     /opt/xensource/libexec/InterfaceReconfigureBridge.py \
++#     /opt/xensource/libexec/InterfaceReconfigureVswitch.py
++# do
++#     # Only revert dangling symlinks.
++#     if [ -h "$f" ] && [ ! -e "$f" ]; then
++#         s=$(basename "$f")
++#         if [ ! -f "/usr/lib/openvswitch/xs-saved/$s" ]; then
++#             printf "Original XenServer $s script not present in /usr/lib/openvswitch/xs-saved\n" >&2
++#             printf "Could not restore original XenServer script.\n" >&2
++#         else
++#             (rm -f "$f" \
++#                 && mv "/usr/lib/openvswitch/xs-saved/$s" "$f") \
++#                 || printf "Could not restore original XenServer $s script.\n" >&2
++#         fi
++#     fi
++# done
++# 
++# if [ "$1" = "0" ]; then     # $1 = 0 for uninstall
++#     rm -f /usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyc \
++#         /usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.pyo
++# 
++#     rm -f /usr/share/openvswitch/scripts/InterfaceReconfigure.pyc \
++#         /usr/share/openvswitch/scripts/InterfaceReconfigure.pyo \
++#         /usr/share/openvswitch/scripts/InterfaceReconfigureBridge.pyc \
++#         /usr/share/openvswitch/scripts/InterfaceReconfigureBridge.pyo \
++#         /usr/share/openvswitch/scripts/InterfaceReconfigureVSwitch.pyc \
++#         /usr/share/openvswitch/scripts/InterfaceReconfigureVSwitch.pyo
++# 
++#     # Remove all configuration files
++#     rm -f /etc/openvswitch/conf.db
++#     rm -f /etc/sysconfig/openvswitch
++#     rm -f /etc/openvswitch/vswitchd.cacert
++# 
++#     # Remove saved XenServer scripts directory, but only if it's empty
++#     rmdir -p /usr/lib/openvswitch/xs-saved 2>/dev/null
++# fi
+ 
+ exit 0
+ 

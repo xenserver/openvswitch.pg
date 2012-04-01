@@ -1,0 +1,146 @@
+# HG changeset patch
+# Parent 256ce7148d8ac37c746c6e72f49594d8378c185a
+
+Build kernel modules (both xen & kdump versions) in openvswitch to
+produce RPMs.
+
+Previously kernel modules were built within kernel build system.
+See EA-1114/CP-3194.
+
+---
+ mk/Makefile                    |   20 ++++++++++++++++-
+ xenserver/openvswitch-xen.spec |   46 ++++++++++++++++++++++-------------------
+ 2 files changed, 43 insertions(+), 23 deletions(-)
+
+diff -r 256ce7148d8a mk/Makefile
+--- a/mk/Makefile
++++ b/mk/Makefile
+@@ -1,5 +1,6 @@
+ include $(B_BASE)/common.mk
+ include $(B_BASE)/rpmbuild.mk
++include $(PROJECT_OUTPUTDIR)/kernel-dom0/kernel.inc
+ 
+ REPONAME  := openvswitch
+ REPOSTAMP := $(call pq_req,$(REPONAME))
+@@ -21,7 +22,8 @@
+ OPENVSWITCH_SRPM := openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm
+ 
+ .PHONY: build
+-build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST
++build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST \
++#	$(KERNEL_FLAVOURS:%=$(MY_OBJ_DIR)/.rpmbuild.openvswitch-modules.%.stamp)
+ 	@ :
+ 
+ .PHONY: clean
+@@ -32,6 +34,7 @@
+ 	rm -f $(OPENVSWITCH_SOURCES:%=$(RPM_SOURCESDIR)/%)
+ 	rm -f $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
+ 
++# Builds the header tarball. Moves it to
+ $(RPM_SOURCESDIR)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz: $(REPOSTAMP)
+ 	cd $(REPO) && ./boot.sh && ./configure && make dist
+ 	mv $(REPO)/openvswitch-$(OPENVSWITCH_VERSION).tar.gz $@
+@@ -39,20 +42,33 @@
+ $(RPM_SOURCESDIR)/%: %
+ 	cp $< $@
+ 
++# Changed version nbrs in openvswitch.spec.in which is then written to /obj/SPECS/openvswitch.spec
+ $(RPM_SPECSDIR)/%.spec: $(RPM_SPECSDIR)/.dirstamp %.spec.in
+ 	sed -e 's/@OPENVSWITCH_VERSION@/$(OPENVSWITCH_VERSION)/g' \
+ 	    -e 's/@OPENVSWITCH_RELEASE@/$(OPENVSWITCH_RELEASE)/g' \
+ 		< $*.spec.in \
+ 		>$(RPM_SPECSDIR)/$*.spec
+ 
++# Builds the SRPMS first time.
+ $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM): $(RPM_SRPMSDIR)/.dirstamp \
+ 				  $(OPENVSWITCH_SOURCES:%=$(RPM_SOURCESDIR)/%) \
+ 				  $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
+ 	$(RPMBUILD) -bs $(RPM_SPECSDIR)/openvswitch.spec
+ 
++# Call Niciras spec file.
+ $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp: $(RPM_DIRECTORIES) $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
+-	$(RPMBUILD) --rebuild $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
++	($(foreach f,$(KERNEL_FLAVOURS),$(RPMBUILD) \
++		-D "openvswitch_version $(OPENVSWITCH_VERSION)" \
++	        -D "kernel_name xen" \
++		-D "kernel_version $(KERNEL_PKG_VERSION)" \
++		-D "kernel_flavor $(f)" \
++		-bb $(REPO)/xenserver/openvswitch-xen.spec;))
+ 	touch $@
+ 
++# $(MY_OBJ_DIR)/openvswitch.modules:
++#	($(foreach f,$(KERNEL_FLAVOURS),echo openvswitch-modules-$(f);)) > $@
++
++
++# Writes the manifest into output dir.
+ $(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
+ 	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
+diff -r 256ce7148d8a xenserver/openvswitch-xen.spec
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -116,12 +116,12 @@
+     $RPM_BUILD_ROOT/usr/sbin/ovs-bugtool \
+     $RPM_BUILD_ROOT/usr/bin/ovs-controller \
+     $RPM_BUILD_ROOT/usr/bin/ovs-pki \
+-    $RPM_BUILD_ROOT/usr/bin/ovs-test \
+-    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-test.8 \
+-    $RPM_BUILD_ROOT/usr/share/man/man1/ovs-benchmark.1 \
+-    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-bugtool.8 \
+-    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-controller.8 \
+-    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-pki.8
++    $RPM_BUILD_ROOT/usr/bin/ovs-test 
++#    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-test.8 \
++#    $RPM_BUILD_ROOT/usr/share/man/man1/ovs-benchmark.1 \
++#    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-bugtool.8 \
++#    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-controller.8 \
++#    $RPM_BUILD_ROOT/usr/share/man/man8/ovs-pki.8
+ 
+ install -d -m 755 $RPM_BUILD_ROOT/var/lib/openvswitch
+ 
+@@ -412,25 +412,30 @@
+ /usr/bin/ovsdb-client
+ /usr/bin/ovsdb-tool
+ /usr/lib/xsconsole/plugins-base/XSFeatureVSwitch.py
+-/usr/share/man/man1/ovsdb-client.1.gz
+-/usr/share/man/man1/ovsdb-server.1.gz
+-/usr/share/man/man1/ovsdb-tool.1.gz
+-/usr/share/man/man5/ovs-vswitchd.conf.db.5.gz
+-/usr/share/man/man8/ovs-appctl.8.gz
+-/usr/share/man/man8/ovs-ctl.8.gz
+-/usr/share/man/man8/ovs-dpctl.8.gz
+-/usr/share/man/man8/ovs-ofctl.8.gz
+-/usr/share/man/man8/ovs-parse-leaks.8.gz
+-/usr/share/man/man1/ovs-pcap.1.gz
+-/usr/share/man/man1/ovs-tcpundump.1.gz
+-/usr/share/man/man8/ovs-vlan-bug-workaround.8.gz
+-/usr/share/man/man8/ovs-vlan-test.8.gz
+-/usr/share/man/man8/ovs-vsctl.8.gz
+-/usr/share/man/man8/ovs-vswitchd.8.gz
++/usr/man/man1/ovsdb-client.1.gz
++/usr/man/man1/ovsdb-server.1.gz
++/usr/man/man1/ovsdb-tool.1.gz
++/usr/man/man5/ovs-vswitchd.conf.db.5.gz
++/usr/man/man8/ovs-appctl.8.gz
++/usr/man/man8/ovs-ctl.8.gz
++/usr/man/man8/ovs-dpctl.8.gz
++/usr/man/man8/ovs-ofctl.8.gz
++/usr/man/man8/ovs-parse-leaks.8.gz
++/usr/man/man1/ovs-pcap.1.gz
++/usr/man/man1/ovs-tcpundump.1.gz
++/usr/man/man8/ovs-vlan-bug-workaround.8.gz
++/usr/man/man8/ovs-vlan-test.8.gz
++/usr/man/man8/ovs-vsctl.8.gz
++/usr/man/man8/ovs-vswitchd.8.gz
++/usr/man/man1/ovs-benchmark.1.gz
++/usr/man/man8/ovs-bugtool.8.gz
++/usr/man/man8/ovs-controller.8.gz
++/usr/man/man8/ovs-pki.8.gz
++/usr/man/man8/ovs-test.8.gz
+ /var/lib/openvswitch
+ %exclude /usr/lib/xsconsole/plugins-base/*.py[co]
+ %exclude /usr/sbin/ovs-brcompatd
+-%exclude /usr/share/man/man8/ovs-brcompatd.8.gz
++%exclude /usr/man/man8/ovs-brcompatd.8.gz
+ %exclude /usr/share/openvswitch/scripts/*.py[co]
+ %exclude /usr/share/openvswitch/python/*.py[co]
+ %exclude /usr/share/openvswitch/python/ovs/*.py[co]

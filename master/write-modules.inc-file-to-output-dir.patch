@@ -1,0 +1,26 @@
+# HG changeset patch
+# Parent 735c32a82ba84f70b432971acb58302f9ff1d2a2
+
+diff -r 735c32a82ba8 mk/Makefile
+--- a/mk/Makefile
++++ b/mk/Makefile
+@@ -22,7 +22,7 @@
+ OPENVSWITCH_SRPM := openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm
+ 
+ .PHONY: build
+-build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST \
++build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST $(MY_OUTPUT_DIR)/modules.inc \
+ #	$(KERNEL_FLAVOURS:%=$(MY_OBJ_DIR)/.rpmbuild.openvswitch-modules.%.stamp)
+ 	@ :
+ 
+@@ -65,8 +65,8 @@
+ 		-bb $(REPO)/xenserver/openvswitch-xen.spec;))
+ 	touch $@
+ 
+-# $(MY_OBJ_DIR)/openvswitch.modules:
+-#	($(foreach f,$(KERNEL_FLAVOURS),echo openvswitch-modules-$(f);)) > $@
++$(MY_OUTPUT_DIR)/modules.inc:
++	($(foreach f,$(KERNEL_FLAVOURS),echo openvswitch-modules-$(f);)) > $@ 
+ 
+ 
+ # Writes the manifest into output dir.

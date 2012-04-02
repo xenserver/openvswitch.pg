@@ -1,0 +1,99 @@
+# HG changeset patch
+# Parent c37778ebf4ec2e19737ee7ce34f8ac18cad8d0d2
+
+diff -r c37778ebf4ec datapath/linux/Kbuild.in
+--- a/datapath/linux/Kbuild.in	Mon Apr 02 09:39:02 2012 +0100
++++ b/datapath/linux/Kbuild.in	Mon Apr 02 10:38:57 2012 +0100
+@@ -24,10 +24,10 @@ EXTRA_CFLAGS += -include $(builddir)/kco
+ # right place, even though it's conceptually incorrect.
+ NOSTDINC_FLAGS += -I$(top_srcdir)/include -I$(srcdir)/compat -I$(srcdir)/compat/include
+ 
+-obj-m := $(patsubst %,%_mod.o,$(build_modules))
++obj-m := $(patsubst %,%.o,$(build_modules))
+ 
+ define module_template
+-$(1)_mod-y = $$(notdir $$(patsubst %.c,%.o,$($(1)_sources)))
++$(1)-y = $$(notdir $$(patsubst %.c,%.o,$($(1)_sources)))
+ endef
+ 
+ $(foreach module,$(build_modules),$(eval $(call module_template,$(module))))
+diff -r c37778ebf4ec datapath/linux/Modules.mk
+--- a/datapath/linux/Modules.mk	Mon Apr 02 09:39:02 2012 +0100
++++ b/datapath/linux/Modules.mk	Mon Apr 02 10:38:57 2012 +0100
+@@ -61,6 +61,6 @@ openvswitch_headers += \
+ 	linux/compat/include/net/route.h \
+ 	linux/compat/genetlink.inc
+ 
+-both_modules += brcompat
+-brcompat_sources = linux/compat/genetlink-brcompat.c brcompat.c
+-brcompat_headers =
++#both_modules += brcompat
++#brcompat_sources = linux/compat/genetlink-brcompat.c brcompat.c
++#brcompat_headers =
+diff -r c37778ebf4ec utilities/ovs-ctl.in
+--- a/utilities/ovs-ctl.in	Mon Apr 02 09:39:02 2012 +0100
++++ b/utilities/ovs-ctl.in	Mon Apr 02 10:38:57 2012 +0100
+@@ -31,14 +31,14 @@ done
+ ## ----- ##
+ 
+ insert_openvswitch_mod_if_required () {
+-    # If openvswitch_mod is already loaded then we're done.
+-    test -e /sys/module/openvswitch_mod && return 0
++    # If openvswitch is already loaded then we're done.
++    test -e /sys/module/openvswitch && return 0
+ 
+-    # Load openvswitch_mod.  If that's successful then we're done.
+-    action "Inserting openvswitch module" modprobe openvswitch_mod && return 0
++    # Load openvswitch.  If that's successful then we're done.
++    action "Inserting openvswitch module" modprobe openvswitch && return 0
+ 
+     # If the bridge module is loaded, then that might be blocking
+-    # openvswitch_mod.  Try to unload it, if there are no bridges.
++    # openvswitch.  Try to unload it, if there are no bridges.
+     test -e /sys/module/bridge || return 1
+     bridges=`echo /sys/class/net/*/bridge | sed 's,/sys/class/net/,,g;s,/bridge,,g'`
+     if test "$bridges" != "*"; then
+@@ -47,13 +47,13 @@ insert_openvswitch_mod_if_required () {
+     fi
+     action "removing bridge module" rmmod bridge || return 1
+ 
+-    # Try loading openvswitch_mod again.
+-    action "Inserting openvswitch module" modprobe openvswitch_mod
++    # Try loading openvswitch again.
++    action "Inserting openvswitch module" modprobe openvswitch
+ }
+ 
+ insert_brcompat_mod_if_required () {
+-    test -e /sys/module/brcompat_mod && return 0
+-    action "Inserting brcompat module" modprobe brcompat_mod
++    test -e /sys/module/brcompat && return 0
++    action "Inserting brcompat module" modprobe brcompat
+ }
+ 
+ insert_mod_if_required () {
+@@ -282,11 +282,11 @@ force_reload_kmod () {
+         action "Removing datapath: $dp" ovs-dpctl del-dp "$dp"
+     done
+ 
+-    if test -e /sys/module/brcompat_mod; then
+-        action "Removing brcompat module" rmmod brcompat_mod
++    if test -e /sys/module/brcompat; then
++        action "Removing brcompat module" rmmod brcompat
+     fi
+-    if test -e /sys/module/openvswitch_mod; then
+-        action "Removing openvswitch module" rmmod openvswitch_mod
++    if test -e /sys/module/openvswitch; then
++        action "Removing openvswitch module" rmmod openvswitch
+     fi
+ 
+     start
+diff -r c37778ebf4ec xenserver/openvswitch-xen.spec
+--- a/xenserver/openvswitch-xen.spec	Mon Apr 02 09:39:02 2012 +0100
++++ b/xenserver/openvswitch-xen.spec	Mon Apr 02 10:38:57 2012 +0100
+@@ -446,5 +446,4 @@ exit 0
+ 
+ 
+ %files %{module_package}
+-/lib/modules/%{xen_version}/extra/openvswitch/openvswitch_mod.ko
+-%exclude /lib/modules/%{xen_version}/extra/openvswitch/brcompat_mod.ko
++/lib/modules/%{xen_version}/extra/openvswitch/openvswitch.ko

@@ -21,5 +21,6 @@ CA-72973-hack-to-strip-temp-dirs-from-paths.patch
 build-kernel-module-into-rpm.patch
 remove-sections-of-niciras-spec-file.patch
 write-modules.inc-file-to-output-dir.patch
+drop-mod-suffix.patch
 
 

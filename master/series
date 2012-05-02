@@ -22,5 +22,6 @@ build-kernel-module-into-rpm.patch
 remove-sections-of-niciras-spec-file.patch
 write-modules.inc-file-to-output-dir.patch
 drop-mod-suffix.patch
+CP-2829-remove-need-for-old-specfile.patch
 
 

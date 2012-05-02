@@ -1,0 +1,59 @@
+# HG changeset patch
+# Parent eb63e0b99dd30eed2727f9c57d3bb410196540a6
+
+diff -r eb63e0b99dd3 mk/Makefile
+--- a/mk/Makefile
++++ b/mk/Makefile
+@@ -17,7 +17,7 @@
+ 
+ OPENVSWITCH_SOURCES += openvswitch-$(OPENVSWITCH_VERSION).tar.gz
+ 
+-OPENVSWITCH_SPEC := openvswitch.spec
++OPENVSWITCH_SPEC := openvswitch-xen.spec
+ 
+ OPENVSWITCH_SRPM := openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm
+ 
+@@ -42,18 +42,21 @@
+ $(RPM_SOURCESDIR)/%: %
+ 	cp $< $@
+ 
+-# Changed version nbrs in openvswitch.spec.in which is then written to /obj/SPECS/openvswitch.spec
+-$(RPM_SPECSDIR)/%.spec: $(RPM_SPECSDIR)/.dirstamp %.spec.in
+-	sed -e 's/@OPENVSWITCH_VERSION@/$(OPENVSWITCH_VERSION)/g' \
+-	    -e 's/@OPENVSWITCH_RELEASE@/$(OPENVSWITCH_RELEASE)/g' \
+-		< $*.spec.in \
+-		>$(RPM_SPECSDIR)/$*.spec
++# Copy spec file to spec directory.
++$(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC):
++	cp $(REPO)/xenserver/openvswitch-xen.spec  $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
+ 
+-# Builds the SRPMS first time.
++# Builds the SRPMS first.
+ $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM): $(RPM_SRPMSDIR)/.dirstamp \
+-				  $(OPENVSWITCH_SOURCES:%=$(RPM_SOURCESDIR)/%) \
+-				  $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
+-	$(RPMBUILD) -bs $(RPM_SPECSDIR)/openvswitch.spec
++			$(OPENVSWITCH_SOURCES:%=$(RPM_SOURCESDIR)/%) \
++			$(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
++	$(RPMBUILD) \
++		-D "openvswitch_version $(OPENVSWITCH_VERSION)" \
++	        -D "kernel_name xen" \
++		-D "kernel_version $(KERNEL_PKG_VERSION)" \
++		-D "kernel_flavor xen" \
++		-D "openvswitch_rel $(OPENVSWITCH_RELEASE)" \
++		-bs $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
+ 
+ # Call Niciras spec file.
+ $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp: $(RPM_DIRECTORIES) $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
+diff -r eb63e0b99dd3 xenserver/openvswitch-xen.spec
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -35,7 +35,7 @@
+ Version: %{openvswitch_version}
+ 
+ License: ASL 2.0
+-Release: 1
++Release: %{openvswitch_rel}
+ Source: openvswitch-%{openvswitch_version}.tar.gz
+ Buildroot: /tmp/openvswitch-xen-rpm
+ #Requires: openvswitch_mod.ko.%{module_abi_version}

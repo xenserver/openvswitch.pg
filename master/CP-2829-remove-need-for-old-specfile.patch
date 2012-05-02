@@ -1,7 +1,7 @@
 # HG changeset patch
-# Parent eb63e0b99dd30eed2727f9c57d3bb410196540a6
+# Parent ed202bf4d0205e1d995e4661b388e726bee3864d
 
-diff -r eb63e0b99dd3 mk/Makefile
+diff -r ed202bf4d020 mk/Makefile
 --- a/mk/Makefile
 +++ b/mk/Makefile
 @@ -17,7 +17,7 @@
@@ -40,12 +40,20 @@ diff -r eb63e0b99dd3 mk/Makefile
 +	        -D "kernel_name xen" \
 +		-D "kernel_version $(KERNEL_PKG_VERSION)" \
 +		-D "kernel_flavor xen" \
-+		-D "openvswitch_rel $(OPENVSWITCH_RELEASE)" \
++		-D "openvswitch_release $(OPENVSWITCH_RELEASE)" \
 +		-bs $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
  
  # Call Niciras spec file.
  $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp: $(RPM_DIRECTORIES) $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
-diff -r eb63e0b99dd3 xenserver/openvswitch-xen.spec
+@@ -62,6 +65,7 @@
+ 	        -D "kernel_name xen" \
+ 		-D "kernel_version $(KERNEL_PKG_VERSION)" \
+ 		-D "kernel_flavor $(f)" \
++		-D "openvswitch_release $(OPENVSWITCH_RELEASE)" \
+ 		-bb $(REPO)/xenserver/openvswitch-xen.spec;))
+ 	touch $@
+ 
+diff -r ed202bf4d020 xenserver/openvswitch-xen.spec
 --- a/xenserver/openvswitch-xen.spec
 +++ b/xenserver/openvswitch-xen.spec
 @@ -35,7 +35,7 @@

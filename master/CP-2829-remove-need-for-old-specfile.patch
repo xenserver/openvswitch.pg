@@ -53,7 +53,7 @@ diff -r eb63e0b99dd3 xenserver/openvswitch-xen.spec
  
  License: ASL 2.0
 -Release: 1
-+Release: %{openvswitch_rel}
++Release: %{openvswitch_release}
  Source: openvswitch-%{openvswitch_version}.tar.gz
  Buildroot: /tmp/openvswitch-xen-rpm
  #Requires: openvswitch_mod.ko.%{module_abi_version}

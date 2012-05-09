@@ -1,6 +1,6 @@
 Disable tests which are incompatible with our version of autoconf/autotest
 
-diff -r 22ac83eb1429 tests/check-structs.at
+diff -r 25f5e637c00e tests/check-structs.at
 --- a/tests/check-structs.at
 +++ b/tests/check-structs.at
 @@ -3,10 +3,10 @@
@@ -16,7 +16,7 @@ diff -r 22ac83eb1429 tests/check-structs.at
  
  AT_SETUP([check struct tail padding])
  RUN_STRUCT_CHECKER(
-diff -r 22ac83eb1429 tests/classifier.at
+diff -r 25f5e637c00e tests/classifier.at
 --- a/tests/classifier.at
 +++ b/tests/classifier.at
 @@ -1,14 +1,14 @@
@@ -47,7 +47,7 @@ diff -r 22ac83eb1429 tests/classifier.at
 +dnl  [AT_SETUP([flow classifier - m4_bpatsubst(testname, [-], [ ])])
 +dnl   AT_CHECK([test-classifier testname], [0], [], [])
 +dnl   AT_CLEANUP])])
-diff -r 22ac83eb1429 tests/daemon-py.at
+diff -r 25f5e637c00e tests/daemon-py.at
 --- a/tests/daemon-py.at
 +++ b/tests/daemon-py.at
 @@ -1,9 +1,9 @@
@@ -181,7 +181,7 @@ diff -r 22ac83eb1429 tests/daemon-py.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | $PYTHON $srcdir/test-daemon.py --pidfile=`pwd`/pid --detach], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r 22ac83eb1429 tests/daemon.at
+diff -r 25f5e637c00e tests/daemon.at
 --- a/tests/daemon.at
 +++ b/tests/daemon.at
 @@ -1,10 +1,10 @@
@@ -299,7 +299,7 @@ diff -r 22ac83eb1429 tests/daemon.at
  OVSDB_INIT([db])
  AT_CHECK([(yes 2>stderr; echo $? > status) | ovsdb-server --detach --monitor --pidfile=$PWD/pid --unixctl=$PWD/unixctl db], [0], [], [])
  AT_CHECK([kill `cat pid`])
-diff -r 22ac83eb1429 tests/json.at
+diff -r 25f5e637c00e tests/json.at
 --- a/tests/json.at
 +++ b/tests/json.at
 @@ -2,7 +2,7 @@
@@ -366,7 +366,7 @@ diff -r 22ac83eb1429 tests/json.at
  AT_CHECK([printf '"xxx' > input
  $PYTHON $srcdir/test-json.py input], [1],
    [error: line 0, column 4, byte 4: unexpected end of input in quoted string
-diff -r 22ac83eb1429 tests/jsonrpc-py.at
+diff -r 25f5e637c00e tests/jsonrpc-py.at
 --- a/tests/jsonrpc-py.at
 +++ b/tests/jsonrpc-py.at
 @@ -1,7 +1,7 @@
@@ -396,7 +396,7 @@ diff -r 22ac83eb1429 tests/jsonrpc-py.at
  AT_CHECK([$PYTHON $srcdir/test-jsonrpc.py --detach --pidfile=`pwd`/pid listen punix:socket])
  AT_CHECK([test -s pid])
  # When a daemon dies it deletes its pidfile, so make a copy.
-diff -r 22ac83eb1429 tests/lockfile.at
+diff -r 25f5e637c00e tests/lockfile.at
 --- a/tests/lockfile.at
 +++ b/tests/lockfile.at
 @@ -1,12 +1,12 @@
@@ -419,7 +419,7 @@ diff -r 22ac83eb1429 tests/lockfile.at
  
  CHECK_LOCKFILE([lock_and_unlock], [0])
  CHECK_LOCKFILE([lock_and_unlock_twice], [0])
-diff -r 22ac83eb1429 tests/odp.at
+diff -r 25f5e637c00e tests/odp.at
 --- a/tests/odp.at
 +++ b/tests/odp.at
 @@ -54,8 +54,8 @@
@@ -433,7 +433,7 @@ diff -r 22ac83eb1429 tests/odp.at
  ])
  AT_CLEANUP
  
-diff -r 22ac83eb1429 tests/ofp-print.at
+diff -r 25f5e637c00e tests/ofp-print.at
 --- a/tests/ofp-print.at
 +++ b/tests/ofp-print.at
 @@ -225,7 +225,7 @@
@@ -445,7 +445,7 @@ diff -r 22ac83eb1429 tests/ofp-print.at
  AT_CHECK([ovs-ofctl ofp-print "\
  01 0a 00 4e 00 00 00 00 00 00 01 11 00 3c 00 03 \
  00 00 50 54 00 00 00 06 50 54 00 00 00 05 08 00 \
-diff -r 22ac83eb1429 tests/ofproto-dpif.at
+diff -r 25f5e637c00e tests/ofproto-dpif.at
 --- a/tests/ofproto-dpif.at
 +++ b/tests/ofproto-dpif.at
 @@ -358,8 +358,8 @@
@@ -459,7 +459,13 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
    done
  done
  OVS_VSWITCHD_STOP
-@@ -420,15 +420,15 @@
+@@ -417,20 +417,20 @@
+ in_port=$p2 actions=output:$p1
+ EOF
+ AT
+-AT_CAPTURE_FILE([flows.txt])
++dnl AT_CAPTURE_FILE([flows.txt])
+ AT_CHECK([ovs-ofctl add-flows br0 flows.txt])
  
  flow="in_port($p1),eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
  AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
@@ -481,7 +487,13 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-@@ -465,15 +465,15 @@
+@@ -464,20 +464,20 @@
+ in_port=$p2 actions=output:$p1
+ EOF
+ AT
+-AT_CAPTURE_FILE([flows.txt])
++dnl AT_CAPTURE_FILE([flows.txt])
+ AT_CHECK([ovs-ofctl add-flows br0 flows.txt])
  
  flow="in_port($p1),eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
  AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
@@ -503,7 +515,7 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  OVS_VSWITCHD_STOP
  AT_CLEANUP
  
-@@ -503,9 +503,9 @@
+@@ -507,9 +507,9 @@
  # "in_port" defaults to OFPP_NONE if it's not specified.
  flow="eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
  AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
@@ -516,7 +528,13 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-@@ -542,15 +542,15 @@
+@@ -543,20 +543,20 @@
+ in_port=$p2 actions=output:$p1
+ EOF
+ AT
+-AT_CAPTURE_FILE([flows.txt])
++dnl AT_CAPTURE_FILE([flows.txt])
+ AT_CHECK([ovs-ofctl add-flows br0 flows.txt])
  
  flow="in_port($p1),eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
  AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
@@ -538,7 +556,13 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-@@ -586,21 +586,21 @@
+@@ -589,26 +589,26 @@
+ in_port=$p1 actions=output:$p2
+ EOF
+ AT
+-AT_CAPTURE_FILE([flows.txt])
++dnl AT_CAPTURE_FILE([flows.txt])
+ AT_CHECK([ovs-ofctl add-flows br0 flows.txt])
  
  flow="in_port($p1),eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
  AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
@@ -569,7 +593,13 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-@@ -637,15 +637,15 @@
+@@ -642,20 +642,20 @@
+ in_port=$p2 actions=output:$p1
+ EOF
+ AT
+-AT_CAPTURE_FILE([flows.txt])
++dnl AT_CAPTURE_FILE([flows.txt])
+ AT_CHECK([ovs-ofctl add-flows br0 flows.txt])
  
  flow="in_port($p1),eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
  AT_CHECK([ovs-appctl ofproto/trace br0 "$flow"], [0], [stdout])
@@ -591,7 +621,16 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-@@ -735,10 +735,10 @@
+@@ -686,7 +686,7 @@
+ in_port=$p2 actions=mod_vlan_vid:17,output:$p1
+ EOF
+ AT
+-AT_CAPTURE_FILE([flows.txt])
++dnl AT_CAPTURE_FILE([flows.txt])
+ AT_CHECK([ovs-ofctl add-flows br0 flows.txt])
+ 
+ flow="in_port($p1),eth(src=50:54:00:00:00:05,dst=50:54:00:00:00:07),eth_type(0x0800),ipv4(src=192.168.0.1,dst=192.168.0.2,proto=1,tos=0,ttl=128,frag=no),icmp(type=8,code=0)"
+@@ -747,10 +747,10 @@
    [br0=$br0 p1=$p1 p2=$p2 p3=$p3])
  
  # Check for the MAC learning entry.
@@ -606,7 +645,7 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  # Trace a packet arrival destined for the learned MAC.
  # (This will also learn a MAC.)
-@@ -750,11 +750,11 @@
+@@ -762,11 +762,11 @@
    [br0=$br0 p1=$p1 p2=$p2 p3=$p3])
  
  # Check for both MAC learning entries.
@@ -623,7 +662,7 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  # Trace a packet arrival that updates the first learned MAC entry.
  OFPROTO_TRACE(
-@@ -765,11 +765,11 @@
+@@ -777,11 +777,11 @@
    [br0=$br0 p1=$p1 p2=$p2 p3=$p3])
  
  # Check that the MAC learning entry was updated.
@@ -640,7 +679,7 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  # Add another bridge.
  AT_CHECK(
-@@ -801,23 +801,23 @@
+@@ -813,23 +813,23 @@
    [br1=$br1 p4=$p4 p5=$p5])
  
  # Check that the MAC learning entries were added.
@@ -677,7 +716,7 @@ diff -r 22ac83eb1429 tests/ofproto-dpif.at
  
  OVS_VSWITCHD_STOP
  AT_CLEANUP
-diff -r 22ac83eb1429 tests/ofproto-macros.at
+diff -r 25f5e637c00e tests/ofproto-macros.at
 --- a/tests/ofproto-macros.at
 +++ b/tests/ofproto-macros.at
 @@ -16,14 +16,14 @@
@@ -697,7 +736,7 @@ diff -r 22ac83eb1429 tests/ofproto-macros.at
     AT_CHECK([[sed < stderr '
  /vlog|INFO|opened log file/d
  /reconnect|INFO|/d
-diff -r 22ac83eb1429 tests/ofproto.at
+diff -r 25f5e637c00e tests/ofproto.at
 --- a/tests/ofproto.at
 +++ b/tests/ofproto.at
 @@ -57,10 +57,10 @@
@@ -715,7 +754,7 @@ diff -r 22ac83eb1429 tests/ofproto.at
   LOCAL(br0): addr:aa:55:aa:55:00:00
       config:     $config
       state:      $state
-diff -r 22ac83eb1429 tests/ovs-monitor-ipsec.at
+diff -r 25f5e637c00e tests/ovs-monitor-ipsec.at
 --- a/tests/ovs-monitor-ipsec.at
 +++ b/tests/ovs-monitor-ipsec.at
 @@ -1,7 +1,7 @@
@@ -738,7 +777,7 @@ diff -r 22ac83eb1429 tests/ovs-monitor-ipsec.at
  OVS_WAIT_UNTIL([test ! -f etc/racoon/certs/ovs-stale.pem])
  
  ###
-diff -r 22ac83eb1429 tests/ovs-xapi-sync.at
+diff -r 25f5e637c00e tests/ovs-xapi-sync.at
 --- a/tests/ovs-xapi-sync.at
 +++ b/tests/ovs-xapi-sync.at
 @@ -1,7 +1,7 @@
@@ -759,7 +798,7 @@ diff -r 22ac83eb1429 tests/ovs-xapi-sync.at
  
  # Add bridges and check ovs-xapi-sync's work.
  AT_CHECK([ovs_vsctl -- add-br xenbr0 -- add-br xenbr1])
-diff -r 22ac83eb1429 tests/ovsdb-idl.at
+diff -r 25f5e637c00e tests/ovsdb-idl.at
 --- a/tests/ovsdb-idl.at
 +++ b/tests/ovsdb-idl.at
 @@ -34,7 +34,7 @@
@@ -771,7 +810,7 @@ diff -r 22ac83eb1429 tests/ovsdb-idl.at
     AT_KEYWORDS([ovsdb server idl positive Python $5])
     AT_CHECK([ovsdb-tool create db $abs_srcdir/idltest.ovsschema],
                    [0], [stdout], [ignore])
-diff -r 22ac83eb1429 tests/ovsdb-log.at
+diff -r 25f5e637c00e tests/ovsdb-log.at
 --- a/tests/ovsdb-log.at
 +++ b/tests/ovsdb-log.at
 @@ -2,7 +2,7 @@
@@ -873,7 +912,7 @@ diff -r 22ac83eb1429 tests/ovsdb-log.at
  AT_CHECK(
    [[test-ovsdb log-io file create 'write:[0]' 'write:[1]' 'write:[2]']], [0], 
    [[file: open successful
-diff -r 22ac83eb1429 tests/ovsdb-monitor.at
+diff -r 25f5e637c00e tests/ovsdb-monitor.at
 --- a/tests/ovsdb-monitor.at
 +++ b/tests/ovsdb-monitor.at
 @@ -24,7 +24,7 @@
@@ -885,7 +924,7 @@ diff -r 22ac83eb1429 tests/ovsdb-monitor.at
     AT_CHECK([ovsdb-server --detach --pidfile=$PWD/server-pid --remote=punix:socket --unixctl=$PWD/unixctl --log-file=$PWD/ovsdb-server-log db >/dev/null 2>&1],
              [0], [], [])
     AT_CHECK([ovsdb-client -vjsonrpc --detach --pidfile=$PWD/client-pid -d json monitor --format=csv unix:socket $4 $5 $8 > output], 
-diff -r 22ac83eb1429 tests/ovsdb-server.at
+diff -r 25f5e637c00e tests/ovsdb-server.at
 --- a/tests/ovsdb-server.at
 +++ b/tests/ovsdb-server.at
 @@ -198,11 +198,11 @@
@@ -947,7 +986,7 @@ diff -r 22ac83eb1429 tests/ovsdb-server.at
     AT_DATA([schema], [$2
  ])
     SSL_PORT=`expr 32767 + \( $RANDOM % 32767 \)`
-diff -r 22ac83eb1429 tests/ovsdb-tool.at
+diff -r 25f5e637c00e tests/ovsdb-tool.at
 --- a/tests/ovsdb-tool.at
 +++ b/tests/ovsdb-tool.at
 @@ -123,7 +123,7 @@
@@ -977,7 +1016,7 @@ diff -r 22ac83eb1429 tests/ovsdb-tool.at
  AT_CHECK([wc -l < db], [0], [4
  ])
  dnl And check that the dumped data is the same except for the added column:
-diff -r 22ac83eb1429 tests/ovsdb.at
+diff -r 25f5e637c00e tests/ovsdb.at
 --- a/tests/ovsdb.at
 +++ b/tests/ovsdb.at
 @@ -23,7 +23,7 @@
@@ -998,7 +1037,7 @@ diff -r 22ac83eb1429 tests/ovsdb.at
     AT_KEYWORDS([ovsdb negative $4])
     AT_CHECK([$PYTHON $srcdir/test-ovsdb.py $2], [1], [], [stderr])
     m4_assert(m4_len([$3]))
-diff -r 22ac83eb1429 tests/reconnect.at
+diff -r 25f5e637c00e tests/reconnect.at
 --- a/tests/reconnect.at
 +++ b/tests/reconnect.at
 @@ -17,7 +17,7 @@
@@ -1010,7 +1049,7 @@ diff -r 22ac83eb1429 tests/reconnect.at
       [$2],
       [$PYTHON $srcdir/test-reconnect.py < input],
       [$3])])
-diff -r 22ac83eb1429 tests/uuid.at
+diff -r 25f5e637c00e tests/uuid.at
 --- a/tests/uuid.at
 +++ b/tests/uuid.at
 @@ -32,7 +32,7 @@
@@ -1022,7 +1061,7 @@ diff -r 22ac83eb1429 tests/uuid.at
  AT_KEYWORDS([UUID])
  AT_CHECK([
    uuids=
-diff -r 22ac83eb1429 tests/vconn.at
+diff -r 25f5e637c00e tests/vconn.at
 --- a/tests/vconn.at
 +++ b/tests/vconn.at
 @@ -1,21 +1,21 @@
@@ -1065,7 +1104,7 @@ diff -r 22ac83eb1429 tests/vconn.at
  
  TEST_VCONN_CLASS([unix])
  TEST_VCONN_CLASS([tcp])
-diff -r 22ac83eb1429 tests/vlog.at
+diff -r 25f5e637c00e tests/vlog.at
 --- a/tests/vlog.at
 +++ b/tests/vlog.at
 @@ -1,12 +1,12 @@

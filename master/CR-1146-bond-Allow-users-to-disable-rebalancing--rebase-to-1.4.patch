@@ -1,0 +1,137 @@
+From bc1b010c2b8bd17973287388da8c171332b70b3f Mon Sep 17 00:00:00 2001
+From: Ethan Jackson <ethan@nicira.com>
+Date: Wed, 25 Jan 2012 17:41:44 -0800
+Subject: [PATCH] bond: Allow users to disable rebalancing.
+
+Bond rebalances come with a risk of packet reordering which some
+users may find unacceptable.
+
+Requested-by: Ben Basler <bbasler@nicira.com>
+Signed-off-by: Ethan Jackson <ethan@nicira.com>
+---
+ lib/bond.c           |    9 +++++++--
+ lib/bond.h           |    3 ++-
+ vswitchd/bridge.c    |    2 +-
+ vswitchd/vswitch.xml |   12 +++++++-----
+ 4 files changed, 17 insertions(+), 9 deletions(-)
+
+Index: openvswitch.hg/lib/bond.c
+===================================================================
+--- openvswitch.hg.orig/lib/bond.c	2012-05-01 15:28:03.000000000 +0100
++++ openvswitch.hg/lib/bond.c	2012-05-02 16:42:31.000000000 +0100
+@@ -245,7 +245,11 @@ bond_reconfigure(struct bond *bond, cons
+ 
+     bond->updelay = s->up_delay;
+     bond->downdelay = s->down_delay;
+-    bond->rebalance_interval = s->rebalance_interval;
++
++    if (bond->rebalance_interval != s->rebalance_interval) {
++        bond->rebalance_interval = s->rebalance_interval;
++        revalidate = true;
++    }
+ 
+     if (bond->balance != s->balance) {
+         bond->balance = s->balance;
+@@ -642,7 +646,8 @@ bond_choose_output_slave(struct bond *bo
+ static bool
+ bond_is_balanced(const struct bond *bond)
+ {
+-    return bond->balance == BM_SLB || bond->balance == BM_TCP;
++    return bond->rebalance_interval
++        && (bond->balance == BM_SLB || bond->balance == BM_TCP);
+ }
+ 
+ /* Notifies 'bond' that 'n_bytes' bytes were sent in 'flow' within 'vlan'. */
+@@ -1366,15 +1371,13 @@ lookup_bond_entry(const struct bond *bon
+  * more complex implementations and require the use of memory.  This may need
+  * to be reimplemented if it becomes a performance bottleneck. */
+ static struct bond_slave *
+-choose_stb_slave(const struct bond *bond, const struct flow *flow,
+-                 uint16_t vlan)
++choose_stb_slave(const struct bond *bond, uint32_t flow_hash)
+ {
+     struct bond_slave *best, *slave;
+-    uint32_t best_hash, flow_hash;
++    uint32_t best_hash;
+ 
+     best = NULL;
+     best_hash = 0;
+-    flow_hash = bond_hash(bond, flow, vlan);
+     HMAP_FOR_EACH (slave, hmap_node, &bond->slaves) {
+         if (slave->enabled) {
+             uint32_t hash;
+@@ -1401,8 +1404,11 @@ choose_output_slave(const struct bond *b
+         return bond->active_slave;
+ 
+     case BM_STABLE:
+-        return choose_stb_slave(bond, flow, vlan);
++        return choose_stb_slave(bond, bond_hash_tcp(flow, vlan, bond->basis));
+     case BM_SLB:
++        if (!bond_is_balanced(bond)) {
++            return choose_stb_slave(bond, bond_hash(bond, flow, vlan));
++        }
+     case BM_TCP:
+         e = lookup_bond_entry(bond, flow, vlan);
+         if (!e->slave || !e->slave->enabled) {
+Index: openvswitch.hg/lib/bond.h
+===================================================================
+--- openvswitch.hg.orig/lib/bond.h	2012-05-01 15:28:03.000000000 +0100
++++ openvswitch.hg/lib/bond.h	2012-05-02 16:32:37.000000000 +0100
+@@ -45,7 +45,8 @@ struct bond_settings {
+ 
+     /* Balancing configuration. */
+     enum bond_mode balance;
+-    int rebalance_interval;     /* Milliseconds between rebalances. */
++    int rebalance_interval;     /* Milliseconds between rebalances.
++                                   Zero to disable rebalancing. */
+ 
+     /* Link status detection. */
+     int up_delay;               /* ms before enabling an up slave. */
+Index: openvswitch.hg/vswitchd/bridge.c
+===================================================================
+--- openvswitch.hg.orig/vswitchd/bridge.c	2012-05-01 15:28:03.000000000 +0100
++++ openvswitch.hg/vswitchd/bridge.c	2012-05-02 16:32:37.000000000 +0100
+@@ -2803,7 +2803,7 @@ port_configure_bond(struct port *port, s
+     s->basis = atoi(get_port_other_config(port->cfg, "bond-hash-basis", "0"));
+     s->rebalance_interval = atoi(
+         get_port_other_config(port->cfg, "bond-rebalance-interval", "10000"));
+-    if (s->rebalance_interval < 1000) {
++    if (s->rebalance_interval && s->rebalance_interval < 1000) {
+         s->rebalance_interval = 1000;
+     }
+ 
+Index: openvswitch.hg/vswitchd/vswitch.xml
+===================================================================
+--- openvswitch.hg.orig/vswitchd/vswitch.xml	2012-05-01 15:28:03.000000000 +0100
++++ openvswitch.hg/vswitchd/vswitch.xml	2012-05-02 16:32:37.000000000 +0100
+@@ -919,11 +919,13 @@
+         </p>
+ 
+         <column name="other_config" key="bond-rebalance-interval"
+-                type='{"type": "integer", "minInteger": 1000, "maxInteger": 10000}'>
+-          For an SLB bonded port, the number of milliseconds between successive
+-          attempts to rebalance the bond, that is, to move source MACs and
+-          their flows from one interface on the bond to another in an attempt
+-          to keep usage of each interface roughly equal.
++                type='{"type": "integer", "minInteger": 0, "maxInteger": 10000}'>
++          For a load balanced bonded port, the number of milliseconds between
++          successive attempts to rebalance the bond, that is, to move flows
++          from one interface on the bond to another in an attempt to keep usage
++          of each interface roughly equal.  If zero, load balancing is disabled
++          on the bond (carrier status changes still cause flows to move).  If
++          less than 1000ms, the rebalance interval will be 1000ms.
+         </column>
+       </group>
+ 
+Index: openvswitch.hg/AUTHORS
+===================================================================
+--- openvswitch.hg.orig/AUTHORS	2012-05-02 16:33:55.000000000 +0100
++++ openvswitch.hg/AUTHORS	2012-05-02 16:36:28.000000000 +0100
+@@ -60,6 +60,7 @@ Alban Browaeys          prahal@yahoo.com
+ Alex Yip                alex@nicira.com
+ Alexey I. Froloff       raorn@altlinux.org
+ Andreas Beckmann        debian@abeckmann.de
++Ben Basler              bbasler@nicira.com
+ Bob Ball                bob.ball@citrix.com
+ Brad Hall               brad@nicira.com
+ Brandon Heller          brandonh@stanford.edu

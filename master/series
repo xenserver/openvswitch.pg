@@ -23,5 +23,6 @@ CP-2829-remove-sections-of-niciras-spec-file.patch
 CP-2829-write-modules.inc-file-to-output-dir.patch
 CP-2829-drop-mod-suffix.patch
 CP-2829-remove-need-for-old-specfile.patch
+CR-1146-bond-Allow-users-to-disable-rebalancing--rebase-to-1.4.patch
 
 

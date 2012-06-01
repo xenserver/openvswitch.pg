@@ -1,0 +1,31 @@
+# HG changeset patch
+# Parent a59bd2f55e2f691bacd3ed200d74c4c279f372ac
+CA-78639: Don't call interface-reconfigure anymore
+
+Interface-reconfigure has been replaced by xcp-networkd and should therefore
+no longer be used. At the same time, this particular call to "interface-reconfigure
+rewrite" is no longer needed, because xapi now causes all ovs bridges to have their
+external-ids refreshed whenever xapi starts, including after a pool join (which was
+the reason for the call).
+
+Signed-off-by: Rob Hoes <rob.hoes@citrix.com>
+
+diff -r a59bd2f55e2f xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
+--- a/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
++++ b/xenserver/etc_xapi.d_plugins_openvswitch-cfg-update
+@@ -41,15 +41,6 @@
+         pass
+ 
+ def update(session, args):
+-    # Refresh bridge network UUIDs in case this host joined or left a pool.
+-    script = "/opt/xensource/libexec/interface-reconfigure"
+-    try:
+-        retval = subprocess.call([script, "rewrite"])
+-        if retval != 0:
+-            syslog.syslog("%s exited with status %d" % (script, retval))
+-    except OSError, e:
+-        syslog.syslog("%s: failed to execute (%s)" % (script, e.strerror))
+-
+     pools = session.xenapi.pool.get_all()
+     # We assume there is only ever one pool...
+     if len(pools) == 0:

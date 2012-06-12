@@ -1,0 +1,37 @@
+# HG changeset patch
+# Parent 4532247cf75a688a70928488109094de906a3417
+CA-82447: CP-2829 resulted in only the kdump kernel debuginfo modules symbols being added, we only need the xen kernel variant debug symbols so we reverse the order the openvswitch kernel modules are built in.
+
+diff -r 4532247cf75a mk/Makefile
+--- a/mk/Makefile
++++ b/mk/Makefile
+@@ -21,6 +21,11 @@ OPENVSWITCH_SPEC := openvswitch-xen.spec
+ 
+ OPENVSWITCH_SRPM := openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm
+ 
++
++# reverse - reverse a list of words
++reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
++KERNEL_FLAVOURS_REV := $(call reverse, $(KERNEL_FLAVOURS))
++
+ .PHONY: build
+ build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST $(MY_OUTPUT_DIR)/modules.inc \
+ #	$(KERNEL_FLAVOURS:%=$(MY_OBJ_DIR)/.rpmbuild.openvswitch-modules.%.stamp)
+@@ -60,7 +65,7 @@ clean:
+ 
+ # Call Niciras spec file.
+ $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp: $(RPM_DIRECTORIES) $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
+-	($(foreach f,$(KERNEL_FLAVOURS),$(RPMBUILD) \
++	($(foreach f,$(KERNEL_FLAVOURS_REV),$(RPMBUILD) \
+ 		-D "openvswitch_version $(OPENVSWITCH_VERSION)" \
+ 	        -D "kernel_name xen" \
+ 		-D "kernel_version $(KERNEL_PKG_VERSION)" \
+@@ -70,7 +75,7 @@ clean:
+ 	touch $@
+ 
+ $(MY_OUTPUT_DIR)/modules.inc:
+-	($(foreach f,$(KERNEL_FLAVOURS),echo openvswitch-modules-$(f);)) > $@ 
++	($(foreach f,$(KERNEL_FLAVOURS_REV),echo openvswitch-modules-$(f);)) > $@ 
+ 
+ 
+ # Writes the manifest into output dir.

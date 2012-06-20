@@ -15,7 +15,7 @@ hgignore
 build-integration.patch
 fixup-of-acinclude.m4-to-work-with-older-tools.patch
 change-log-level-to-log-to-syslog.patch
-CA-72973-hack-to-strip-temp-dirs-from-paths.patch
+#CA-72973-hack-to-strip-temp-dirs-from-paths.patch
 
 # CP-2829: Patches to build openvswitch kernel modules into seperate RPMs
 CP-2829-build-kernel-module-into-rpm.patch

@@ -1,0 +1,27 @@
+[PATCH] xenserver: Improve efficiency of code by using get_all_records_where()
+
+Replace the get_record() for network references which caused as many slave-to-master 
+calls as there are Network records plus one. 
+The get_all_records_where() call gets exactly what is needed with a single call.
+
+Signed-off-by: Rob Hoes <rob.hoes@citrix.com>
+
+# HG changeset patch
+# Parent 4d98f76d79d2e6df2862d4cd244c3c2dbbc6a9b3
+diff -r 4d98f76d79d2 -r bb86595f4d83 xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync
+--- a/xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync
++++ b/xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync
+@@ -72,10 +72,9 @@
+                 " XAPI session could not be initialized" % br_name)
+         return None
+ 
+-    for n in session.xenapi.network.get_all():
+-        rec = session.xenapi.network.get_record(n)
+-        if rec['bridge'] == br_name:
+-            return rec
++    recs = session.xenapi.network.get_all_records_where('field "bridge"="%s"' % br_name)
++    if len(recs) > 0:
++        return recs.values()[0]
+ 
+     return None
+ 

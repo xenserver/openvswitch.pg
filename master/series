@@ -27,5 +27,6 @@ CP-2829-reverse-order-of-module-build.patch
 
 CR-1146-bond-Allow-users-to-disable-rebalancing--rebase-to-1.4.patch
 CA-78639-dont-call-interface-reconfigure-anymore.patch
+CA-83996-improve-ovs-xapi-sync.patch
 
 

@@ -1,0 +1,38 @@
+From ad1de6c5b90a232e084226a516ea6063f42cfb69 Mon Sep 17 00:00:00 2001
+From: Dominic Curran <dominic.curran@citrix.com>
+Date: Wed, 27 Jun 2012 15:14:41 +0100
+Subject: [PATCH 1/1] xenserver: Improve efficiency of code by using
+ get_all_records_where()
+
+Replace the get_record() for network references which caused as many
+slave-to-master calls as there are Network records plus one.
+The get_all_records_where() call gets exactly what is needed with a single
+call.
+
+Signed-off-by: Rob Hoes <rob.hoes@citrix.com>
+Acked-by: Dominic Curran <dominic.curran@citrix.com>
+---
+ .../usr_share_openvswitch_scripts_ovs-xapi-sync    |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync b/xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync
+index 5083bbd..cb35e7a 100755
+--- a/xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync
++++ b/xenserver/usr_share_openvswitch_scripts_ovs-xapi-sync
+@@ -82,10 +82,9 @@ def get_network_by_bridge(br_name):
+                 " XAPI session could not be initialized" % br_name)
+         return None
+ 
+-    for n in session.xenapi.network.get_all():
+-        rec = session.xenapi.network.get_record(n)
+-        if rec['bridge'] == br_name:
+-            return rec
++    recs = session.xenapi.network.get_all_records_where('field "bridge"="%s"' % br_name)
++    if len(recs) > 0:
++        return recs.values()[0]
+ 
+     return None
+ 
+-- 
+1.7.5.4
+

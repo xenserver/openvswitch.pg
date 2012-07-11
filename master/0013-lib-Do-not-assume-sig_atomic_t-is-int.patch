@@ -1,0 +1,50 @@
+From cc8ccb53fd54d27cd08fd15d0e96fce6b7a640bd Mon Sep 17 00:00:00 2001
+From: Ed Maste <emaste@freebsd.org>
+Date: Tue, 26 Jun 2012 14:43:54 +0000
+Subject: [PATCH 13/13] lib: Do not assume sig_atomic_t is int.
+
+On FreeBSD sig_atomic_t is long, which causes the comparison in
+fatal_signal_run to be true when no signal has been reported.
+
+Signed-off-by: Ed Maste <emaste@freebsd.org>
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ AUTHORS            |    1 +
+ lib/fatal-signal.c |    4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index ddb3b13..5893ef3 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -16,6 +16,7 @@ Dan Wendlandt           dan@nicira.com
+ Daniel Roman            droman@nicira.com
+ David Erickson          derickso@stanford.edu
+ Dominic Curran          dominic.curran@citrix.com
++Ed Maste                emaste at freebsd.org
+ Edward Tomasz Napierała trasz@freebsd.org
+ Ethan Jackson           ethan@nicira.com
+ Gaetano Catalli         gaetano.catalli@gmail.com
+diff --git a/lib/fatal-signal.c b/lib/fatal-signal.c
+index a6ce1b7..ddc43e6 100644
+--- a/lib/fatal-signal.c
++++ b/lib/fatal-signal.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2008, 2009, 2010, 2011 Nicira Networks.
++ * Copyright (c) 2008, 2009, 2010, 2011, 2012 Nicira Networks.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -152,7 +152,7 @@ fatal_signal_handler(int sig_nr)
+ void
+ fatal_signal_run(void)
+ {
+-    int sig_nr;
++    sig_atomic_t sig_nr;
+ 
+     fatal_signal_init();
+ 
+-- 
+1.7.5.4
+

@@ -1,0 +1,31 @@
+From b42c6f6033ce5a6dfd8ed1769c63a8b68da5ace1 Mon Sep 17 00:00:00 2001
+From: Ethan Jackson <ethan@nicira.com>
+Date: Thu, 7 Jun 2012 13:05:41 -0700
+Subject: [PATCH 09/13] ofproto: Fix use after free in ofoperation_complete().
+
+In one edge case, ofoperation_complete() destroys its rule, without
+updating its ofoperation that the rule is gone.  Later in the same
+function, ofoperation_destroy() attempts to modify the rule which
+already destroyed.
+
+Bug #11797.
+Signed-off-by: Ethan Jackson <ethan@nicira.com>
+---
+ ofproto/ofproto.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/ofproto/ofproto.c b/ofproto/ofproto.c
+index 85509e7..829271f 100644
+--- a/ofproto/ofproto.c
++++ b/ofproto/ofproto.c
+@@ -3212,6 +3212,7 @@ ofoperation_complete(struct ofoperation *op, int error)
+                 classifier_remove(table, &rule->cr);
+             }
+             ofproto_rule_destroy__(rule);
++            op->rule = NULL;
+         }
+         op->victim = NULL;
+         break;
+-- 
+1.7.5.4
+

@@ -1,0 +1,52 @@
+From 7ea32ef72d153bd4d63c3d57331d0ec7b2111545 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Mon, 18 Jun 2012 09:33:23 -0700
+Subject: [PATCH 12/13] debian: Make DKMS automatically build for running
+ kernel.
+
+By default DKMS doesn't build on demand for each kernel booted or updated.
+Adding AUTOINSTALL=yes gives it this behavior.  Based on a small sample of
+Debian packages and how-to guides for Ubuntu, AUTOINSTALL=yes is what most
+packages use and what users expect.
+
+Fix-suggested-by: Kirill Kabardin
+Reported-by: Ralf Heiringhoff <ralf@frosty-geek.net>
+Reported-at: https://bugs.launchpad.net/bugs/962189
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ AUTHORS             |    2 ++
+ debian/dkms.conf.in |    1 +
+ 2 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index a5b522f..ddb3b13 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -93,6 +93,7 @@ Jed Daniels             openvswitch@jeddaniels.com
+ Jeongkeun Lee           jklee@hp.com
+ Joan Cirer              joan@ev0.net
+ John Galgay             john@galgay.net
++Kirill Kabardin
+ Koichi Yagishita        yagishita.koichi@jrc.co.jp
+ Krishna Miriyala        krishna@nicira.com
+ Luca Falavigna          dktrkranz@debian.org
+@@ -109,6 +110,7 @@ Pankaj Thakkar          thakkar@nicira.com
+ Paulo Cravero           pcravero@as2594.net
+ Peter Balland           peter@nicira.com
+ Peter Phaal             peter.phaal@inmon.com
++Ralf Heiringhoff        ralf@frosty-geek.net
+ Ram Jothikumar          rjothikumar@nicira.com
+ Ramana Reddy            gtvrreddy@gmail.com
+ Rob Hoes                rob.hoes@citrix.com
+diff --git a/debian/dkms.conf.in b/debian/dkms.conf.in
+index d5bc37e..279e3a0 100644
+--- a/debian/dkms.conf.in
++++ b/debian/dkms.conf.in
+@@ -7,3 +7,4 @@ BUILT_MODULE_LOCATION[0]=datapath/linux/
+ BUILT_MODULE_LOCATION[1]=datapath/linux/
+ DEST_MODULE_LOCATION[0]=/kernel/drivers/net/openvswitch/
+ DEST_MODULE_LOCATION[1]=/kernel/drivers/net/openvswitch/
++AUTOINSTALL=yes
+-- 
+1.7.5.4
+

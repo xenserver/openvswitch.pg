@@ -1,0 +1,34 @@
+From 0ada27a055648f1aaf6e8e83f72ac9066e9f2e35 Mon Sep 17 00:00:00 2001
+From: Pravin B Shelar <pshelar@nicira.com>
+Date: Tue, 12 Jun 2012 11:19:16 -0700
+Subject: [PATCH 10/13] datapath: Check currect return value from
+ skb_gso_segment()
+
+Fix return check typo.
+
+Signed-off-by: Pravin B Shelar <pshelar@nicira.com>
+Acked-by: Jesse Gross <jesse@nicira.com>
+
+Bug #11933
+---
+ datapath/datapath.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/datapath/datapath.c b/datapath/datapath.c
+index 0030593..da45cd2 100644
+--- a/datapath/datapath.c
++++ b/datapath/datapath.c
+@@ -384,8 +384,8 @@ static int queue_gso_packets(int dp_ifindex, struct sk_buff *skb,
+ 	int err;
+ 
+ 	segs = skb_gso_segment(skb, NETIF_F_SG | NETIF_F_HW_CSUM);
+-	if (IS_ERR(skb))
+-		return PTR_ERR(skb);
++	if (IS_ERR(segs))
++		return PTR_ERR(segs);
+ 
+ 	/* Queue all of the segments. */
+ 	skb = segs;
+-- 
+1.7.5.4
+

@@ -1,0 +1,105 @@
+From 61011a77ad1152b6da1e0b557574c654a0641b2e Mon Sep 17 00:00:00 2001
+From: Brian Kruger <bkruger+ovsdev@gmail.com>
+Date: Wed, 9 May 2012 09:13:42 -0700
+Subject: [PATCH 02/13] rhel: Add timeouts to network scripts.
+
+If the daemon(s) aren't running for whatever reason, the RHEL ovs
+ifup/ifdown scripts don't take that into account and an attempt to reboot a
+system could take forever. (literally. endless loop!)  Here are a couple of
+patches (one of ifup, one for ifdown) to add timeouts (10 seconds), because
+it runs per interface you have configured and that could take awhile to
+reboot a system if needed.
+
+Signed-off-by: Brian Kruger <bkruger+ovsdev@gmail.com>
+[blp@nicira.com fixed up a conflict against master]
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ AUTHORS                                       |    1 +
+ rhel/etc_sysconfig_network-scripts_ifdown-ovs |    5 +++--
+ rhel/etc_sysconfig_network-scripts_ifup-ovs   |    9 +++++----
+ 3 files changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index d4080f6..8d3c172 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -7,6 +7,7 @@ Andrew Evans            aevans@nicira.com
+ Andrew Lambeth          wal@nicira.com
+ Andy Southgate          andy.southgate@citrix.com
+ Ben Pfaff               blp@nicira.com
++Brian Kruger            bkruger+ovsdev@gmail.com
+ Bryan Phillippe         bp@toroki.com
+ Casey Barker            crbarker@google.com
+ Chris Wright            chrisw@sous-sol.org
+diff --git a/rhel/etc_sysconfig_network-scripts_ifdown-ovs b/rhel/etc_sysconfig_network-scripts_ifdown-ovs
+index 3b5252d..19047d8 100755
+--- a/rhel/etc_sysconfig_network-scripts_ifdown-ovs
++++ b/rhel/etc_sysconfig_network-scripts_ifdown-ovs
+@@ -22,6 +22,7 @@ cd /etc/sysconfig/network-scripts
+ [ -f ../network ] && . ../network
+ 
+ CONFIG=${1}
++TIMEOUT=10
+ 
+ source_config
+ 
+@@ -37,12 +38,12 @@ case "$TYPE" in
+ 	OVSBridge)
+ 		${OTHERSCRIPT} ${CONFIG} $2
+ 		retval=$?
+-		ovs-vsctl -- --if-exists del-br "$DEVICE"
++		ovs-vsctl -t ${TIMEOUT} -- --if-exists del-br "$DEVICE"
+ 		;;
+ 	OVSPort|OVSIntPort|OVSBond)
+ 		${OTHERSCRIPT} ${CONFIG} $2
+ 		retval=$?
+-		ovs-vsctl -- --if-exists del-port "$OVS_BRIDGE" "$DEVICE"
++		ovs-vsctl -t ${TIMEOUT} -- --if-exists del-port "$OVS_BRIDGE" "$DEVICE"
+ 		;;
+ 	*)
+ 		echo $"Invalid OVS interface type $TYPE"
+diff --git a/rhel/etc_sysconfig_network-scripts_ifup-ovs b/rhel/etc_sysconfig_network-scripts_ifup-ovs
+index 7074c07..e07b5bf 100755
+--- a/rhel/etc_sysconfig_network-scripts_ifup-ovs
++++ b/rhel/etc_sysconfig_network-scripts_ifup-ovs
+@@ -22,6 +22,7 @@ cd /etc/sysconfig/network-scripts
+ [ -f ../network ] && . ../network
+ 
+ CONFIG=${1}
++TIMEOUT=10
+ 
+ need_config ${CONFIG}
+ 
+@@ -35,17 +36,17 @@ fi
+ 
+ case "$TYPE" in
+ 	OVSBridge)
+-		ovs-vsctl -- --may-exist add-br "$DEVICE" $OVS_OPTIONS ${OVS_EXTRA+-- $OVS_EXTRA}
++		ovs-vsctl -t ${TIMEOUT} -- --may-exist add-br "$DEVICE" $OVS_OPTIONS ${OVS_EXTRA+-- $OVS_EXTRA}
+ 		${OTHERSCRIPT} ${CONFIG} ${2}
+ 		;;
+ 	OVSPort)
+ 		/sbin/ifup "$OVS_BRIDGE"
+ 		${OTHERSCRIPT} ${CONFIG} ${2}
+-		ovs-vsctl -- --may-exist add-port "$OVS_BRIDGE" "$DEVICE" $OVS_OPTIONS ${OVS_EXTRA+-- $OVS_EXTRA}
++		ovs-vsctl -t ${TIMEOUT} -- --may-exist add-port "$OVS_BRIDGE" "$DEVICE" $OVS_OPTIONS ${OVS_EXTRA+-- $OVS_EXTRA}
+ 		;;
+ 	OVSIntPort)
+ 		/sbin/ifup "$OVS_BRIDGE"
+-		ovs-vsctl -- --may-exist add-port "$OVS_BRIDGE" "$DEVICE" $OVS_OPTIONS -- set Interface "$DEVICE" type=internal ${OVS_EXTRA+-- $OVS_EXTRA}
++		ovs-vsctl -t ${TIMEOUT} -- --may-exist add-port "$OVS_BRIDGE" "$DEVICE" $OVS_OPTIONS -- set Interface "$DEVICE" type=internal ${OVS_EXTRA+-- $OVS_EXTRA}
+ 		${OTHERSCRIPT} ${CONFIG} ${2}
+ 		;;
+ 	OVSBond)
+@@ -53,7 +54,7 @@ case "$TYPE" in
+ 		for _iface in $BOND_IFACES; do
+ 			/sbin/ifup ${_iface}
+ 		done
+-		ovs-vsctl -- --fake-iface add-bond "$OVS_BRIDGE" "$DEVICE" ${BOND_IFACES} $OVS_OPTIONS ${OVS_EXTRA+-- $OVS_EXTRA}
++		ovs-vsctl -t ${TIMEOUT} -- --fake-iface add-bond "$OVS_BRIDGE" "$DEVICE" ${BOND_IFACES} $OVS_OPTIONS ${OVS_EXTRA+-- $OVS_EXTRA}
+ 		${OTHERSCRIPT} ${CONFIG} ${2}
+ 		;;
+ 	*)
+-- 
+1.7.5.4
+

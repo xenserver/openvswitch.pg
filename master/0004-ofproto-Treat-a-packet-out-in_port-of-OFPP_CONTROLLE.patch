@@ -1,0 +1,149 @@
+From ec386d857c9c03374347141b7c8c76bd98b8fa49 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Mon, 7 May 2012 14:01:57 -0700
+Subject: [PATCH 04/13] ofproto: Treat a packet-out in_port of OFPP_CONTROLLER
+ as OFPP_NONE.
+
+Some OpenFlow 1.0 controllers incorrectly use OPFP_CONTROLLER as the
+in_port in packet-out messages, when OFPP_NONE is their intent.  Until now,
+Open vSwitch has rejected such requests with an error message.  This commit
+makes Open vSwitch instead treat OFPP_CONTROLLER the same as OFPP_NONE for
+compatibility with those controllers.
+
+(Also, as of this writing, OpenFlow 1.0.1 appears to be changing the port
+to use from OFPP_NONE to OFPP_CONTROLLER.)
+
+Suggested-by: Rob Sherwood <rob.sherwood@bigswitch.com>
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ lib/odp-util.c             |    4 ++--
+ lib/odp-util.h             |    4 ++--
+ ofproto/ofproto-dpif.c     |    6 +++---
+ ofproto/ofproto-provider.h |   25 ++++++++++++++++++++++---
+ ofproto/ofproto.c          |    3 ++-
+ 5 files changed, 31 insertions(+), 11 deletions(-)
+
+diff --git a/lib/odp-util.c b/lib/odp-util.c
+index aae5cc7..dd67ef6 100644
+--- a/lib/odp-util.c
++++ b/lib/odp-util.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2009, 2010, 2011 Nicira Networks.
++ * Copyright (c) 2009, 2010, 2011, 2012 Nicira Networks.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -1170,7 +1170,7 @@ odp_flow_key_from_flow(struct ofpbuf *buf, const struct flow *flow)
+         nl_msg_put_be64(buf, OVS_KEY_ATTR_TUN_ID, flow->tun_id);
+     }
+ 
+-    if (flow->in_port != OFPP_NONE) {
++    if (flow->in_port != OFPP_NONE && flow->in_port != OFPP_CONTROLLER) {
+         nl_msg_put_u32(buf, OVS_KEY_ATTR_IN_PORT,
+                        ofp_port_to_odp_port(flow->in_port));
+     }
+diff --git a/lib/odp-util.h b/lib/odp-util.h
+index 7c9b588..415db60 100644
+--- a/lib/odp-util.h
++++ b/lib/odp-util.h
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2009, 2010, 2011 Nicira Networks.
++ * Copyright (c) 2009, 2010, 2011, 2012 Nicira Networks.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -127,7 +127,7 @@ struct user_action_cookie {
+     uint8_t   type;                 /* enum user_action_cookie_type. */
+     uint8_t   n_output;             /* No of output ports. used by sflow. */
+     ovs_be16  vlan_tci;             /* Used by sFlow */
+-    uint32_t  data;                 /* Data is len for OFPP_CONTROLLER action.
++    uint32_t  data;                 /* (len<<16)|in_port for OFPP_CONTROLLER.
+                                        For sFlow it is port_ifindex. */
+ };
+ 
+diff --git a/ofproto/ofproto-dpif.c b/ofproto/ofproto-dpif.c
+index 2a60ac1..2949085 100644
+--- a/ofproto/ofproto-dpif.c
++++ b/ofproto/ofproto-dpif.c
+@@ -2408,10 +2408,10 @@ send_packet_in_action(struct ofproto_dpif *ofproto, struct ofpbuf *packet,
+     memcpy(&cookie, &userdata, sizeof(cookie));
+ 
+     pin.packet = packet;
+-    pin.in_port = flow->in_port;
++    pin.in_port = cookie.data & 0xffff;
+     pin.reason = OFPR_ACTION;
+     pin.buffer_id = 0;          /* not yet known */
+-    pin.send_len = cookie.data;
++    pin.send_len = cookie.data >> 16;
+     connmgr_send_packet_in(ofproto->up.connmgr, &pin, flow,
+                            clone ? NULL : packet);
+ }
+@@ -4322,7 +4322,7 @@ compose_controller_action(struct action_xlate_ctx *ctx, int len)
+ 
+     commit_odp_actions(&ctx->flow, &ctx->base_flow, ctx->odp_actions);
+     cookie.type = USER_ACTION_COOKIE_CONTROLLER;
+-    cookie.data = len;
++    cookie.data = (len << 16) | ctx->flow.in_port;
+     cookie.n_output = 0;
+     cookie.vlan_tci = 0;
+     put_userspace_action(ctx->ofproto, ctx->odp_actions, &ctx->flow, &cookie);
+diff --git a/ofproto/ofproto-provider.h b/ofproto/ofproto-provider.h
+index 6e67fcf..5a8a36a 100644
+--- a/ofproto/ofproto-provider.h
++++ b/ofproto/ofproto-provider.h
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2009, 2010, 2011 Nicira Networks.
++ * Copyright (c) 2009, 2010, 2011, 2012 Nicira Networks.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -867,8 +867,27 @@ struct ofproto_class {
+      *
+      * 'flow' reflects the flow information for 'packet'.  All of the
+      * information in 'flow' is extracted from 'packet', except for
+-     * flow->in_port, which is taken from the OFPT_PACKET_OUT message.
+-     * flow->tun_id and its register values are zeroed.
++     * flow->in_port (see below).  flow->tun_id and its register values are
++     * zeroed.
++     *
++     * flow->in_port comes from the OpenFlow OFPT_PACKET_OUT message.  The
++     * implementation should reject invalid flow->in_port values by returning
++     * OFPERR_NXBRC_BAD_IN_PORT.  For consistency, the implementation should
++     * consider valid for flow->in_port any value that could possibly be seen
++     * in a packet that it passes to connmgr_send_packet_in().  Ideally, even
++     * an implementation that never generates packet-ins (e.g. due to hardware
++     * limitations) should still allow flow->in_port values for every possible
++     * physical port and OFPP_LOCAL.  The only virtual ports (those above
++     * OFPP_MAX) that the caller will ever pass in as flow->in_port, other than
++     * OFPP_LOCAL, are OFPP_NONE and OFPP_CONTROLLER.  The implementation
++     * should allow both of these, treating each of them as packets generated
++     * by the controller as opposed to packets originating from some switch
++     * port.
++     *
++     * (Ordinarily the only effect of flow->in_port is on output actions that
++     * involve the input port, such as actions that output to OFPP_IN_PORT,
++     * OFPP_FLOOD, or OFPP_ALL.  flow->in_port can also affect Nicira extension
++     * "resubmit" actions.)
+      *
+      * 'packet' is not matched against the OpenFlow flow table, so its
+      * statistics should not be included in OpenFlow flow statistics.
+diff --git a/ofproto/ofproto.c b/ofproto/ofproto.c
+index 9057215..85509e7 100644
+--- a/ofproto/ofproto.c
++++ b/ofproto/ofproto.c
+@@ -1858,7 +1858,8 @@ handle_packet_out(struct ofconn *ofconn, const struct ofp_header *oh)
+      * we do know that only certain reserved ports (numbered OFPP_MAX and
+      * above) are valid. */
+     in_port = ntohs(opo->in_port);
+-    if (in_port >= OFPP_MAX && in_port != OFPP_LOCAL && in_port != OFPP_NONE) {
++    if (in_port >= OFPP_MAX && in_port != OFPP_LOCAL && in_port != OFPP_NONE
++        && in_port != OFPP_CONTROLLER) {
+         return ofp_mkerr_nicira(OFPET_BAD_REQUEST, NXBRC_BAD_IN_PORT);
+     }
+ 
+-- 
+1.7.5.4
+

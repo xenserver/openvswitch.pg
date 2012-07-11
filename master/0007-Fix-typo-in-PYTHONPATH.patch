@@ -1,0 +1,24 @@
+From 55aa388454dc7681a6d60a5a3546e76510348b77 Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 22 May 2012 10:12:49 -0700
+Subject: [PATCH 07/13] Fix typo in "PYTHONPATH".
+
+Reported-by: Justin Pettit <jpettit@nicira.com>
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ python/automake.mk |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/python/automake.mk b/python/automake.mk
+index 089ef36..a13b249 100644
+--- a/python/automake.mk
++++ b/python/automake.mk
+@@ -1,4 +1,4 @@
+-run_python = PYTHONPATH=$(top_srcdir)/python:$$PYTHON_PATH $(PYTHON)
++run_python = PYTHONPATH=$(top_srcdir)/python:$$PYTHONPATH $(PYTHON)
+ 
+ ovstest_pyfiles = \
+ 	python/ovstest/__init__.py \
+-- 
+1.7.5.4
+

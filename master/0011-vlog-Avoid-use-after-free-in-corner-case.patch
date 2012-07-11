@@ -1,0 +1,42 @@
+From fcb51b08fe06f0a71f4dafabb3d4d0bee633db4a Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 12 Jun 2012 16:45:20 -0700
+Subject: [PATCH 11/13] vlog: Avoid use-after-free in corner case.
+
+Found by valgrind.
+
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ lib/vlog.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
+
+diff --git a/lib/vlog.c b/lib/vlog.c
+index 11b2f7c..7b12453 100644
+--- a/lib/vlog.c
++++ b/lib/vlog.c
+@@ -463,6 +463,7 @@ vlog_unixctl_reopen(struct unixctl_conn *conn,
+ void
+ vlog_init(void)
+ {
++    static char *program_name_copy;
+     time_t now;
+ 
+     if (vlog_inited) {
+@@ -470,7 +471,13 @@ vlog_init(void)
+     }
+     vlog_inited = true;
+ 
+-    openlog(program_name, LOG_NDELAY, LOG_DAEMON);
++    /* openlog() is allowed to keep the pointer passed in, without making a
++     * copy.  The daemonize code sometimes frees and replaces 'program_name',
++     * so make a private copy just for openlog().  (We keep a pointer to the
++     * private copy to suppress memory leak warnings in case openlog() does
++     * make its own copy.) */
++    program_name_copy = program_name ? xstrdup(program_name) : NULL;
++    openlog(program_name_copy, LOG_NDELAY, LOG_DAEMON);
+ 
+     boot_time = time_msec();
+     now = time_wall();
+-- 
+1.7.5.4
+

@@ -1,7 +1,20 @@
-## Boston Bug fixes
-# Pull patches from ovs tree (vlan-main branch) using:
-#  $ git co -b vlan-maint origin/vlan-maint
-#  $ git format-patch -n -o ./output/ 28a14bf3d86e..HEAD
+## Tampa Bug fixes
+# Pull patches from ovs tree (branch-1.4 branch) using:
+#  $ git format-patch -n -o ./output/ a5d6676..HEAD
+
+0001-datapath-Validation-of-IPv6-set-port-action-uses-IPv.patch
+0002-rhel-Add-timeouts-to-network-scripts.patch
+0003-odp-util-Fix-parsing-of-actions-encapsulated-within-.patch
+0004-ofproto-Treat-a-packet-out-in_port-of-OFPP_CONTROLLE.patch
+0005-dpif-netdev-allow-for-proper-destruction-of-netdev-d.patch
+0006-odp-util-Update-ODPUTIL_FLOW_KEY_BYTES-for-current-k.patch
+0007-Fix-typo-in-PYTHONPATH.patch
+0008-Declare-the-version-as-1.4.2.patch
+0009-ofproto-Fix-use-after-free-in-ofoperation_complete.patch
+0010-datapath-Check-currect-return-value-from-skb_gso_seg.patch
+0011-vlog-Avoid-use-after-free-in-corner-case.patch
+0012-debian-Make-DKMS-automatically-build-for-running-ker.patch
+0013-lib-Do-not-assume-sig_atomic_t-is-int.patch
 
 
 # patches proposed upstream

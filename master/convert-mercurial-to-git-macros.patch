@@ -1,0 +1,21 @@
+diff --git a/mk/Makefile b/mk/Makefile
+index 88ef255..a12b82c 100644
+--- a/mk/Makefile
++++ b/mk/Makefile
+@@ -3,13 +3,13 @@ include $(B_BASE)/rpmbuild.mk
+ include $(PROJECT_OUTPUTDIR)/kernel-dom0/kernel.inc
+ 
+ REPONAME  := openvswitch
+-REPOSTAMP := $(call pq_req,$(REPONAME))
+-REPO      := $(call pq_loc,$(REPONAME))
++REPOSTAMP := $(call git_req,$(REPONAME))
++REPO      := $(call git_loc,$(REPONAME))
+ 
+ -include $(MY_OBJ_DIR)/version.inc
+ $(MY_OBJ_DIR)/version.inc: $(REPOSTAMP)
+ 	rm -f $(MY_OBJ_DIR)/version.inc
+-	$(call hg_cset_number,$(REPONAME)) >> $@
++	$(call git_cset_number,$(REPONAME)) >> $@
+ 	echo -n "OPENVSWITCH_VERSION := " >> $@
+ 	awk -F, '/^AC_INIT\(/ { print $$2 }' $(REPO)/configure.ac >>$@
+ 

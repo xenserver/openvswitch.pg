@@ -1,0 +1,149 @@
+diff --git a/mk/Makefile b/mk/Makefile
+index a12b82c..9b95a6a 100644
+--- a/mk/Makefile
++++ b/mk/Makefile
+@@ -22,13 +22,8 @@ OPENVSWITCH_SPEC := openvswitch-xen.spec
+ OPENVSWITCH_SRPM := openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm
+ 
+ 
+-# reverse - reverse a list of words
+-reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
+-KERNEL_FLAVOURS_REV := $(call reverse, $(KERNEL_FLAVOURS))
+-
+ .PHONY: build
+-build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST $(MY_OUTPUT_DIR)/modules.inc \
+-#	$(KERNEL_FLAVOURS:%=$(MY_OBJ_DIR)/.rpmbuild.openvswitch-modules.%.stamp)
++build: $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp $(MY_SOURCES)/MANIFEST
+ 	@ :
+ 
+ .PHONY: clean
+@@ -59,25 +54,19 @@ $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM): $(RPM_SRPMSDIR)/.dirstamp \
+ 		-D "openvswitch_version $(OPENVSWITCH_VERSION)" \
+ 	        -D "kernel_name xen" \
+ 		-D "kernel_version $(KERNEL_PKG_VERSION)" \
+-		-D "kernel_flavor xen" \
+ 		-D "openvswitch_release $(OPENVSWITCH_RELEASE)" \
+ 		-bs $(RPM_SPECSDIR)/$(OPENVSWITCH_SPEC)
+ 
+ # Call Niciras spec file.
+ $(MY_OBJ_DIR)/.rpmbuild.openvswitch.stamp: $(RPM_DIRECTORIES) $(RPM_SRPMSDIR)/$(OPENVSWITCH_SRPM)
+-	($(foreach f,$(KERNEL_FLAVOURS_REV),$(RPMBUILD) \
++	$(RPMBUILD) \
+ 		-D "openvswitch_version $(OPENVSWITCH_VERSION)" \
+ 	        -D "kernel_name xen" \
+ 		-D "kernel_version $(KERNEL_PKG_VERSION)" \
+-		-D "kernel_flavor $(f)" \
+ 		-D "openvswitch_release $(OPENVSWITCH_RELEASE)" \
+-		-bb $(REPO)/xenserver/openvswitch-xen.spec;))
++		-bb $(REPO)/xenserver/openvswitch-xen.spec
+ 	touch $@
+ 
+-$(MY_OUTPUT_DIR)/modules.inc:
+-	($(foreach f,$(KERNEL_FLAVOURS_REV),echo openvswitch-modules-$(f);)) > $@ 
+-
+-
+ # Writes the manifest into output dir.
+ $(MY_SOURCES)/MANIFEST: $(MY_SOURCES_DIRSTAMP)
+ 	echo "vswitch ASL2.0 file $(MY_OUTPUT_DIR)/SRPMS/openvswitch-$(OPENVSWITCH_VERSION)-$(OPENVSWITCH_RELEASE).src.rpm" >$@
+diff --git a/xenserver/openvswitch-xen.spec b/xenserver/openvswitch-xen.spec
+index 4bcfbc2..f8534d6 100644
+--- a/xenserver/openvswitch-xen.spec
++++ b/xenserver/openvswitch-xen.spec
+@@ -8,24 +8,25 @@
+ # without warranty of any kind.
+ 
+ # When building, the rpmbuild command line should define
+-# openvswitch_version, kernel_name, kernel_version, kernel_flavor,
++# openvswitch_version, kernel_name, kernel_version,
+ # and build_number using -D arguments.
+ # for example:
+ #
+ #    rpmbuild -D "openvswitch_version 1.1.0+build123"
+ #      -D "kernel_name  NAME-xen"
+ #      -D "kernel_version 2.6.32.12-0.7.1.xs5.6.100.323.170596"
+-#      -D "kernel_flavor xen"
+ #      -D "build_number --with-build-number=123"
+ #      -bb /usr/src/redhat/SPECS/openvswitch-xen.spec
+ 
+-%define xen_version %{kernel_version}%{kernel_flavor}
++%define build_modules 0
++
++%define xen_version %{kernel_version}
+ 
+ # bump this when breaking compatibility with userspace
+ %define module_abi_version 0
+ 
+ # build-supplemental-pack.sh requires this naming for kernel module packages
+-%define module_package modules-%{kernel_flavor}-%{kernel_version}
++%define module_package modules-%{kernel_version}
+ 
+ Name: openvswitch
+ Summary: Open vSwitch daemon/database/utilities
+@@ -38,29 +39,39 @@ License: ASL 2.0
+ Release: %{openvswitch_release}
+ Source: openvswitch-%{openvswitch_version}.tar.gz
+ Buildroot: /tmp/openvswitch-xen-rpm
+-#Requires: openvswitch_mod.ko.%{module_abi_version}
++%if %{build_modules}
++Requires: openvswitch_mod.ko.%{module_abi_version}
++%endif
+ 
+ %description
+ Open vSwitch provides standard network bridging functions augmented with
+ support for the OpenFlow protocol for remote per-flow control of
+ traffic.
+ 
++%if %{build_modules}
+ %package %{module_package}
+ Summary: Open vSwitch kernel module
+ Group: System Environment/Kernel
+ License: GPLv2
+-Provides: %{name}-modules-%{kernel_flavor} = %{kernel_version}, openvswitch_mod.ko.%{module_abi_version}
++Provides: %{name}-modules-%{kernel_flavor} = %{kernel_version}, openvswitch_mod
+ #Requires: kernel-%{kernel_name} = %{kernel_version}
+ 
+ %description %{module_package}
+ Open vSwitch Linux kernel module compiled against kernel version
+ %{xen_version}.
++%endif
+ 
+ %prep
+ %setup -q -n openvswitch-%{openvswitch_version}
+ 
++%if %{build_modules}
++%define with_linux --with-linux=/lib/modules/%{xen_version}/build
++%else
++%define with_linux ""
++%endif
++
+ %build
+-./configure --prefix=/usr --sysconfdir=/etc --localstatedir=%{_localstatedir} --with-linux=/lib/modules/%{xen_version}/build --enable-ssl %{build_number}
++./configure --prefix=/usr --sysconfdir=/etc --localstatedir=%{_localstatedir} --enable-ssl %{build_number} %{with_linux}
+ make %{_smp_mflags}
+ 
+ %install
+@@ -302,6 +313,7 @@ if [ "$1" = "2" ]; then    # $1 = 2 for upgrade
+     printf "\n\n"
+ fi
+ 
++%if %{build_modules}
+ %posttrans %{module_package}
+ # Ensure that modprobe will find our modules.
+ #
+@@ -311,6 +323,7 @@ fi
+ # we use %post then depmod may find the old versions that are about to
+ # be removed.
+ depmod %{xen_version}
++%endif
+ 
+ %preun
+ if [ "$1" = "0" ]; then     # $1 = 0 for uninstall
+@@ -444,6 +457,7 @@ exit 0
+ %exclude /usr/share/openvswitch/python/ovs/*.py[co]
+ %exclude /usr/share/openvswitch/python/ovs/db/*.py[co]
+ 
+-
++%if %{build_modules}
+ %files %{module_package}
+ /lib/modules/%{xen_version}/extra/openvswitch/openvswitch.ko
++%endif

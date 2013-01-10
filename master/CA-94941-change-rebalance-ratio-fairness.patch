@@ -1,0 +1,47 @@
+From ba60b421cc159b7e53f7e9a890aa130a35801083 Mon Sep 17 00:00:00 2001
+From: Zoltan Kiss <zoltan.kiss@citrix.com>
+Date: Mon, 7 Jan 2013 22:47:51 +0000
+Subject: [PATCH] bond: Change rebalance ratio to be more fair
+
+The old algorithm tries to converge to 0, despite it would mean a very
+unbalanced situation. We're aiming for an ideal ratio of 1, meaning both
+the 'from' and 'to' slave have the same load.  Therefore, we only move an
+entry if it decreases the load on 'from', and brings us closer to equal
+traffic load.
+
+Signed-off-by: Zoltan Kiss <zoltan.kiss@citrix.com>
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+---
+ lib/bond.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/lib/bond.c b/lib/bond.c
+index c34ecb6..ab00ef6 100644
+--- a/lib/bond.c
++++ b/lib/bond.c
+@@ -21,6 +21,7 @@
+ #include <limits.h>
+ #include <stdint.h>
+ #include <stdlib.h>
++#include <math.h>
+ 
+ #include "coverage.h"
+ #include "dynamic-string.h"
+@@ -754,8 +755,12 @@ choose_entry_to_migrate(const struct bond_slave *from, uint64_t to_tx_bytes)
+         delta = e->tx_bytes;
+         old_ratio = (double)from->tx_bytes / to_tx_bytes;
+         new_ratio = (double)(from->tx_bytes - delta) / (to_tx_bytes + delta);
+-        if (old_ratio - new_ratio > 0.1) {
+-            /* Would decrease the ratio, move it. */
++        if (old_ratio - new_ratio > 0.1
++            && fabs(new_ratio - 1.0) < fabs(old_ratio - 1.0)) {
++            /* We're aiming for an ideal ratio of 1, meaning both the 'from'
++               and 'to' slave have the same load.  Therefore, we only move an
++               entry if it decreases the load on 'from', and brings us closer
++               to equal traffic load. */
+             return e;
+         }
+     }
+-- 
+1.7.1
+

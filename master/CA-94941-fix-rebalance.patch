@@ -1,0 +1,102 @@
+From 865f22b3b3cb953c48ed30dd21f16ea3dd53f04c Mon Sep 17 00:00:00 2001
+From: Ben Pfaff <blp@nicira.com>
+Date: Tue, 21 Aug 2012 13:51:01 -0700
+Subject: [PATCH] bond: Tag flows according to their hash bucket, not just their slave.
+
+The bonding code is supposed to tag flows two ways:
+
+    - According to the chosen bond slave, to make it easy to invalidate all
+      of the flows assigned to a given slave.
+
+    - According to the hash value for a flow, to make it easy to invalidate
+      all of the flows that hash into the same bucket.
+
+However, the code wasn't actually applying the hash-based tags.  This
+meant that rebalancing didn't take effect immediately, and so after
+rebalancing we could get log messages like this:
+
+   inconsistency in subfacet (actions were: 5) (correct actions: 4)
+
+specifying some flow that was moved by the rebalance.
+
+This commit fixes the problem by applying the hash-based tags.
+
+Bug #12847.
+Reported-by: Pratap Reddy <preddy@nicira.com>
+Signed-off-by: Ben Pfaff <blp@nicira.com>
+Acked-by: Ethan Jackson <ethan@nicira.com>
+---
+ AUTHORS    |    1 +
+ lib/bond.c |   10 ++++++----
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index e3ccbda..ee70dcd 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -112,6 +112,7 @@ Pankaj Thakkar          thakkar@nicira.com
+ Paulo Cravero           pcravero@as2594.net
+ Peter Balland           peter@nicira.com
+ Peter Phaal             peter.phaal@inmon.com
++Pratap Reddy            preddy@nicira.com
+ Ralf Heiringhoff        ralf@frosty-geek.net
+ Ram Jothikumar          rjothikumar@nicira.com
+ Ramana Reddy            gtvrreddy@gmail.com
+diff --git a/lib/bond.c b/lib/bond.c
+index e2d8e2c..c34ecb6 100644
+--- a/lib/bond.c
++++ b/lib/bond.c
+@@ -132,7 +132,7 @@ static struct bond_entry *lookup_bond_entry(const struct bond *,
+ static tag_type bond_get_active_slave_tag(const struct bond *);
+ static struct bond_slave *choose_output_slave(const struct bond *,
+                                               const struct flow *,
+-                                              uint16_t vlan);
++                                              uint16_t vlan, tag_type *tags);
+ static void bond_update_fake_slave_stats(struct bond *);
+ 
+ /* Attempts to parse 's' as the name of a bond balancing mode.  If successful,
+@@ -518,13 +518,14 @@ bond_compose_learning_packet(struct bond *bond,
+ {
+     struct bond_slave *slave;
+     struct ofpbuf *packet;
++    tag_type tags = 0;
+     struct flow flow;
+ 
+     assert(may_send_learning_packets(bond));
+ 
+     memset(&flow, 0, sizeof flow);
+     memcpy(flow.dl_src, eth_src, ETH_ADDR_LEN);
+-    slave = choose_output_slave(bond, &flow, vlan);
++    slave = choose_output_slave(bond, &flow, vlan, &tags);
+ 
+     packet = ofpbuf_new(0);
+     compose_benign_packet(packet, "Open vSwitch Bond Failover", 0xf177,
+@@ -627,7 +628,7 @@ void *
+ bond_choose_output_slave(struct bond *bond, const struct flow *flow,
+                          uint16_t vlan, tag_type *tags)
+ {
+-    struct bond_slave *slave = choose_output_slave(bond, flow, vlan);
++    struct bond_slave *slave = choose_output_slave(bond, flow, vlan, tags);
+     if (slave) {
+         *tags |= bond->balance == BM_STABLE ? bond->stb_tag : slave->tag;
+         return slave->aux;
+@@ -1392,7 +1393,7 @@ choose_stb_slave(const struct bond *bond, const struct flow *flow,
+ 
+ static struct bond_slave *
+ choose_output_slave(const struct bond *bond, const struct flow *flow,
+-                    uint16_t vlan)
++                    uint16_t vlan, tag_type *tags)
+ {
+     struct bond_entry *e;
+ 
+@@ -1413,6 +1414,7 @@ choose_output_slave(const struct bond *bond, const struct flow *flow,
+             }
+             e->tag = tag_create_random();
+         }
++        *tags |= e->tag;
+         return e->slave;
+ 
+     default:
+-- 
+1.7.1
+

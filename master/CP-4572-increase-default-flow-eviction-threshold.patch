@@ -1,0 +1,35 @@
+From 27a88d1373cbfcceac6d901bbf1c17051aa7845f Mon Sep 17 00:00:00 2001
+From: Ethan Jackson <ethan@nicira.com>
+Date: Fri, 29 Mar 2013 14:19:04 -0700
+Subject: [PATCH] ofproto: Increase default flow-eviction-threshold.
+
+The flow-eviction-threshold presents a trade off between the
+expense of maintaining large numbers of datapath flows, and the
+benefit of avoid unnecessary flow misses.  In some large Open
+vSwitch deployments, we've seen the previous default flow eviction
+threshold negatively impact performance with reasonably typical
+traffic patterns.  This patch increases the default to a level
+which should represent a better trade off: still relatively safe,
+but much more amenable to large numbers of long lived flows.
+
+Signed-off-by: Ethan Jackson <ethan@nicira.com>
+---
+ ofproto/ofproto.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ofproto/ofproto.h b/ofproto/ofproto.h
+index d815ed0..1b15ed3 100644
+--- a/ofproto/ofproto.h
++++ b/ofproto/ofproto.h
+@@ -182,7 +182,7 @@ int ofproto_port_dump_done(struct ofproto_port_dump *);
+           : (ofproto_port_dump_done(DUMP), false));         \
+         )
+ 
+-#define OFPROTO_FLOW_EVICTON_THRESHOLD_DEFAULT	1000
++#define OFPROTO_FLOW_EVICTON_THRESHOLD_DEFAULT	2500
+ #define OFPROTO_FLOW_EVICTION_THRESHOLD_MIN	100
+ 
+ int ofproto_port_add(struct ofproto *, struct netdev *, uint16_t *ofp_portp);
+-- 
+1.7.9.5
+

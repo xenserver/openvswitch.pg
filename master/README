@@ -1,0 +1,24 @@
+What is this repository ?
+==========================
+
+This is the repository of XenServer-specific patches to Open vSwitch.
+
+To contribute bug fixes, email them to the XenServer development mailing
+
+	list (xs-devel@lists.xenserver.org).
+										
+For any new features, please work with the upstream Open vSwitch project
+and request backports by emailing the XenServer development mailing list
+
+	(xs-devel@lists.xenserver.org).
+
+Refer to http://openvswitch.org/development/ for information on contributing
+to the Open vSwitch project.
+
+
+
+What other documentation is available ?
+========================================
+
+To install Open vSwitch for XenServer please read INSTALL.
+

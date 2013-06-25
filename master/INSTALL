@@ -1,0 +1,36 @@
+
+Follow these steps to build an RPM.
+
+1. Clone the openvswitch.git repository to /some/path/openvswitch
+
+2. Clone openvswitch.pq.git repository to /some/path/openvswitch/.git/patches
+   
+3. cd /some/path/openvswitch and create a working branch:
+     git branch -f patchqueue
+     git checkout patchqueue
+
+4. cd .git/patches and make patchqueue branch use the master branch patches:
+     ln -sf master patchqueue
+     touch patchqueue/status
+    
+5. Check to see all the patches are visibile in the working branch patchqueue:
+     cd /some/path/openvswitch
+     guilt series
+     
+6. Do a `guilt push -a` to apply all the patches
+     
+7. Generate the source distribution:
+     ./boot.sh && ./configure && make dist
+
+8. Move openvswitch-1.4.2.tar.gzip to /usr/src/redhat/SOURCES/
+   Move xenserver/opevswitch-xen.spec to /usr/src/redhat/SPECS/
+	      
+9. To build the RPMs run:
+     cd /usr/src/redhat/SPECS/
+     rpmbuild -D "openvswitch_version 1.4.2" -D "openvswitch_release 140.4324"
+        -D "kernel_name  NAME-xen" -D "kernel_version 2.6.18-274.el5"
+        -D "kernel_flavor xen" -bb /usr/src/redhat/SPECS/openvswitch-xen.spec
+			  
+10. Install using
+     rpm -ivh /usr/src/redhat/RPMS/i386/openvswitch-*.rpm
+
